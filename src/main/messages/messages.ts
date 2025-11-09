@@ -270,9 +270,14 @@ typedIpcMain.handle(CHANNEL.SCRAPER.GET_API_SETTINGS, async event => {
   }
 })
 
-typedIpcMain.handle(CHANNEL.SCRAPER.START, async () => {
+typedIpcMain.handle(CHANNEL.SCRAPER.START, async (_event, params) => {
   try {
-    const result = await scraper.startScraping(mainWindow)
+    const result = await scraper.startScraping(
+      mainWindow,
+      params.apiKey,
+      params.model,
+      params.delay,
+    )
     return {
       type: 'start_scraping',
       ...result,
@@ -292,6 +297,9 @@ typedIpcMain.handle(CHANNEL.SCRAPER.RETRY, async (_event, params) => {
     const result = await scraper.retryFailedScrapes(
       mainWindow,
       params.scrapeRunId,
+      params.apiKey,
+      params.model,
+      params.delay,
     )
     return {
       type: 'retry_scraping',

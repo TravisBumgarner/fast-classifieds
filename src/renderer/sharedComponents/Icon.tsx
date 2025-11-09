@@ -3,6 +3,7 @@ import { IoMdSettings } from 'react-icons/io'
 import { IoInformationCircleOutline } from 'react-icons/io5'
 import { LuPartyPopper } from 'react-icons/lu'
 import { MdAdd, MdClose, MdDelete, MdEdit, MdError } from 'react-icons/md'
+import { FaExternalLinkAlt } from "react-icons/fa";
 
 export const iconMap = {
   edit: MdEdit,
@@ -14,6 +15,7 @@ export const iconMap = {
   success: LuPartyPopper,
   settings: IoMdSettings,
   debug: CgDebug,
+  externalLink: FaExternalLinkAlt,
 }
 
 const Icon = ({

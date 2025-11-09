@@ -56,7 +56,7 @@ export const scrape = async ({
 }: {
   siteUrl: string
   selector: string
-  delay?: number
+  delay: number
 }): Promise<{ siteContent: string; hash: string }> => {
   const browser = await puppeteer.launch({
     headless: true,

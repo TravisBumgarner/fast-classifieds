@@ -1,21 +1,16 @@
-import { Link as MUILink } from '@mui/material'
-import { Link as RouterLink } from 'react-router-dom'
+import { IconButton } from '@mui/material'
+import Icon from './Icon'
 
-const Link = ({
-  to,
-  children,
-  target,
-  rel,
-}: {
-  to: string
-  children: React.ReactNode
-  target?: string
-  rel?: string
-}) => {
+const Link = ({ url }: { url: string }) => {
+  const handleClick = () => {
+    // @ts-expect-error - shell:openExternal is not in typed IPC but is defined in messages.ts
+    window.electron.ipcRenderer.invoke('shell:openExternal', url)
+  }
+
   return (
-    <MUILink component={RouterLink} to={to} target={target} rel={rel}>
-      {children}
-    </MUILink>
+    <IconButton onClick={handleClick} size="small">
+      <Icon name="externalLink" size={16} />
+    </IconButton>
   )
 }
 

@@ -2,11 +2,11 @@ import {
   Alert,
   Box,
   Button,
+  Checkbox,
   Chip,
   FormControl,
   InputLabel,
   MenuItem,
-  Link as MuiLink,
   Paper,
   Select,
   Stack,
@@ -23,6 +23,7 @@ import {
 import { useEffect, useState } from 'react'
 import { CHANNEL } from '../../shared/messages.types'
 import ipcMessenger from '../ipcMessenger'
+import Link from '../sharedComponents/Link'
 import Message from '../sharedComponents/Message'
 import { MODAL_ID } from '../sharedComponents/Modal/Modal.consts'
 import { activeModalSignal, onboardingCompletedSignal } from '../signals'
@@ -51,7 +52,7 @@ interface JobPosting {
 type SortField = 'company' | 'title' | 'status' | 'createdAt'
 type SortDirection = 'asc' | 'desc'
 
-const Home = () => {
+const Postings = () => {
   const [hasCheckedOnboarding, setHasCheckedOnboarding] = useState(false)
   const [jobPostings, setJobPostings] = useState<JobPosting[]>([])
   const [loading, setLoading] = useState(true)
@@ -59,6 +60,9 @@ const Home = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | PostingStatus>('all')
   const [sortField, setSortField] = useState<SortField>('createdAt')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
+  const [selectedPostings, setSelectedPostings] = useState<Set<number>>(
+    new Set(),
+  )
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -123,6 +127,42 @@ const Home = () => {
     activeModalSignal.value = {
       id: MODAL_ID.SCRAPE_PROGRESS_MODAL,
       onComplete: loadJobPostings,
+    }
+  }
+
+  const handleOpenAllInBrowser = () => {
+    filteredPostings.forEach(posting => {
+      // @ts-expect-error - shell:openExternal is not in typed IPC but is defined in messages.ts
+      window.electron.ipcRenderer.invoke('shell:openExternal', posting.siteUrl)
+    })
+  }
+
+  const handleOpenSelectedInBrowser = () => {
+    const postingsToOpen = filteredPostings.filter(posting =>
+      selectedPostings.has(posting.id),
+    )
+    postingsToOpen.forEach(posting => {
+      // @ts-expect-error - shell:openExternal is not in typed IPC but is defined in messages.ts
+      window.electron.ipcRenderer.invoke('shell:openExternal', posting.siteUrl)
+    })
+    setSelectedPostings(new Set())
+  }
+
+  const handleTogglePosting = (id: number) => {
+    const newSelected = new Set(selectedPostings)
+    if (newSelected.has(id)) {
+      newSelected.delete(id)
+    } else {
+      newSelected.add(id)
+    }
+    setSelectedPostings(newSelected)
+  }
+
+  const handleSelectAll = () => {
+    if (selectedPostings.size === filteredPostings.length) {
+      setSelectedPostings(new Set())
+    } else {
+      setSelectedPostings(new Set(filteredPostings.map(p => p.id)))
     }
   }
 
@@ -211,6 +251,11 @@ const Home = () => {
       >
         <Typography variant="h4">Job Postings</Typography>
         <Stack direction="row" spacing={SPACING.SMALL.PX} alignItems="center">
+          {selectedPostings.size > 0 && (
+            <Button variant="outlined" onClick={handleOpenSelectedInBrowser}>
+              Open Selected ({selectedPostings.size})
+            </Button>
+          )}
           <Button variant="contained" onClick={handleFindJobs}>
             Find Jobs
           </Button>
@@ -254,6 +299,19 @@ const Home = () => {
         <Table>
           <TableHead>
             <TableRow>
+              <TableCell padding="checkbox">
+                <Checkbox
+                  indeterminate={
+                    selectedPostings.size > 0 &&
+                    selectedPostings.size < filteredPostings.length
+                  }
+                  checked={
+                    filteredPostings.length > 0 &&
+                    selectedPostings.size === filteredPostings.length
+                  }
+                  onChange={handleSelectAll}
+                />
+              </TableCell>
               <TableCell>
                 <TableSortLabel
                   active={sortField === 'company'}
@@ -272,7 +330,6 @@ const Home = () => {
                   Title
                 </TableSortLabel>
               </TableCell>
-              <TableCell>URL</TableCell>
               <TableCell>
                 <TableSortLabel
                   active={sortField === 'status'}
@@ -292,12 +349,13 @@ const Home = () => {
                   Found On
                 </TableSortLabel>
               </TableCell>
+              <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {filteredPostings.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} align="center">
+                <TableCell colSpan={7} align="center">
                   <Stack
                     spacing={SPACING.SMALL.PX}
                     alignItems="center"
@@ -314,22 +372,14 @@ const Home = () => {
             ) : (
               filteredPostings.map(posting => (
                 <TableRow key={posting.id} hover>
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      checked={selectedPostings.has(posting.id)}
+                      onChange={() => handleTogglePosting(posting.id)}
+                    />
+                  </TableCell>
                   <TableCell>{posting.company || '-'}</TableCell>
                   <TableCell>{posting.title}</TableCell>
-                  <TableCell>
-                    <Tooltip title={posting.siteUrl} placement="right">
-                      <MuiLink
-                        component="button"
-                        variant="body2"
-                        onClick={() => {
-                          window.electron.shell.openExternal(posting.siteUrl)
-                        }}
-                        sx={{ cursor: 'pointer' }}
-                      >
-                        Link
-                      </MuiLink>
-                    </Tooltip>
-                  </TableCell>
                   <TableCell>
                     <FormControl size="small" sx={{ minWidth: 120 }}>
                       <Select
@@ -364,18 +414,18 @@ const Home = () => {
                       <Typography
                         variant="body2"
                         sx={{
-                          maxWidth: 200,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
+                          maxWidth: 275,
                         }}
                       >
-                        {posting.explanation || '-'}
+                        {posting.explanation?.slice(0, 75) + '...' || '-'}
                       </Typography>
                     </Tooltip>
                   </TableCell>
                   <TableCell>
                     {new Date(posting.createdAt).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell align="right">
+                    <Link url={posting.siteUrl} />
                   </TableCell>
                 </TableRow>
               ))
@@ -387,4 +437,4 @@ const Home = () => {
   )
 }
 
-export default Home
+export default Postings

@@ -11,7 +11,7 @@ import { activeModalSignal } from '../signals'
 import { SPACING } from '../styles/consts'
 
 const NAV_ROUTES: Array<keyof typeof ROUTES> = [
-  'home',
+  'postings',
   'sites',
   'prompts',
   'scrapeRuns',

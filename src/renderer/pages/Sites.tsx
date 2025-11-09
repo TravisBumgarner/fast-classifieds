@@ -7,7 +7,6 @@ import {
   IconButton,
   InputLabel,
   MenuItem,
-  Link as MuiLink,
   Paper,
   Select,
   Stack,
@@ -25,6 +24,7 @@ import { useEffect, useState } from 'react'
 import { CHANNEL } from '../../shared/messages.types'
 import ipcMessenger from '../ipcMessenger'
 import Icon from '../sharedComponents/Icon'
+import Link from '../sharedComponents/Link'
 import Message from '../sharedComponents/Message'
 import { MODAL_ID } from '../sharedComponents/Modal/Modal.consts'
 import { activeModalSignal } from '../signals'
@@ -232,7 +232,6 @@ const Sites = () => {
                   Company
                 </TableSortLabel>
               </TableCell>
-              <TableCell>URL</TableCell>
               <TableCell>Selector</TableCell>
               <TableCell>
                 <TableSortLabel
@@ -258,7 +257,7 @@ const Sites = () => {
           <TableBody>
             {filteredSites.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} align="center">
+                <TableCell colSpan={5} align="center">
                   <Stack
                     spacing={SPACING.SMALL.PX}
                     alignItems="center"
@@ -277,20 +276,6 @@ const Sites = () => {
                 <TableRow key={site.id} hover>
                   <TableCell>{site.siteTitle}</TableCell>
                   <TableCell>
-                    <Tooltip title={site.siteUrl} placement="right">
-                      <MuiLink
-                        component="button"
-                        variant="body2"
-                        onClick={() => {
-                          window.electron.shell.openExternal(site.siteUrl)
-                        }}
-                        sx={{ cursor: 'pointer' }}
-                      >
-                        Link
-                      </MuiLink>
-                    </Tooltip>
-                  </TableCell>
-                  <TableCell>
                     <code>{site.selector}</code>
                   </TableCell>
                   <TableCell>
@@ -307,6 +292,7 @@ const Sites = () => {
                     {new Date(site.updatedAt).toLocaleDateString()}
                   </TableCell>
                   <TableCell align="right">
+                    <Link url={site.siteUrl} />
                     <Tooltip title="Debug scraper">
                       <IconButton
                         size="small"

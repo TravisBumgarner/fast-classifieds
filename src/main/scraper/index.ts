@@ -138,27 +138,24 @@ async function processSite({
   }
 }
 
-export async function startScraping(mainWindow: BrowserWindow | null) {
+export async function startScraping(
+  mainWindow: BrowserWindow | null,
+  apiKey: string,
+  model: string,
+  delay: number,
+) {
   try {
-    // Get API settings from localStorage
-    let apiKey = ''
-    let model = 'gpt-4o-mini'
-    let delay = 3000
+    if (!model) {
+      return {
+        success: false,
+        error: 'OpenAI model not configured. Please set it in Settings.',
+      }
+    }
 
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      try {
-        apiKey = await mainWindow.webContents.executeJavaScript(
-          "localStorage.getItem('openai_api_key') || ''",
-        )
-        model = await mainWindow.webContents.executeJavaScript(
-          "localStorage.getItem('openai_model') || 'gpt-4o-mini'",
-        )
-        const delayStr = await mainWindow.webContents.executeJavaScript(
-          "localStorage.getItem('scrape_delay') || '3000'",
-        )
-        delay = Number(delayStr)
-      } catch (error) {
-        console.error('Error fetching API settings:', error)
+    if (!delay) {
+      return {
+        success: false,
+        error: 'Scrape delay not configured. Please set it in Settings.',
       }
     }
 
@@ -341,34 +338,29 @@ export function getProgress(scrapeRunId: number) {
 export async function retryFailedScrapes(
   mainWindow: BrowserWindow | null,
   originalRunId: number,
+  apiKey: string,
+  model: string,
+  delay: number,
 ) {
   try {
-    // Get API settings from localStorage
-    let apiKey = ''
-    let model = 'gpt-4o-mini'
-    let delay = 3000
-
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      try {
-        apiKey = await mainWindow.webContents.executeJavaScript(
-          "localStorage.getItem('openai_api_key') || ''",
-        )
-        model = await mainWindow.webContents.executeJavaScript(
-          "localStorage.getItem('openai_model') || 'gpt-4o-mini'",
-        )
-        const delayStr = await mainWindow.webContents.executeJavaScript(
-          "localStorage.getItem('scrape_delay') || '3000'",
-        )
-        delay = Number(delayStr)
-      } catch (error) {
-        console.error('Error fetching API settings:', error)
-      }
-    }
-
     if (!apiKey) {
       return {
         success: false,
         error: 'OpenAI API key not configured. Please set it in Settings.',
+      }
+    }
+
+    if (!model) {
+      return {
+        success: false,
+        error: 'OpenAI model not configured. Please set it in Settings.',
+      }
+    }
+
+    if (!delay) {
+      return {
+        success: false,
+        error: 'Scrape delay not configured. Please set it in Settings.',
       }
     }
 

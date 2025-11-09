@@ -193,11 +193,11 @@ export type Invokes = {
     result: { success: boolean; error?: string }
   }
   [CHANNEL.SCRAPER.START]: {
-    args: undefined
+    args: { apiKey: string; model: string; delay: number }
     result: { success: boolean; scrapeRunId?: number; error?: string }
   }
   [CHANNEL.SCRAPER.RETRY]: {
-    args: { scrapeRunId: number }
+    args: { scrapeRunId: number; apiKey: string; model: string; delay: number }
     result: { success: boolean; scrapeRunId?: number; error?: string }
   }
   [CHANNEL.SCRAPER.GET_PROGRESS]: {

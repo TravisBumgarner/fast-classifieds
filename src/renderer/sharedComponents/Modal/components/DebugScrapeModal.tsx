@@ -66,9 +66,11 @@ const DebugScrapeModal = ({ siteId }: DebugScrapeModalProps) => {
 
     try {
       setLoading(true)
+      const delay = Number(localStorage.getItem('scrape_delay') || '3000')
       const result = await ipcMessenger.invoke(CHANNEL.SCRAPER.DEBUG_SCRAPE, {
         url,
         selector,
+        delay,
       })
 
       if (result.success) {

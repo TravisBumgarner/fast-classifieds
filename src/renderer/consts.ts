@@ -1,7 +1,7 @@
 export const ROUTES = {
-  home: {
+  postings: {
     href: () => '/',
-    label: 'Home',
+    label: 'Postings',
     target: '_self',
   },
   sites: {
