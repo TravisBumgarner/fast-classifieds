@@ -18,6 +18,7 @@ const config: ForgeConfig = {
     // https://github.com/electron/forge/issues/3738#issuecomment-2692534953
     ignore: [],
     icon: './src/assets/icon',
+    extraResource: ['./drizzle'],
     osxSign: {},
     osxNotarize: {
       appleId: process.env.APPLE_ID,
