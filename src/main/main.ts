@@ -61,7 +61,10 @@ const createWindow = () => {
     )
   }
 
-  mainWindow.webContents.openDevTools()
+  // Only open dev tools in development mode
+  if (!app.isPackaged) {
+    mainWindow.webContents.openDevTools()
+  }
 }
 
 app.on('ready', () => {

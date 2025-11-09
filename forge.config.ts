@@ -1,8 +1,4 @@
-import { MakerDeb } from '@electron-forge/maker-deb'
 import { MakerDMG } from '@electron-forge/maker-dmg'
-import { MakerRpm } from '@electron-forge/maker-rpm'
-import { MakerSquirrel } from '@electron-forge/maker-squirrel'
-import { MakerZIP } from '@electron-forge/maker-zip'
 import { AutoUnpackNativesPlugin } from '@electron-forge/plugin-auto-unpack-natives'
 import { VitePlugin } from '@electron-forge/plugin-vite'
 import type { ForgeConfig } from '@electron-forge/shared-types'
@@ -19,21 +15,21 @@ const config: ForgeConfig = {
     ignore: [],
     icon: './src/assets/icon',
     extraResource: ['./drizzle'],
-    osxSign: {},
-    osxNotarize: {
-      appleId: process.env.APPLE_ID,
-      appleIdPassword: process.env.APPLE_PASSWORD,
-      teamId: process.env.APPLE_TEAM_ID,
-    },
+    // osxSign: {},
+    // osxNotarize: {
+    //   appleId: process.env.APPLE_ID,
+    //   appleIdPassword: process.env.APPLE_PASSWORD,
+    //   teamId: process.env.APPLE_TEAM_ID,
+    // },
   },
 
   rebuildConfig: {},
   makers: [
-    new MakerSquirrel({}),
+    // new MakerSquirrel({}),
     new MakerDMG({}),
-    new MakerZIP({}, ['darwin']),
-    new MakerRpm({}),
-    new MakerDeb({}),
+    // new MakerZIP({}, ['darwin']),
+    // new MakerRpm({}),
+    // new MakerDeb({}),
   ],
   plugins: [
     new AutoUnpackNativesPlugin({}),

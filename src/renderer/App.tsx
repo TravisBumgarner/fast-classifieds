@@ -7,7 +7,7 @@ import Navigation from './components/Navigation'
 import Router from './components/Router'
 import RenderModal from './sharedComponents/Modal'
 import { MODAL_ID } from './sharedComponents/Modal/Modal.consts'
-import { activeModalSignal } from './signals'
+import { activeModalSignal, onboardingCompletedSignal } from './signals'
 import AppThemeProvider from './styles/Theme'
 import { SPACING } from './styles/consts'
 
@@ -15,7 +15,9 @@ const queryClient = new QueryClient()
 
 function App() {
   useEffect(() => {
-    // Check if we should show the changelog
+    // Wait for onboarding check to complete before showing changelog
+    if (!onboardingCompletedSignal.value) return
+
     const lastSeenVersion = localStorage.getItem(CHANGELOG_VERSION_KEY)
 
     if (lastSeenVersion !== CURRENT_VERSION) {
