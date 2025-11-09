@@ -32,7 +32,7 @@ const createWindow = () => {
   const externalDisplay = displays.length > 1 ? displays[1] : null
 
   const windowOptions: BrowserWindowConstructorOptions = {
-    width: 1200,
+    width: app.isPackaged ? 800 : 1200,
     height: 800,
     x: 0,
     y: 0,
@@ -43,7 +43,7 @@ const createWindow = () => {
     },
   }
 
-  if (externalDisplay) {
+  if (externalDisplay && !app.isPackaged) {
     windowOptions.x = externalDisplay.bounds.x + 50
     windowOptions.y = externalDisplay.bounds.y + 50
   }
@@ -61,7 +61,10 @@ const createWindow = () => {
     )
   }
 
-  mainWindow.webContents.openDevTools()
+  // Only open dev tools in development mode
+  if (!app.isPackaged) {
+    mainWindow.webContents.openDevTools()
+  }
 }
 
 app.on('ready', () => {

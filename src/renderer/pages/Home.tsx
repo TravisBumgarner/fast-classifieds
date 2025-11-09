@@ -25,7 +25,7 @@ import { CHANNEL } from '../../shared/messages.types'
 import ipcMessenger from '../ipcMessenger'
 import Message from '../sharedComponents/Message'
 import { MODAL_ID } from '../sharedComponents/Modal/Modal.consts'
-import { activeModalSignal } from '../signals'
+import { activeModalSignal, onboardingCompletedSignal } from '../signals'
 import { SPACING } from '../styles/consts'
 
 type PostingStatus =
@@ -163,9 +163,12 @@ const Home = () => {
         }
 
         setHasCheckedOnboarding(true)
+        // Signal that onboarding check is complete (whether shown or not)
+        onboardingCompletedSignal.value = true
       } catch (err) {
         console.error('Error checking first launch:', err)
         setHasCheckedOnboarding(true)
+        onboardingCompletedSignal.value = true
       }
     }
 

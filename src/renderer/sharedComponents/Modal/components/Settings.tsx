@@ -111,7 +111,7 @@ const SettingsModal = ({ id }: SettingsModalProps) => {
         const timestamp = new Date().toISOString().split('T')[0]
         link.setAttribute(
           'download',
-          `menu-engineering-backup-${timestamp}.json`,
+          `fast-classifieds-backup-${timestamp}.json`,
         )
         link.style.visibility = 'hidden'
 
