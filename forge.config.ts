@@ -15,11 +15,13 @@ const config: ForgeConfig = {
     ignore: [],
     icon: './src/assets/icon',
     extraResource: ['./drizzle'],
-    osxSign: {},
-    osxNotarize: {
-      appleId: process.env.APPLE_ID,
-      appleIdPassword: process.env.APPLE_PASSWORD,
-      teamId: process.env.APPLE_TEAM_ID,
+    osxSign: {
+      optionsForFile: () => {
+        return {
+          hardenedRuntime: true,
+          entitlements: 'entitlements.plist',
+        }
+      },
     },
   },
 
@@ -71,6 +73,23 @@ const config: ForgeConfig = {
     //   [FuseV1Options.OnlyLoadAppFromAsar]: true,
     // }),
   ],
+  hooks: {
+    postPackage: async (
+      _forgeConfig,
+      options: { outputPaths: string[]; platform: string; arch: string },
+    ) => {
+      if (options.platform === 'darwin') {
+        const { notarize } = await import('@electron/notarize')
+        const appPath = `${options.outputPaths[0]}/Fast Classifieds.app`
+        await notarize({
+          appPath,
+          appleId: process.env.APPLE_ID!,
+          appleIdPassword: process.env.APPLE_PASSWORD!,
+          teamId: process.env.APPLE_TEAM_ID!,
+        })
+      }
+    },
+  },
   publishers: [
     {
       name: '@electron-forge/publisher-github',
