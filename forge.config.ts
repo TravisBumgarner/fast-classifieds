@@ -1,4 +1,5 @@
 import { MakerDMG } from '@electron-forge/maker-dmg'
+import { MakerZIP } from '@electron-forge/maker-zip'
 import { AutoUnpackNativesPlugin } from '@electron-forge/plugin-auto-unpack-natives'
 import { VitePlugin } from '@electron-forge/plugin-vite'
 import type { ForgeConfig } from '@electron-forge/shared-types'
@@ -15,11 +16,13 @@ const config: ForgeConfig = {
     ignore: [],
     icon: './src/assets/icon',
     extraResource: ['./drizzle'],
-    osxSign: {},
-    osxNotarize: {
-      appleId: process.env.APPLE_ID,
-      appleIdPassword: process.env.APPLE_PASSWORD,
-      teamId: process.env.APPLE_TEAM_ID,
+    osxSign: {
+      optionsForFile: () => {
+        return {
+          hardenedRuntime: true,
+          entitlements: 'entitlements.plist',
+        }
+      },
     },
   },
 
@@ -27,7 +30,7 @@ const config: ForgeConfig = {
   makers: [
     // new MakerSquirrel({}),
     new MakerDMG({}),
-    // new MakerZIP({}, ['darwin']),
+    new MakerZIP({}, ['darwin']),
     // new MakerRpm({}),
     // new MakerDeb({}),
   ],
@@ -71,6 +74,23 @@ const config: ForgeConfig = {
     //   [FuseV1Options.OnlyLoadAppFromAsar]: true,
     // }),
   ],
+  hooks: {
+    postPackage: async (
+      _forgeConfig,
+      options: { outputPaths: string[]; platform: string; arch: string },
+    ) => {
+      if (options.platform === 'darwin') {
+        const { notarize } = await import('@electron/notarize')
+        const appPath = `${options.outputPaths[0]}/Fast Classifieds.app`
+        await notarize({
+          appPath,
+          appleId: process.env.APPLE_ID!,
+          appleIdPassword: process.env.APPLE_PASSWORD!,
+          teamId: process.env.APPLE_TEAM_ID!,
+        })
+      }
+    },
+  },
   publishers: [
     {
       name: '@electron-forge/publisher-github',
