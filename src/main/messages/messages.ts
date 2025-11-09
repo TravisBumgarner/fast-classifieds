@@ -3,6 +3,7 @@ import path from 'node:path'
 import { CHANNEL } from '../../shared/messages.types'
 import queries from '../database/queries'
 import * as scraper from '../scraper'
+import { scrape } from '../scraper/scrape'
 import { typedIpcMain } from './index'
 
 let mainWindow: BrowserWindow | null = null
@@ -325,33 +326,14 @@ typedIpcMain.handle(CHANNEL.SCRAPER.GET_PROGRESS, async (_event, params) => {
 
 typedIpcMain.handle(CHANNEL.SCRAPER.DEBUG_SCRAPE, async (_event, params) => {
   try {
-    const puppeteer = await import('puppeteer')
-    const browser = await puppeteer.default.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    const result = await scrape({
+      siteUrl: params.url,
+      selector: params.selector,
     })
 
-    const page = await browser.newPage()
-
-    try {
-      await page.goto(params.url, {
-        waitUntil: 'domcontentloaded',
-        timeout: 30_000,
-      })
-
-      await page.waitForSelector(params.selector, { timeout: 10_000 })
-
-      const rawHtml = await page.$eval(
-        params.selector,
-        (el: Element) => el.outerHTML,
-      )
-
-      return {
-        success: true,
-        html: rawHtml,
-      }
-    } finally {
-      await browser.close()
+    return {
+      success: true,
+      html: result.siteContent,
     }
   } catch (error) {
     console.error('Error in debug scrape:', error)

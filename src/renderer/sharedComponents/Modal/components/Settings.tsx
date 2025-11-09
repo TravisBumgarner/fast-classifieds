@@ -12,6 +12,7 @@ import {
   Tab,
   Tabs,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
@@ -19,6 +20,7 @@ import { CHANNEL } from '../../../../shared/messages.types'
 import ipcMessenger from '../../../ipcMessenger'
 import { activeModalSignal } from '../../../signals'
 import { SPACING } from '../../../styles/consts'
+import Icon from '../../Icon'
 import { MODAL_ID } from '../Modal.consts'
 import DefaultModal from './DefaultModal'
 
@@ -348,49 +350,92 @@ const SettingsModal = ({ id }: SettingsModalProps) => {
             )}
 
             <Stack spacing={SPACING.SMALL.PX}>
-              <TextField
-                label="API Key"
-                type="password"
-                value={apiKey}
-                onChange={e => setApiKey(e.target.value)}
-                placeholder="sk-..."
-                fullWidth
-                size="small"
-              />
+              <Stack
+                direction="row"
+                spacing={SPACING.SMALL.PX}
+                alignItems="center"
+              >
+                <TextField
+                  label="API Key"
+                  type="password"
+                  value={apiKey}
+                  onChange={e => setApiKey(e.target.value)}
+                  placeholder="sk-..."
+                  fullWidth
+                  size="small"
+                />
+                <Tooltip
+                  title={
+                    <span>
+                      <a
+                        href="https://platform.openai.com/settings/organization/api-keys"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          color: 'lightblue',
+                          textDecoration: 'underline',
+                        }}
+                        onClick={e => {
+                          e.preventDefault()
+                          window.electron.shell.openExternal(
+                            'https://platform.openai.com/settings/organization/api-keys',
+                          )
+                        }}
+                      >
+                        Get your API key from OpenAI
+                      </a>
+                    </span>
+                  }
+                  arrow
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Icon name="info" size={20} />
+                  </Box>
+                </Tooltip>
+              </Stack>
 
-              <TextField
-                label="Model"
-                value={model}
-                onChange={e => setModel(e.target.value)}
-                placeholder="gpt-4o-mini"
-                fullWidth
-                size="small"
-                helperText={
-                  <span>
-                    View{' '}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        window.electron.shell.openExternal(
-                          'https://platform.openai.com/docs/pricing',
-                        )
-                      }}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        padding: 0,
-                        color: 'inherit',
-                        textDecoration: 'underline',
-                        cursor: 'pointer',
-                        font: 'inherit',
-                      }}
-                    >
-                      pricing documentation
-                    </button>{' '}
-                    for all available models
-                  </span>
-                }
-              />
+              <Stack
+                direction="row"
+                spacing={SPACING.SMALL.PX}
+                alignItems="center"
+              >
+                <TextField
+                  label="Model"
+                  value={model}
+                  onChange={e => setModel(e.target.value)}
+                  placeholder="gpt-4o-mini"
+                  fullWidth
+                  size="small"
+                />
+                <Tooltip
+                  title={
+                    <span>
+                      <a
+                        href="https://platform.openai.com/docs/pricing"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          color: 'lightblue',
+                          textDecoration: 'underline',
+                        }}
+                        onClick={e => {
+                          e.preventDefault()
+                          window.electron.shell.openExternal(
+                            'https://platform.openai.com/docs/pricing',
+                          )
+                        }}
+                      >
+                        View available models
+                      </a>
+                    </span>
+                  }
+                  arrow
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Icon name="info" size={20} />
+                  </Box>
+                </Tooltip>
+              </Stack>
 
               <Button
                 variant="contained"
@@ -504,6 +549,7 @@ const SettingsModal = ({ id }: SettingsModalProps) => {
             value={confirmationText}
             onChange={e => setConfirmationText(e.target.value)}
             sx={{ mt: 2 }}
+            size="small"
           />
         </DialogContent>
         <DialogActions>
@@ -542,6 +588,7 @@ const SettingsModal = ({ id }: SettingsModalProps) => {
             onChange={e => setNukeConfirmationText(e.target.value)}
             sx={{ mt: 2 }}
             color="error"
+            size="small"
           />
         </DialogContent>
         <DialogActions>

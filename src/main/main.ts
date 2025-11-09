@@ -37,7 +37,7 @@ const createWindow = () => {
     x: 0,
     y: 0,
     icon: path.join(__dirname, '../assets/icon.png'),
-
+    title: app.isPackaged ? 'Fast Classifieds' : 'Fast Classifieds - Debug',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     },

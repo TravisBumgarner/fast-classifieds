@@ -129,6 +129,7 @@ const PromptModal = (props: PromptModalProps) => {
           )}
 
           <TextField
+            size="small"
             label="Title"
             value={title}
             onChange={e => setTitle(e.target.value)}
@@ -140,6 +141,7 @@ const PromptModal = (props: PromptModalProps) => {
           />
 
           <TextField
+            size="small"
             label="Content"
             value={content}
             onChange={e => setContent(e.target.value)}

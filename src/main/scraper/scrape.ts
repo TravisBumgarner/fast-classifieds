@@ -70,6 +70,10 @@ export const scrape = async ({
     })
 
     await page.waitForSelector(selector, { timeout: 10_000 })
+    // Not sure the best solution here.
+    // For some sites, content loads dynamically after selector appears.
+    // Maybe this gets passed in as a param later?
+    await new Promise(r => setTimeout(r, 3000))
 
     const rawContent = await page.$eval(selector, (el: Element) => el.outerHTML)
     const siteContent = extractTextAndLinks(rawContent, siteUrl)

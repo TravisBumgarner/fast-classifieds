@@ -1,8 +1,10 @@
-import { Box, Button, Paper, Stack, TextField, Typography } from '@mui/material'
+import { Box, Button, Paper, Stack, TextField, Tooltip } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { CHANNEL } from '../../../../shared/messages.types'
+import { TOOLTIPS } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
 import { SPACING } from '../../../styles/consts'
+import Icon from '../../Icon'
 import Message from '../../Message'
 import DefaultModal from './DefaultModal'
 
@@ -70,7 +72,16 @@ const DebugScrapeModal = ({ siteId }: DebugScrapeModalProps) => {
       })
 
       if (result.success) {
-        setScrapedHtml(result.html || '')
+        // Pretty print the HTML
+        const formatted = result.html
+          ? result.html
+              .replace(/></g, '>\n<') // Add newlines between tags
+              .split('\n')
+              .map(line => line.trim())
+              .filter(line => line.length > 0)
+              .join('\n')
+          : ''
+        setScrapedHtml(formatted)
       } else {
         setError(result.error || 'Failed to scrape')
       }
@@ -157,16 +168,38 @@ const DebugScrapeModal = ({ siteId }: DebugScrapeModalProps) => {
             placeholder="Auto-generated from URL"
           />
 
-          <TextField
-            size="small"
-            fullWidth
-            label="CSS Selector"
-            value={selector}
-            onChange={e => setSelector(e.target.value)}
-            placeholder="body"
-            // helperText="CSS selector for the content to scrape (default: body)"
-          />
+          <Stack direction="row" spacing={SPACING.SMALL.PX} alignItems="center">
+            <TextField
+              size="small"
+              fullWidth
+              label="CSS Selector"
+              value={selector}
+              onChange={e => setSelector(e.target.value)}
+              placeholder="body"
+            />
+            <Tooltip title={TOOLTIPS.CSS_SELECTOR} arrow>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Icon name="info" size={20} />
+              </Box>
+            </Tooltip>
+          </Stack>
         </Stack>
+        <Paper sx={{ p: SPACING.MEDIUM.PX }}>
+          <Box
+            component="pre"
+            sx={{
+              p: SPACING.SMALL.PX,
+              borderRadius: 1,
+              overflow: 'auto',
+              height: '400px',
+              fontSize: '12px',
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+            }}
+          >
+            {scrapedHtml}
+          </Box>
+        </Paper>
 
         <Stack direction="row" spacing={SPACING.SMALL.PX}>
           <Button
@@ -189,28 +222,6 @@ const DebugScrapeModal = ({ siteId }: DebugScrapeModalProps) => {
         </Stack>
 
         {error && <Message message={error} color="error" />}
-
-        {scrapedHtml && (
-          <Paper sx={{ p: SPACING.MEDIUM.PX }}>
-            <Typography variant="h6" sx={{ mb: SPACING.SMALL.PX }}>
-              Scraped HTML
-            </Typography>
-            <Box
-              component="pre"
-              sx={{
-                p: SPACING.SMALL.PX,
-                borderRadius: 1,
-                overflow: 'auto',
-                maxHeight: '400px',
-                fontSize: '12px',
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-              }}
-            >
-              {scrapedHtml}
-            </Box>
-          </Paper>
-        )}
       </Stack>
     </DefaultModal>
   )

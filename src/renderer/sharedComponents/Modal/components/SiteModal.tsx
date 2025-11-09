@@ -7,15 +7,17 @@ import {
   Select,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CHANNEL } from '../../../../shared/messages.types'
-import { ROUTES } from '../../../consts'
+import { ROUTES, TOOLTIPS } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
 import { activeModalSignal } from '../../../signals'
 import { SPACING } from '../../../styles/consts'
+import Icon from '../../Icon'
 import { MODAL_ID } from '../Modal.consts'
 import DefaultModal from './DefaultModal'
 
@@ -248,6 +250,7 @@ const SiteModal = (props: SiteModalProps) => {
           )}
 
           <TextField
+            size="small"
             label="Site URL"
             value={siteUrl}
             onChange={e => handleUrlChange(e.target.value)}
@@ -259,6 +262,7 @@ const SiteModal = (props: SiteModalProps) => {
           />
 
           <TextField
+            size="small"
             label="Site Title"
             value={siteTitle}
             onChange={e => setSiteTitle(e.target.value)}
@@ -269,18 +273,25 @@ const SiteModal = (props: SiteModalProps) => {
             helperText="Auto-generated from URL, but you can edit it"
           />
 
-          <TextField
-            label="CSS Selector"
-            value={selector}
-            onChange={e => setSelector(e.target.value)}
-            required
-            fullWidth
-            disabled={loading}
-            placeholder=".job-list or #jobs"
-            helperText="Tip: To save on AI costs, use specific CSS selectors like '.careers-list' instead of 'body'"
-          />
+          <Stack direction="row" spacing={SPACING.SMALL.PX} alignItems="center">
+            <TextField
+              size="small"
+              label="CSS Selector"
+              value={selector}
+              onChange={e => setSelector(e.target.value)}
+              required
+              fullWidth
+              disabled={loading}
+              placeholder=".job-list or #jobs"
+            />
+            <Tooltip title={TOOLTIPS.CSS_SELECTOR} arrow>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Icon name="info" size={20} />
+              </Box>
+            </Tooltip>
+          </Stack>
 
-          <FormControl fullWidth required disabled={loading}>
+          <FormControl fullWidth required disabled={loading} size="small">
             <InputLabel>Prompt</InputLabel>
             <Select
               value={promptId}
@@ -295,7 +306,7 @@ const SiteModal = (props: SiteModalProps) => {
             </Select>
           </FormControl>
 
-          <FormControl fullWidth required disabled={loading}>
+          <FormControl fullWidth required disabled={loading} size="small">
             <InputLabel>Status</InputLabel>
             <Select
               value={status}
