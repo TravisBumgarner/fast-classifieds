@@ -15,12 +15,12 @@ const config: ForgeConfig = {
     ignore: [],
     icon: './src/assets/icon',
     extraResource: ['./drizzle'],
-    // osxSign: {},
-    // osxNotarize: {
-    //   appleId: process.env.APPLE_ID,
-    //   appleIdPassword: process.env.APPLE_PASSWORD,
-    //   teamId: process.env.APPLE_TEAM_ID,
-    // },
+    osxSign: {},
+    osxNotarize: {
+      appleId: process.env.APPLE_ID,
+      appleIdPassword: process.env.APPLE_PASSWORD,
+      teamId: process.env.APPLE_TEAM_ID,
+    },
   },
 
   rebuildConfig: {},
