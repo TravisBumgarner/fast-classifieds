@@ -13,6 +13,8 @@ import { setMainWindow } from './messages/messages'
 log.initialize()
 
 updateElectronApp({
+  repo: 'TravisBumgarner/fast-classifieds',
+  updateInterval: '1 hour',
   logger: {
     log: log.log,
     info: log.info,
