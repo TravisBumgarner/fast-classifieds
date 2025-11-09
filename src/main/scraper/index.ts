@@ -39,6 +39,7 @@ async function processSite({
   scrapeRunId,
   apiKey,
   model,
+  delay,
   onProgress,
 }: {
   siteId: number
@@ -48,6 +49,7 @@ async function processSite({
   scrapeRunId: number
   apiKey: string
   model: string
+  delay?: number
   onProgress?: (
     status: 'scraping' | 'processing' | 'complete' | 'error',
   ) => void
@@ -56,7 +58,7 @@ async function processSite({
     console.log(`Processing: ${siteUrl}`)
     onProgress?.('scraping')
 
-    const { siteContent, hash } = await scrape({ siteUrl, selector })
+    const { siteContent, hash } = await scrape({ siteUrl, selector, delay })
     console.log(
       `Scraped content for: ${siteUrl}, hash: ${hash}, content: ${JSON.stringify(siteContent)}`,
     )
@@ -141,6 +143,7 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
     // Get API settings from localStorage
     let apiKey = ''
     let model = 'gpt-4o-mini'
+    let delay = 3000
 
     if (mainWindow && !mainWindow.isDestroyed()) {
       try {
@@ -150,6 +153,10 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
         model = await mainWindow.webContents.executeJavaScript(
           "localStorage.getItem('openai_model') || 'gpt-4o-mini'",
         )
+        const delayStr = await mainWindow.webContents.executeJavaScript(
+          "localStorage.getItem('scrape_delay') || '3000'",
+        )
+        delay = Number(delayStr)
       } catch (error) {
         console.error('Error fetching API settings:', error)
       }
@@ -242,6 +249,7 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
           scrapeRunId,
           apiKey,
           model,
+          delay,
           onProgress: status => {
             const currentProgress = activeRuns.get(scrapeRunId)
             if (currentProgress) {
@@ -338,6 +346,7 @@ export async function retryFailedScrapes(
     // Get API settings from localStorage
     let apiKey = ''
     let model = 'gpt-4o-mini'
+    let delay = 3000
 
     if (mainWindow && !mainWindow.isDestroyed()) {
       try {
@@ -347,6 +356,10 @@ export async function retryFailedScrapes(
         model = await mainWindow.webContents.executeJavaScript(
           "localStorage.getItem('openai_model') || 'gpt-4o-mini'",
         )
+        const delayStr = await mainWindow.webContents.executeJavaScript(
+          "localStorage.getItem('scrape_delay') || '3000'",
+        )
+        delay = Number(delayStr)
       } catch (error) {
         console.error('Error fetching API settings:', error)
       }
@@ -440,6 +453,7 @@ export async function retryFailedScrapes(
           scrapeRunId,
           apiKey,
           model,
+          delay,
           onProgress: status => {
             const currentProgress = activeRuns.get(scrapeRunId)
             if (currentProgress) {
