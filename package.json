@@ -1,13 +1,13 @@
 {
   "name": "fast-classifieds",
   "productName": "Fast Classifieds",
-  "version": "1.0.4",
+  "version": "1.0.0",
   "description": "An Electron app to quickly browse classified ads sites.",
   "main": ".vite/build/main.js",
   "scripts": {
     "dev": "electron-forge start",
     "package": "electron-forge package",
-    "make": "electron-forge make",
+    "make": "dotenv -e .env -- electron-forge make",
     "publish": "dotenv -e .env -- electron-forge publish",
     "lint": "eslint --ext .ts,.tsx .",
     "db:generate": "drizzle-kit generate",
