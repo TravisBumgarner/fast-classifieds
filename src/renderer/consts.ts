@@ -1,7 +1,7 @@
 export const ROUTES = {
-  home: {
+  postings: {
     href: () => '/',
-    label: 'Home',
+    label: 'Postings',
     target: '_self',
   },
   sites: {
@@ -22,3 +22,12 @@ export const ROUTES = {
 } as const
 
 export const QUERY_KEYS = {}
+
+export const TOOLTIPS = {
+  CSS_SELECTOR:
+    "Use the CSS Selector to target the HTML element wrapping all the jobs. Tip: To save on AI costs, use specific selectors like '.careers-list' instead of 'body'.",
+  API_KEY:
+    'Get your API key from https://platform.openai.com/settings/organization/api-keys',
+  MODEL:
+    'View pricing and available models at https://platform.openai.com/docs/pricing',
+} as const

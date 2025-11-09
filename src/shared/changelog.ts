@@ -9,6 +9,20 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.1.0',
+    date: '2025-11-09',
+    changes: [
+      {
+        category: 'New',
+        description: 'Added ability to open selected job postings in browser',
+      },
+      {
+        category: 'New',
+        description: 'Added debugger tool for checking scraper issues',
+      },
+    ],
+  },
+  {
     version: '1.0.0',
     date: '2025-11-08',
     changes: [

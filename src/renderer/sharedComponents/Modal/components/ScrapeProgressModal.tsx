@@ -91,12 +91,24 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
     try {
       console.log('[ScrapeProgressModal] Starting scrape...')
 
+      // Get settings from localStorage
+      const apiKey = localStorage.getItem('openai_api_key') || ''
+      const model = localStorage.getItem('openai_model') || 'gpt-4o-mini'
+      const delay = Number(localStorage.getItem('scrape_delay') || '3000')
+
       // If retryRunId is provided, call retry instead of start
       const result = props.retryRunId
         ? await ipcMessenger.invoke(CHANNEL.SCRAPER.RETRY, {
             scrapeRunId: props.retryRunId,
+            apiKey,
+            model,
+            delay,
           })
-        : await ipcMessenger.invoke(CHANNEL.SCRAPER.START, undefined)
+        : await ipcMessenger.invoke(CHANNEL.SCRAPER.START, {
+            apiKey,
+            model,
+            delay,
+          })
 
       console.log('[ScrapeProgressModal] Start result:', result)
 

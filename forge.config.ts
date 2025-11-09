@@ -32,7 +32,9 @@ const config: ForgeConfig = {
     // new MakerDeb({}),
   ],
   plugins: [
-    new AutoUnpackNativesPlugin({}),
+    ...(process.env.NODE_ENV === 'production'
+      ? [new AutoUnpackNativesPlugin({})]
+      : []),
     new VitePlugin({
       // `build` can specify multiple entry builds, which can be Main process, Preload scripts, Worker process, etc.
       // If you are familiar with Vite configuration, it will look really familiar.

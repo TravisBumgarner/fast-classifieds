@@ -183,7 +183,7 @@ const ImportSitesModal = (props: ImportSitesModalProps) => {
             </Typography>
           )}
 
-          <FormControl fullWidth required disabled={loading}>
+          <FormControl fullWidth required disabled={loading} size="small">
             <InputLabel>Prompt</InputLabel>
             <Select
               value={promptId}
@@ -199,6 +199,7 @@ const ImportSitesModal = (props: ImportSitesModalProps) => {
           </FormControl>
 
           <TextField
+            size="small"
             label="URLs"
             value={urls}
             onChange={e => setUrls(e.target.value)}

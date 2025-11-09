@@ -12,6 +12,7 @@ import {
   Tab,
   Tabs,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
@@ -19,6 +20,7 @@ import { CHANNEL } from '../../../../shared/messages.types'
 import ipcMessenger from '../../../ipcMessenger'
 import { activeModalSignal } from '../../../signals'
 import { SPACING } from '../../../styles/consts'
+import Icon from '../../Icon'
 import { MODAL_ID } from '../Modal.consts'
 import DefaultModal from './DefaultModal'
 
@@ -32,6 +34,7 @@ const SettingsModal = ({ id }: SettingsModalProps) => {
   const [backupDirectory, setBackupDirectory] = useState<string>('')
   const [apiKey, setApiKey] = useState<string>('')
   const [model, setModel] = useState<string>('gpt-4o-mini')
+  const [scrapeDelay, setScrapeDelay] = useState<number>(3000)
   const [isExporting, setIsExporting] = useState(false)
   const [isRestoring, setIsRestoring] = useState(false)
   const [apiMessage, setApiMessage] = useState<{
@@ -39,6 +42,10 @@ const SettingsModal = ({ id }: SettingsModalProps) => {
     text: string
   } | null>(null)
   const [dataMessage, setDataMessage] = useState<{
+    type: 'success' | 'error'
+    text: string
+  } | null>(null)
+  const [scrapeMessage, setScrapeMessage] = useState<{
     type: 'success' | 'error'
     text: string
   } | null>(null)
@@ -66,8 +73,10 @@ const SettingsModal = ({ id }: SettingsModalProps) => {
       // Load from localStorage
       const savedApiKey = localStorage.getItem('openai_api_key') || ''
       const savedModel = localStorage.getItem('openai_model') || 'gpt-4o-mini'
+      const savedDelay = localStorage.getItem('scrape_delay') || '3000'
       setApiKey(savedApiKey)
       setModel(savedModel)
+      setScrapeDelay(Number(savedDelay))
     }
 
     getBackupDirectory()
@@ -265,7 +274,15 @@ const SettingsModal = ({ id }: SettingsModalProps) => {
   }
 
   return (
-    <DefaultModal title="Settings" sx={{ height: '600px', overflowY: 'auto' }}>
+    <DefaultModal
+      title="Settings"
+      sx={{
+        height: '600px',
+        width: '800px',
+        maxWidth: '90hw',
+        overflowY: 'auto',
+      }}
+    >
       <Box sx={{ minWidth: 500 }}>
         <Tabs
           value={activeTab}
@@ -273,12 +290,13 @@ const SettingsModal = ({ id }: SettingsModalProps) => {
           sx={{ borderBottom: 1, borderColor: 'divider' }}
         >
           <Tab label="OpenAI Config" />
+          <Tab label="Scraper Config" />
           <Tab label="Data Management" />
           <Tab label="Help & Onboarding" />
         </Tabs>
 
         {/* Help & Onboarding Tab */}
-        {activeTab === 2 && (
+        {activeTab === 3 && (
           <Box sx={{ p: SPACING.MEDIUM.PX }}>
             <Typography variant="subtitle2" gutterBottom>
               Getting Started Guide
@@ -348,49 +366,92 @@ const SettingsModal = ({ id }: SettingsModalProps) => {
             )}
 
             <Stack spacing={SPACING.SMALL.PX}>
-              <TextField
-                label="API Key"
-                type="password"
-                value={apiKey}
-                onChange={e => setApiKey(e.target.value)}
-                placeholder="sk-..."
-                fullWidth
-                size="small"
-              />
+              <Stack
+                direction="row"
+                spacing={SPACING.SMALL.PX}
+                alignItems="center"
+              >
+                <TextField
+                  label="API Key"
+                  type="password"
+                  value={apiKey}
+                  onChange={e => setApiKey(e.target.value)}
+                  placeholder="sk-..."
+                  fullWidth
+                  size="small"
+                />
+                <Tooltip
+                  title={
+                    <span>
+                      <a
+                        href="https://platform.openai.com/settings/organization/api-keys"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          color: 'lightblue',
+                          textDecoration: 'underline',
+                        }}
+                        onClick={e => {
+                          e.preventDefault()
+                          window.electron.shell.openExternal(
+                            'https://platform.openai.com/settings/organization/api-keys',
+                          )
+                        }}
+                      >
+                        Get your API key from OpenAI
+                      </a>
+                    </span>
+                  }
+                  arrow
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Icon name="info" size={20} />
+                  </Box>
+                </Tooltip>
+              </Stack>
 
-              <TextField
-                label="Model"
-                value={model}
-                onChange={e => setModel(e.target.value)}
-                placeholder="gpt-4o-mini"
-                fullWidth
-                size="small"
-                helperText={
-                  <span>
-                    View{' '}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        window.electron.shell.openExternal(
-                          'https://platform.openai.com/docs/pricing',
-                        )
-                      }}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        padding: 0,
-                        color: 'inherit',
-                        textDecoration: 'underline',
-                        cursor: 'pointer',
-                        font: 'inherit',
-                      }}
-                    >
-                      pricing documentation
-                    </button>{' '}
-                    for all available models
-                  </span>
-                }
-              />
+              <Stack
+                direction="row"
+                spacing={SPACING.SMALL.PX}
+                alignItems="center"
+              >
+                <TextField
+                  label="Model"
+                  value={model}
+                  onChange={e => setModel(e.target.value)}
+                  placeholder="gpt-4o-mini"
+                  fullWidth
+                  size="small"
+                />
+                <Tooltip
+                  title={
+                    <span>
+                      <a
+                        href="https://platform.openai.com/docs/pricing"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          color: 'lightblue',
+                          textDecoration: 'underline',
+                        }}
+                        onClick={e => {
+                          e.preventDefault()
+                          window.electron.shell.openExternal(
+                            'https://platform.openai.com/docs/pricing',
+                          )
+                        }}
+                      >
+                        View available models
+                      </a>
+                    </span>
+                  }
+                  arrow
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Icon name="info" size={20} />
+                  </Box>
+                </Tooltip>
+              </Stack>
 
               <Button
                 variant="contained"
@@ -403,8 +464,89 @@ const SettingsModal = ({ id }: SettingsModalProps) => {
           </Box>
         )}
 
-        {/* Data Management Tab */}
+        {/* Scraper Config Tab */}
         {activeTab === 1 && (
+          <Box sx={{ p: SPACING.MEDIUM.PX }}>
+            <Typography variant="subtitle2" gutterBottom>
+              Scraper Configuration
+            </Typography>
+            <Typography
+              variant="body2"
+              color="textSecondary"
+              sx={{ mb: SPACING.SMALL.PX }}
+            >
+              Configure how the scraper behaves when loading pages
+            </Typography>
+
+            {scrapeMessage && (
+              <Alert
+                severity={scrapeMessage.type}
+                sx={{ mb: SPACING.MEDIUM.PX }}
+              >
+                {scrapeMessage.text}
+              </Alert>
+            )}
+
+            <Stack spacing={SPACING.SMALL.PX}>
+              <Stack
+                direction="row"
+                spacing={SPACING.SMALL.PX}
+                alignItems="center"
+              >
+                <TextField
+                  label="Page Load Delay (ms)"
+                  type="number"
+                  value={scrapeDelay}
+                  onChange={e => setScrapeDelay(Number(e.target.value))}
+                  placeholder="3000"
+                  fullWidth
+                  size="small"
+                  inputProps={{ min: 0, step: 100 }}
+                />
+                <Tooltip
+                  title={
+                    <span>
+                      Time to wait after the page selector appears before
+                      scraping content. Some sites load content dynamically
+                      after the initial page load. Increase this value if
+                      you&apos;re missing content, decrease it to speed up
+                      scraping.
+                    </span>
+                  }
+                  arrow
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Icon name="info" size={20} />
+                  </Box>
+                </Tooltip>
+              </Stack>
+
+              <Button
+                variant="contained"
+                onClick={() => {
+                  try {
+                    localStorage.setItem('scrape_delay', String(scrapeDelay))
+                    setScrapeMessage({
+                      type: 'success',
+                      text: 'Scraper settings saved successfully',
+                    })
+                  } catch {
+                    setScrapeMessage({
+                      type: 'error',
+                      text: 'Failed to save scraper settings',
+                    })
+                  }
+                }}
+                fullWidth
+              >
+                Save Scraper Settings
+              </Button>
+            </Stack>
+          </Box>
+        )}
+
+        {/* Data Management Tab */}
+        {activeTab === 2 && (
           <Box sx={{ p: SPACING.MEDIUM.PX }}>
             <Typography variant="subtitle2" gutterBottom>
               Database Backups
@@ -504,6 +646,7 @@ const SettingsModal = ({ id }: SettingsModalProps) => {
             value={confirmationText}
             onChange={e => setConfirmationText(e.target.value)}
             sx={{ mt: 2 }}
+            size="small"
           />
         </DialogContent>
         <DialogActions>
@@ -542,6 +685,7 @@ const SettingsModal = ({ id }: SettingsModalProps) => {
             onChange={e => setNukeConfirmationText(e.target.value)}
             sx={{ mt: 2 }}
             color="error"
+            size="small"
           />
         </DialogContent>
         <DialogActions>

@@ -1,6 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 import { ROUTES } from '../consts'
-import Home from '../pages/Home'
+import Postings from '../pages/Postings'
 import Prompts from '../pages/Prompts'
 import ScrapeRuns from '../pages/ScrapeRuns'
 import Sites from '../pages/Sites'
@@ -8,7 +8,7 @@ import Sites from '../pages/Sites'
 export default function AppRouter() {
   return (
     <Routes>
-      <Route path={ROUTES.home.href()} element={<Home />} />
+      <Route path={ROUTES.postings.href()} element={<Postings />} />
       <Route path={ROUTES.sites.href()} element={<Sites />} />
       <Route path={ROUTES.prompts.href()} element={<Prompts />} />
       <Route path={ROUTES.scrapeRuns.href()} element={<ScrapeRuns />} />

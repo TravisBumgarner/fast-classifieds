@@ -3,6 +3,7 @@ import path from 'node:path'
 import { CHANNEL } from '../../shared/messages.types'
 import queries from '../database/queries'
 import * as scraper from '../scraper'
+import { scrape } from '../scraper/scrape'
 import { typedIpcMain } from './index'
 
 let mainWindow: BrowserWindow | null = null
@@ -269,9 +270,14 @@ typedIpcMain.handle(CHANNEL.SCRAPER.GET_API_SETTINGS, async event => {
   }
 })
 
-typedIpcMain.handle(CHANNEL.SCRAPER.START, async () => {
+typedIpcMain.handle(CHANNEL.SCRAPER.START, async (_event, params) => {
   try {
-    const result = await scraper.startScraping(mainWindow)
+    const result = await scraper.startScraping(
+      mainWindow,
+      params.apiKey,
+      params.model,
+      params.delay,
+    )
     return {
       type: 'start_scraping',
       ...result,
@@ -291,6 +297,9 @@ typedIpcMain.handle(CHANNEL.SCRAPER.RETRY, async (_event, params) => {
     const result = await scraper.retryFailedScrapes(
       mainWindow,
       params.scrapeRunId,
+      params.apiKey,
+      params.model,
+      params.delay,
     )
     return {
       type: 'retry_scraping',
@@ -317,6 +326,27 @@ typedIpcMain.handle(CHANNEL.SCRAPER.GET_PROGRESS, async (_event, params) => {
     console.error('Error getting scrape progress:', error)
     return {
       type: 'get_scrape_progress',
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    }
+  }
+})
+
+typedIpcMain.handle(CHANNEL.SCRAPER.DEBUG_SCRAPE, async (_event, params) => {
+  try {
+    const result = await scrape({
+      siteUrl: params.url,
+      selector: params.selector,
+      delay: params.delay,
+    })
+
+    return {
+      success: true,
+      html: result.siteContent,
+    }
+  } catch (error) {
+    console.error('Error in debug scrape:', error)
+    return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
     }

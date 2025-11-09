@@ -52,9 +52,11 @@ function hashContent(content: string): string {
 export const scrape = async ({
   siteUrl,
   selector,
+  delay,
 }: {
   siteUrl: string
   selector: string
+  delay: number
 }): Promise<{ siteContent: string; hash: string }> => {
   const browser = await puppeteer.launch({
     headless: true,
@@ -70,6 +72,10 @@ export const scrape = async ({
     })
 
     await page.waitForSelector(selector, { timeout: 10_000 })
+    // Not sure the best solution here.
+    // For some sites, content loads dynamically after selector appears.
+    // Maybe this gets passed in as a param later?
+    await new Promise(r => setTimeout(r, delay))
 
     const rawContent = await page.$eval(selector, (el: Element) => el.outerHTML)
     const siteContent = extractTextAndLinks(rawContent, siteUrl)
