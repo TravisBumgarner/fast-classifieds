@@ -178,6 +178,14 @@ const Sites = () => {
               <MenuItem value="inactive">Inactive</MenuItem>
             </Select>
           </FormControl>
+          <Button
+            variant="outlined"
+            onClick={() =>
+              (activeModalSignal.value = { id: MODAL_ID.DEBUG_SCRAPE_MODAL })
+            }
+          >
+            Debug Scraper
+          </Button>
           <Button variant="outlined" onClick={handleImportSites}>
             Import Sites
           </Button>
@@ -299,21 +307,38 @@ const Sites = () => {
                     {new Date(site.updatedAt).toLocaleDateString()}
                   </TableCell>
                   <TableCell align="right">
-                    <IconButton
-                      size="small"
-                      onClick={() => handleEditSite(site)}
-                      title="Edit site"
-                    >
-                      <Icon name="edit" />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDeleteSite(site.id, site.siteTitle)}
-                      title="Delete site"
-                      color="error"
-                    >
-                      <Icon name="delete" />
-                    </IconButton>
+                    <Tooltip title="Debug scraper">
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          (activeModalSignal.value = {
+                            id: MODAL_ID.DEBUG_SCRAPE_MODAL,
+                            siteId: site.id,
+                          })
+                        }
+                      >
+                        <Icon name="debug" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Edit site">
+                      <IconButton
+                        size="small"
+                        onClick={() => handleEditSite(site)}
+                      >
+                        <Icon name="edit" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete site">
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          handleDeleteSite(site.id, site.siteTitle)
+                        }
+                        color="error"
+                      >
+                        <Icon name="delete" />
+                      </IconButton>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               ))

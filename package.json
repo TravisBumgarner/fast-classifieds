@@ -6,9 +6,9 @@
   "main": ".vite/build/main.js",
   "scripts": {
     "dev": "electron-forge start",
-    "package": "electron-forge package",
-    "make": "dotenv -e .env -- electron-forge make",
-    "publish": "dotenv -e .env -- electron-forge publish",
+    "package": "NODE_ENV=production electron-forge package",
+    "make": "NODE_ENV=production dotenv -e .env -- electron-forge make",
+    "publish": "NODE_ENV=production dotenv -e .env -- electron-forge publish",
     "lint": "eslint --ext .ts,.tsx .",
     "db:generate": "drizzle-kit generate",
     "db:apply": "drizzle-kit push",

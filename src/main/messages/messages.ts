@@ -323,6 +323,45 @@ typedIpcMain.handle(CHANNEL.SCRAPER.GET_PROGRESS, async (_event, params) => {
   }
 })
 
+typedIpcMain.handle(CHANNEL.SCRAPER.DEBUG_SCRAPE, async (_event, params) => {
+  try {
+    const puppeteer = await import('puppeteer')
+    const browser = await puppeteer.default.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    })
+
+    const page = await browser.newPage()
+
+    try {
+      await page.goto(params.url, {
+        waitUntil: 'domcontentloaded',
+        timeout: 30_000,
+      })
+
+      await page.waitForSelector(params.selector, { timeout: 10_000 })
+
+      const rawHtml = await page.$eval(
+        params.selector,
+        (el: Element) => el.outerHTML,
+      )
+
+      return {
+        success: true,
+        html: rawHtml,
+      }
+    } finally {
+      await browser.close()
+    }
+  } catch (error) {
+    console.error('Error in debug scrape:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    }
+  }
+})
+
 // Scrape run history handlers
 typedIpcMain.handle(CHANNEL.SCRAPE_RUNS.GET_ALL, async () => {
   try {

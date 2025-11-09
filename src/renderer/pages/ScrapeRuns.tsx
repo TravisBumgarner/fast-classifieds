@@ -386,12 +386,18 @@ const ScrapeRuns = () => {
                   <Fragment key={run.id}>
                     <TableRow hover>
                       <TableCell>
-                        <IconButton
-                          size="small"
-                          onClick={() => loadTasksForRun(run.id)}
+                        <Tooltip
+                          title={
+                            isExpanded ? 'Collapse details' : 'Expand details'
+                          }
                         >
-                          {isExpanded ? '▲' : '▼'}
-                        </IconButton>
+                          <IconButton
+                            size="small"
+                            onClick={() => loadTasksForRun(run.id)}
+                          >
+                            {isExpanded ? '▲' : '▼'}
+                          </IconButton>
+                        </Tooltip>
                       </TableCell>
                       <TableCell>
                         {new Date(run.createdAt).toLocaleString()}

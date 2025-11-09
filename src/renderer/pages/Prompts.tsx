@@ -13,6 +13,7 @@ import {
   TableHead,
   TableRow,
   TableSortLabel,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
@@ -295,23 +296,25 @@ const Prompts = () => {
                       {new Date(prompt.updatedAt).toLocaleDateString()}
                     </TableCell>
                     <TableCell align="right">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleEditPrompt(prompt)}
-                        title="Edit prompt"
-                      >
-                        <Icon name="edit" />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={() =>
-                          handleDeletePrompt(prompt.id, prompt.title)
-                        }
-                        title="Delete prompt"
-                        color="error"
-                      >
-                        <Icon name="delete" />
-                      </IconButton>
+                      <Tooltip title="Edit prompt">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleEditPrompt(prompt)}
+                        >
+                          <Icon name="edit" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete prompt">
+                        <IconButton
+                          size="small"
+                          onClick={() =>
+                            handleDeletePrompt(prompt.id, prompt.title)
+                          }
+                          color="error"
+                        >
+                          <Icon name="delete" />
+                        </IconButton>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 )
