@@ -329,6 +329,7 @@ typedIpcMain.handle(CHANNEL.SCRAPER.DEBUG_SCRAPE, async (_event, params) => {
     const result = await scrape({
       siteUrl: params.url,
       selector: params.selector,
+      delay: params.delay,
     })
 
     return {

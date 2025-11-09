@@ -52,7 +52,7 @@ function hashContent(content: string): string {
 export const scrape = async ({
   siteUrl,
   selector,
-  delay = 3000,
+  delay,
 }: {
   siteUrl: string
   selector: string
