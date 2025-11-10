@@ -90,6 +90,19 @@ const getThemeOptions = (isDark: boolean): ThemeOptions => {
           },
         },
       },
+      MuiTableContainer: {
+        styleOverrides: {
+          root: {
+            boxShadow: isDark
+              ? `0 2px 8px rgba(0, 0, 0, 0.3)`
+              : `0 2px 8px ${PALETTE.grayscale[200]}`,
+            borderRadius: SPACING.SMALL.PX,
+            backgroundColor: colors.surface,
+            maxHeight: '100%',
+            overflow: 'auto',
+          },
+        },
+      },
       MuiTable: {
         styleOverrides: {
           root: {
@@ -97,7 +110,6 @@ const getThemeOptions = (isDark: boolean): ThemeOptions => {
             borderSpacing: 0,
             border: `1px solid ${colors.border.light}`,
             borderRadius: SPACING.SMALL.PX,
-            overflow: 'hidden',
             backgroundColor: colors.surface,
           },
         },
@@ -122,6 +134,9 @@ const getThemeOptions = (isDark: boolean): ThemeOptions => {
             fontWeight: 600,
             color: colors.text.primary,
             borderBottom: `2px solid ${colors.border.medium}`,
+            position: 'sticky',
+            top: 0,
+            zIndex: 10,
           },
           body: {
             color: colors.text.tertiary,
@@ -137,14 +152,14 @@ const getThemeOptions = (isDark: boolean): ThemeOptions => {
           },
         },
       },
-      MuiTableContainer: {
+      MuiTablePagination: {
         styleOverrides: {
           root: {
-            boxShadow: isDark
-              ? `0 2px 8px rgba(0, 0, 0, 0.3)`
-              : `0 2px 8px ${PALETTE.grayscale[200]}`,
-            borderRadius: SPACING.SMALL.PX,
+            borderTop: `1px solid ${colors.border.light}`,
             backgroundColor: colors.surface,
+            position: 'sticky',
+            bottom: 0,
+            zIndex: 10,
           },
         },
       },

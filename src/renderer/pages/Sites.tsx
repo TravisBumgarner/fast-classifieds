@@ -283,7 +283,13 @@ const Sites = () => {
   }
 
   return (
-    <Box>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+      }}
+    >
       <Stack
         direction="row"
         justifyContent="space-between"
@@ -347,247 +353,282 @@ const Sites = () => {
 
       {error && <Message message={error} color="error" />}
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell padding="checkbox" />
-              <TableCell>
-                <TableSortLabel
-                  active={sortField === 'siteTitle'}
-                  direction={sortField === 'siteTitle' ? sortDirection : 'asc'}
-                  onClick={() => handleSort('siteTitle')}
-                >
-                  Company
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>Selector</TableCell>
-              <TableCell>Total Jobs</TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortField === 'status'}
-                  direction={sortField === 'status' ? sortDirection : 'asc'}
-                  onClick={() => handleSort('status')}
-                >
-                  Status
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortField === 'updatedAt'}
-                  direction={sortField === 'updatedAt' ? sortDirection : 'asc'}
-                  onClick={() => handleSort('updatedAt')}
-                >
-                  Updated
-                </TableSortLabel>
-              </TableCell>
-              <TableCell align="right">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredSites.length === 0 ? (
+      <TableContainer
+        component={Paper}
+        sx={{
+          flexGrow: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+        }}
+      >
+        <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
+          <Table stickyHeader>
+            <TableHead>
               <TableRow>
-                <TableCell colSpan={7} align="center">
-                  <Stack
-                    spacing={SPACING.SMALL.PX}
-                    alignItems="center"
-                    sx={{ py: 4 }}
+                <TableCell padding="checkbox" />
+                <TableCell>
+                  <TableSortLabel
+                    active={sortField === 'siteTitle'}
+                    direction={
+                      sortField === 'siteTitle' ? sortDirection : 'asc'
+                    }
+                    onClick={() => handleSort('siteTitle')}
                   >
-                    <Typography variant="body2" color="textSecondary">
-                      {sites.length === 0
-                        ? 'No sites found. Click "Add Site" or "Import Sites" to get started.'
-                        : 'No sites match the current filter.'}
-                    </Typography>
-                  </Stack>
+                    Company
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>Selector</TableCell>
+                <TableCell>Total Jobs</TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortField === 'status'}
+                    direction={sortField === 'status' ? sortDirection : 'asc'}
+                    onClick={() => handleSort('status')}
+                  >
+                    Status
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortField === 'updatedAt'}
+                    direction={
+                      sortField === 'updatedAt' ? sortDirection : 'asc'
+                    }
+                    onClick={() => handleSort('updatedAt')}
+                  >
+                    Updated
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell
+                  align="right"
+                  sx={{
+                    width: '200px',
+                  }}
+                >
+                  Actions
                 </TableCell>
               </TableRow>
-            ) : (
-              paginatedSites.map(site => {
-                const isExpanded = expandedSiteId === site.id
-                const jobs = siteJobs[site.id] || []
-                const loading = loadingJobs[site.id] || false
+            </TableHead>
+            <TableBody>
+              {filteredSites.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} align="center">
+                    <Stack
+                      spacing={SPACING.SMALL.PX}
+                      alignItems="center"
+                      sx={{ py: 4 }}
+                    >
+                      <Typography variant="body2" color="textSecondary">
+                        {sites.length === 0
+                          ? 'No sites found. Click "Add Site" or "Import Sites" to get started.'
+                          : 'No sites match the current filter.'}
+                      </Typography>
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedSites.map(site => {
+                  const isExpanded = expandedSiteId === site.id
+                  const jobs = siteJobs[site.id] || []
+                  const loading = loadingJobs[site.id] || false
 
-                return (
-                  <>
-                    <TableRow key={site.id} hover>
-                      <TableCell padding="checkbox">
-                        <Tooltip
-                          title={
-                            isExpanded
-                              ? 'Collapse job listings'
-                              : 'Expand job listings'
-                          }
+                  return (
+                    <>
+                      <TableRow key={site.id} hover>
+                        <TableCell padding="checkbox">
+                          <Tooltip
+                            title={
+                              isExpanded
+                                ? 'Collapse job listings'
+                                : 'Expand job listings'
+                            }
+                          >
+                            <IconButton
+                              onClick={() => handleToggleExpand(site.id)}
+                            >
+                              <Icon name={isExpanded ? 'down' : 'right'} />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                        <TableCell>{site.siteTitle}</TableCell>
+                        <TableCell>
+                          <code>{site.selector}</code>
+                        </TableCell>
+                        <TableCell>{site.totalJobs}</TableCell>
+                        <TableCell>
+                          <Chip
+                            label={
+                              site.status.charAt(0).toUpperCase() +
+                              site.status.slice(1)
+                            }
+                            color={
+                              site.status === 'active' ? 'success' : 'default'
+                            }
+                          />
+                        </TableCell>
+                        <TableCell>
+                          {new Date(site.updatedAt).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell align="right">
+                          <Tooltip title="Open site in browser">
+                            <span>
+                              <Link url={site.siteUrl} />
+                            </span>
+                          </Tooltip>
+                          <Tooltip title="Debug Site">
+                            <IconButton
+                              onClick={() =>
+                                (activeModalSignal.value = {
+                                  id: MODAL_ID.DEBUG_SCRAPE_MODAL,
+                                  siteId: site.id,
+                                })
+                              }
+                            >
+                              <Icon name="debug" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Edit site">
+                            <IconButton onClick={() => handleEditSite(site)}>
+                              <Icon name="edit" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Delete site">
+                            <IconButton
+                              onClick={() =>
+                                handleDeleteSite(site.id, site.siteTitle)
+                              }
+                              color="error"
+                            >
+                              <Icon name="delete" />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell
+                          style={{ paddingBottom: 0, paddingTop: 0 }}
+                          colSpan={7}
                         >
-                          <IconButton
-                            onClick={() => handleToggleExpand(site.id)}
+                          <Collapse
+                            in={isExpanded}
+                            timeout="auto"
+                            unmountOnExit
                           >
-                            <Icon name={isExpanded ? 'down' : 'right'} />
-                          </IconButton>
-                        </Tooltip>
-                      </TableCell>
-                      <TableCell>{site.siteTitle}</TableCell>
-                      <TableCell>
-                        <code>{site.selector}</code>
-                      </TableCell>
-                      <TableCell>{site.totalJobs}</TableCell>
-                      <TableCell>
-                        <Chip
-                          label={
-                            site.status.charAt(0).toUpperCase() +
-                            site.status.slice(1)
-                          }
-                          color={
-                            site.status === 'active' ? 'success' : 'default'
-                          }
-                        />
-                      </TableCell>
-                      <TableCell>
-                        {new Date(site.updatedAt).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell align="right">
-                        <Tooltip title="Open site in browser">
-                          <span>
-                            <Link url={site.siteUrl} />
-                          </span>
-                        </Tooltip>
-                        <Tooltip title="Debug Site">
-                          <IconButton
-                            onClick={() =>
-                              (activeModalSignal.value = {
-                                id: MODAL_ID.DEBUG_SCRAPE_MODAL,
-                                siteId: site.id,
-                              })
-                            }
-                          >
-                            <Icon name="debug" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Edit site">
-                          <IconButton onClick={() => handleEditSite(site)}>
-                            <Icon name="edit" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Delete site">
-                          <IconButton
-                            onClick={() =>
-                              handleDeleteSite(site.id, site.siteTitle)
-                            }
-                            color="error"
-                          >
-                            <Icon name="delete" />
-                          </IconButton>
-                        </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell
-                        style={{ paddingBottom: 0, paddingTop: 0 }}
-                        colSpan={7}
-                      >
-                        <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                          <Box sx={{ margin: 2 }}>
-                            {loading ? (
-                              <Typography variant="body2" color="textSecondary">
-                                Loading jobs...
-                              </Typography>
-                            ) : jobs.length === 0 ? (
-                              <Typography variant="body2" color="textSecondary">
-                                No jobs found for this site.
-                              </Typography>
-                            ) : (
-                              <Table>
-                                <TableHead>
-                                  <TableRow>
-                                    <TableCell>Title</TableCell>
-                                    <TableCell>Explanation</TableCell>
-                                    <TableCell>Status</TableCell>
-                                    <TableCell>Created</TableCell>
-                                    <TableCell align="right">Actions</TableCell>
-                                  </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                  {jobs.map(job => (
-                                    <TableRow key={job.id}>
-                                      <TableCell>
-                                        <Typography variant="body2">
-                                          {job.title}
-                                        </Typography>
-                                      </TableCell>
-                                      <TableCell>
-                                        <Typography
-                                          variant="body2"
-                                          color="textSecondary"
-                                          sx={{
-                                            maxWidth: 400,
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            whiteSpace: 'nowrap',
-                                          }}
-                                        >
-                                          {job.explanation || '-'}
-                                        </Typography>
-                                      </TableCell>
-                                      <TableCell>
-                                        <FormControl sx={{ minWidth: 120 }}>
-                                          <Select
-                                            value={job.status}
-                                            onChange={e =>
-                                              handleStatusChange(
-                                                job.id,
-                                                e.target.value as PostingStatus,
-                                                site.id,
-                                              )
-                                            }
-                                            renderValue={value => {
-                                              const option = statusOptions.find(
-                                                opt => opt.value === value,
-                                              )
-                                              return (
-                                                <Chip
-                                                  label={option?.label}
-                                                  color={option?.color}
-                                                />
-                                              )
-                                            }}
-                                          >
-                                            {statusOptions.map(option => (
-                                              <MenuItem
-                                                key={option.value}
-                                                value={option.value}
-                                              >
-                                                {option.label}
-                                              </MenuItem>
-                                            ))}
-                                          </Select>
-                                        </FormControl>
-                                      </TableCell>
-                                      <TableCell>
-                                        {new Date(
-                                          job.createdAt,
-                                        ).toLocaleDateString()}
-                                      </TableCell>
+                            <Box sx={{ margin: 2 }}>
+                              {loading ? (
+                                <Typography
+                                  variant="body2"
+                                  color="textSecondary"
+                                >
+                                  Loading jobs...
+                                </Typography>
+                              ) : jobs.length === 0 ? (
+                                <Typography
+                                  variant="body2"
+                                  color="textSecondary"
+                                >
+                                  No jobs found for this site.
+                                </Typography>
+                              ) : (
+                                <Table>
+                                  <TableHead>
+                                    <TableRow>
+                                      <TableCell>Title</TableCell>
+                                      <TableCell>Explanation</TableCell>
+                                      <TableCell>Status</TableCell>
+                                      <TableCell>Created</TableCell>
                                       <TableCell align="right">
-                                        <Tooltip title="Open job posting in browser">
-                                          <span>
-                                            <Link url={job.siteUrl} />
-                                          </span>
-                                        </Tooltip>
+                                        Actions
                                       </TableCell>
                                     </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
-                            )}
-                          </Box>
-                        </Collapse>
-                      </TableCell>
-                    </TableRow>
-                  </>
-                )
-              })
-            )}
-          </TableBody>
-        </Table>
+                                  </TableHead>
+                                  <TableBody>
+                                    {jobs.map(job => (
+                                      <TableRow key={job.id}>
+                                        <TableCell>
+                                          <Typography variant="body2">
+                                            {job.title}
+                                          </Typography>
+                                        </TableCell>
+                                        <TableCell>
+                                          <Typography
+                                            variant="body2"
+                                            color="textSecondary"
+                                            sx={{
+                                              maxWidth: 400,
+                                              overflow: 'hidden',
+                                              textOverflow: 'ellipsis',
+                                              whiteSpace: 'nowrap',
+                                            }}
+                                          >
+                                            {job.explanation || '-'}
+                                          </Typography>
+                                        </TableCell>
+                                        <TableCell>
+                                          <FormControl sx={{ minWidth: 120 }}>
+                                            <Select
+                                              value={job.status}
+                                              onChange={e =>
+                                                handleStatusChange(
+                                                  job.id,
+                                                  e.target
+                                                    .value as PostingStatus,
+                                                  site.id,
+                                                )
+                                              }
+                                              renderValue={value => {
+                                                const option =
+                                                  statusOptions.find(
+                                                    opt => opt.value === value,
+                                                  )
+                                                return (
+                                                  <Chip
+                                                    label={option?.label}
+                                                    color={option?.color}
+                                                  />
+                                                )
+                                              }}
+                                            >
+                                              {statusOptions.map(option => (
+                                                <MenuItem
+                                                  key={option.value}
+                                                  value={option.value}
+                                                >
+                                                  {option.label}
+                                                </MenuItem>
+                                              ))}
+                                            </Select>
+                                          </FormControl>
+                                        </TableCell>
+                                        <TableCell>
+                                          {new Date(
+                                            job.createdAt,
+                                          ).toLocaleDateString()}
+                                        </TableCell>
+                                        <TableCell align="right">
+                                          <Tooltip title="Open job posting in browser">
+                                            <span>
+                                              <Link url={job.siteUrl} />
+                                            </span>
+                                          </Tooltip>
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              )}
+                            </Box>
+                          </Collapse>
+                        </TableCell>
+                      </TableRow>
+                    </>
+                  )
+                })
+              )}
+            </TableBody>
+          </Table>
+        </Box>
         <TablePagination
           rowsPerPageOptions={PAGINATION.ROWS_PER_PAGE_OPTIONS}
           component="div"

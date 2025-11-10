@@ -177,7 +177,13 @@ const Prompts = () => {
   }
 
   return (
-    <Box>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+      }}
+    >
       <Stack
         direction="row"
         justifyContent="space-between"
@@ -215,146 +221,158 @@ const Prompts = () => {
 
       {error && <Message message={error} color="error" />}
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>
-                <TableSortLabel
-                  active={sortField === 'title'}
-                  direction={sortField === 'title' ? sortDirection : 'asc'}
-                  onClick={() => handleSort('title')}
-                >
-                  Title
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>Prompt</TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortField === 'status'}
-                  direction={sortField === 'status' ? sortDirection : 'asc'}
-                  onClick={() => handleSort('status')}
-                >
-                  Status
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortField === 'updatedAt'}
-                  direction={sortField === 'updatedAt' ? sortDirection : 'asc'}
-                  onClick={() => handleSort('updatedAt')}
-                >
-                  Updated
-                </TableSortLabel>
-              </TableCell>
-              <TableCell align="right">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {sortedPrompts.length === 0 ? (
+      <TableContainer
+        component={Paper}
+        sx={{
+          flexGrow: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+        }}
+      >
+        <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
+          <Table stickyHeader>
+            <TableHead>
               <TableRow>
-                <TableCell colSpan={5} align="center">
-                  <Stack
-                    spacing={SPACING.SMALL.PX}
-                    alignItems="center"
-                    sx={{ py: 4 }}
+                <TableCell>
+                  <TableSortLabel
+                    active={sortField === 'title'}
+                    direction={sortField === 'title' ? sortDirection : 'asc'}
+                    onClick={() => handleSort('title')}
                   >
-                    <Typography variant="body2" color="textSecondary">
-                      No prompts found. Click &quot;Add Prompt&quot; to create
-                      your first one.
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      color="textSecondary"
-                      sx={{ fontStyle: 'italic' }}
-                    >
-                      Example: &quot;Senior Full Stack Engineer&quot; with
-                      keywords like React, TypeScript, Node.js, Remote
-                    </Typography>
-                  </Stack>
+                    Title
+                  </TableSortLabel>
                 </TableCell>
+                <TableCell>Prompt</TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortField === 'status'}
+                    direction={sortField === 'status' ? sortDirection : 'asc'}
+                    onClick={() => handleSort('status')}
+                  >
+                    Status
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortField === 'updatedAt'}
+                    direction={
+                      sortField === 'updatedAt' ? sortDirection : 'asc'
+                    }
+                    onClick={() => handleSort('updatedAt')}
+                  >
+                    Updated
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell align="right">Actions</TableCell>
               </TableRow>
-            ) : (
-              paginatedPrompts.map(prompt => {
-                const isExpanded = expandedRows.has(prompt.id)
-                const contentLength = prompt.content.length
-                const showToggle = contentLength > 100 // Only show if content is longer than 100 characters
+            </TableHead>
+            <TableBody>
+              {sortedPrompts.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} align="center">
+                    <Stack
+                      spacing={SPACING.SMALL.PX}
+                      alignItems="center"
+                      sx={{ py: 4 }}
+                    >
+                      <Typography variant="body2" color="textSecondary">
+                        No prompts found. Click &quot;Add Prompt&quot; to create
+                        your first one.
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        color="textSecondary"
+                        sx={{ fontStyle: 'italic' }}
+                      >
+                        Example: &quot;Senior Full Stack Engineer&quot; with
+                        keywords like React, TypeScript, Node.js, Remote
+                      </Typography>
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedPrompts.map(prompt => {
+                  const isExpanded = expandedRows.has(prompt.id)
+                  const contentLength = prompt.content.length
+                  const showToggle = contentLength > 100 // Only show if content is longer than 100 characters
 
-                return (
-                  <TableRow key={prompt.id} hover>
-                    <TableCell>{prompt.title}</TableCell>
-                    <TableCell>
-                      {isExpanded || !showToggle ? (
-                        <Typography
-                          variant="body2"
-                          sx={{ whiteSpace: 'pre-wrap' }}
-                        >
-                          {prompt.content}
-                        </Typography>
-                      ) : (
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            maxWidth: 400,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          {prompt.content}
-                        </Typography>
-                      )}
-                      {showToggle && (
-                        <Button
-                          size="small"
-                          onClick={() => toggleRowExpansion(prompt.id)}
-                          sx={{ mt: 0.5 }}
-                        >
-                          {isExpanded ? 'Show less' : 'Show more'}
-                        </Button>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={
-                          prompt.status === 'active' ? 'Active' : 'Inactive'
-                        }
-                        color={
-                          prompt.status === 'active' ? 'success' : 'default'
-                        }
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {new Date(prompt.updatedAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell align="right">
-                      <Tooltip title="Edit prompt">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleEditPrompt(prompt)}
-                        >
-                          <Icon name="edit" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete prompt">
-                        <IconButton
-                          size="small"
-                          onClick={() =>
-                            handleDeletePrompt(prompt.id, prompt.title)
+                  return (
+                    <TableRow key={prompt.id} hover>
+                      <TableCell>{prompt.title}</TableCell>
+                      <TableCell>
+                        {isExpanded || !showToggle ? (
+                          <Typography
+                            variant="body2"
+                            sx={{ whiteSpace: 'pre-wrap' }}
+                          >
+                            {prompt.content}
+                          </Typography>
+                        ) : (
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              maxWidth: 400,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {prompt.content}
+                          </Typography>
+                        )}
+                        {showToggle && (
+                          <Button
+                            size="small"
+                            onClick={() => toggleRowExpansion(prompt.id)}
+                            sx={{ mt: 0.5 }}
+                          >
+                            {isExpanded ? 'Show less' : 'Show more'}
+                          </Button>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={
+                            prompt.status === 'active' ? 'Active' : 'Inactive'
                           }
-                          color="error"
-                        >
-                          <Icon name="delete" />
-                        </IconButton>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                )
-              })
-            )}
-          </TableBody>
-        </Table>
+                          color={
+                            prompt.status === 'active' ? 'success' : 'default'
+                          }
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {new Date(prompt.updatedAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell align="right">
+                        <Tooltip title="Edit prompt">
+                          <IconButton
+                            size="small"
+                            onClick={() => handleEditPrompt(prompt)}
+                          >
+                            <Icon name="edit" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete prompt">
+                          <IconButton
+                            size="small"
+                            onClick={() =>
+                              handleDeletePrompt(prompt.id, prompt.title)
+                            }
+                            color="error"
+                          >
+                            <Icon name="delete" />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })
+              )}
+            </TableBody>
+          </Table>
+        </Box>
         <TablePagination
           rowsPerPageOptions={PAGINATION.ROWS_PER_PAGE_OPTIONS}
           component="div"

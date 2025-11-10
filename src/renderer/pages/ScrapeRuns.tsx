@@ -253,7 +253,13 @@ const ScrapeRuns = () => {
   }
 
   return (
-    <Box>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+      }}
+    >
       <Stack
         direction="row"
         justifyContent="space-between"
@@ -278,316 +284,334 @@ const ScrapeRuns = () => {
 
       {error && <Message message={error} color="error" />}
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell width={50}></TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={runSortField === 'createdAt'}
-                  direction={
-                    runSortField === 'createdAt' ? runSortDirection : 'asc'
-                  }
-                  onClick={() => handleRunSort('createdAt')}
-                >
-                  Run Date
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={runSortField === 'status'}
-                  direction={
-                    runSortField === 'status' ? runSortDirection : 'asc'
-                  }
-                  onClick={() => handleRunSort('status')}
-                >
-                  Status
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={runSortField === 'totalSites'}
-                  direction={
-                    runSortField === 'totalSites' ? runSortDirection : 'asc'
-                  }
-                  onClick={() => handleRunSort('totalSites')}
-                >
-                  Sites Scanned
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={runSortField === 'successfulSites'}
-                  direction={
-                    runSortField === 'successfulSites'
-                      ? runSortDirection
-                      : 'asc'
-                  }
-                  onClick={() => handleRunSort('successfulSites')}
-                >
-                  Successful
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={runSortField === 'failedSites'}
-                  direction={
-                    runSortField === 'failedSites' ? runSortDirection : 'asc'
-                  }
-                  onClick={() => handleRunSort('failedSites')}
-                >
-                  Failed
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>Duration</TableCell>
-              <TableCell>Comments</TableCell>
-              <TableCell>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {sortedRuns.length === 0 ? (
+      <TableContainer
+        component={Paper}
+        sx={{
+          flexGrow: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+        }}
+      >
+        <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
+          <Table stickyHeader>
+            <TableHead>
               <TableRow>
-                <TableCell colSpan={9} align="center">
-                  <Stack
-                    spacing={SPACING.SMALL.PX}
-                    alignItems="center"
-                    sx={{ py: 4 }}
+                <TableCell width={50}></TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={runSortField === 'createdAt'}
+                    direction={
+                      runSortField === 'createdAt' ? runSortDirection : 'asc'
+                    }
+                    onClick={() => handleRunSort('createdAt')}
                   >
-                    <Typography variant="body2" color="textSecondary">
-                      No scrape runs found. Run your first scrape to see results
-                      here.
-                    </Typography>
-                  </Stack>
+                    Run Date
+                  </TableSortLabel>
                 </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={runSortField === 'status'}
+                    direction={
+                      runSortField === 'status' ? runSortDirection : 'asc'
+                    }
+                    onClick={() => handleRunSort('status')}
+                  >
+                    Status
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={runSortField === 'totalSites'}
+                    direction={
+                      runSortField === 'totalSites' ? runSortDirection : 'asc'
+                    }
+                    onClick={() => handleRunSort('totalSites')}
+                  >
+                    Sites Scanned
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={runSortField === 'successfulSites'}
+                    direction={
+                      runSortField === 'successfulSites'
+                        ? runSortDirection
+                        : 'asc'
+                    }
+                    onClick={() => handleRunSort('successfulSites')}
+                  >
+                    Successful
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={runSortField === 'failedSites'}
+                    direction={
+                      runSortField === 'failedSites' ? runSortDirection : 'asc'
+                    }
+                    onClick={() => handleRunSort('failedSites')}
+                  >
+                    Failed
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>Duration</TableCell>
+                <TableCell>Comments</TableCell>
+                <TableCell>Actions</TableCell>
               </TableRow>
-            ) : (
-              paginatedRuns.map(run => {
-                const isExpanded = expandedRunId === run.id
-                const runTasks = tasks[run.id] || []
+            </TableHead>
+            <TableBody>
+              {sortedRuns.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={9} align="center">
+                    <Stack
+                      spacing={SPACING.SMALL.PX}
+                      alignItems="center"
+                      sx={{ py: 4 }}
+                    >
+                      <Typography variant="body2" color="textSecondary">
+                        No scrape runs found. Run your first scrape to see
+                        results here.
+                      </Typography>
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedRuns.map(run => {
+                  const isExpanded = expandedRunId === run.id
+                  const runTasks = tasks[run.id] || []
 
-                const sortedTasks = [...runTasks].sort((a, b) => {
-                  let aVal: string | number
-                  let bVal: string | number
+                  const sortedTasks = [...runTasks].sort((a, b) => {
+                    let aVal: string | number
+                    let bVal: string | number
 
-                  switch (taskSortField) {
-                    case 'siteUrl':
-                      aVal = getSiteTitle(a.siteId)
-                      bVal = getSiteTitle(b.siteId)
-                      break
-                    case 'status':
-                      aVal = a.status
-                      bVal = b.status
-                      break
-                    case 'newPostingsFound':
-                      aVal = a.newPostingsFound
-                      bVal = b.newPostingsFound
-                      break
-                    case 'completedAt':
-                      aVal = a.completedAt
-                        ? new Date(a.completedAt).getTime()
-                        : 0
-                      bVal = b.completedAt
-                        ? new Date(b.completedAt).getTime()
-                        : 0
-                      break
-                  }
+                    switch (taskSortField) {
+                      case 'siteUrl':
+                        aVal = getSiteTitle(a.siteId)
+                        bVal = getSiteTitle(b.siteId)
+                        break
+                      case 'status':
+                        aVal = a.status
+                        bVal = b.status
+                        break
+                      case 'newPostingsFound':
+                        aVal = a.newPostingsFound
+                        bVal = b.newPostingsFound
+                        break
+                      case 'completedAt':
+                        aVal = a.completedAt
+                          ? new Date(a.completedAt).getTime()
+                          : 0
+                        bVal = b.completedAt
+                          ? new Date(b.completedAt).getTime()
+                          : 0
+                        break
+                    }
 
-                  if (aVal < bVal) return taskSortDirection === 'asc' ? -1 : 1
-                  if (aVal > bVal) return taskSortDirection === 'asc' ? 1 : -1
-                  return 0
-                })
-                const duration =
-                  run.completedAt && run.createdAt
-                    ? Math.round(
-                        (new Date(run.completedAt).getTime() -
-                          new Date(run.createdAt).getTime()) /
-                          1000,
-                      )
-                    : null
+                    if (aVal < bVal) return taskSortDirection === 'asc' ? -1 : 1
+                    if (aVal > bVal) return taskSortDirection === 'asc' ? 1 : -1
+                    return 0
+                  })
+                  const duration =
+                    run.completedAt && run.createdAt
+                      ? Math.round(
+                          (new Date(run.completedAt).getTime() -
+                            new Date(run.createdAt).getTime()) /
+                            1000,
+                        )
+                      : null
 
-                return (
-                  <Fragment key={run.id}>
-                    <TableRow hover>
-                      <TableCell>
-                        <Tooltip
-                          title={
-                            isExpanded ? 'Collapse details' : 'Expand details'
-                          }
-                        >
-                          <IconButton
-                            size="small"
-                            onClick={() => loadTasksForRun(run.id)}
+                  return (
+                    <Fragment key={run.id}>
+                      <TableRow hover>
+                        <TableCell>
+                          <Tooltip
+                            title={
+                              isExpanded ? 'Collapse details' : 'Expand details'
+                            }
                           >
-                            {isExpanded ? '▲' : '▼'}
-                          </IconButton>
-                        </Tooltip>
-                      </TableCell>
-                      <TableCell>
-                        {new Date(run.createdAt).toLocaleString()}
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={formatStatus(run.status)}
-                          color={getStatusColor(run.status)}
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell>{run.totalSites}</TableCell>
-                      <TableCell>{run.successfulSites}</TableCell>
-                      <TableCell>{run.failedSites}</TableCell>
-                      <TableCell>
-                        {duration !== null ? `${duration}s` : 'In progress...'}
-                      </TableCell>
-                      <TableCell>{run.comments || '-'}</TableCell>
-                      <TableCell>
-                        {run.failedSites > 0 && (
-                          <Tooltip title="Retry failed sites">
-                            <Button
+                            <IconButton
                               size="small"
-                              variant="outlined"
-                              color="warning"
-                              onClick={() => handleRetry(run.id)}
+                              onClick={() => loadTasksForRun(run.id)}
                             >
-                              Retry ({run.failedSites})
-                            </Button>
+                              {isExpanded ? '▲' : '▼'}
+                            </IconButton>
                           </Tooltip>
-                        )}
-                      </TableCell>
-                    </TableRow>
+                        </TableCell>
+                        <TableCell>
+                          {new Date(run.createdAt).toLocaleString()}
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={formatStatus(run.status)}
+                            color={getStatusColor(run.status)}
+                            size="small"
+                          />
+                        </TableCell>
+                        <TableCell>{run.totalSites}</TableCell>
+                        <TableCell>{run.successfulSites}</TableCell>
+                        <TableCell>{run.failedSites}</TableCell>
+                        <TableCell>
+                          {duration !== null
+                            ? `${duration}s`
+                            : 'In progress...'}
+                        </TableCell>
+                        <TableCell>{run.comments || '-'}</TableCell>
+                        <TableCell>
+                          {run.failedSites > 0 && (
+                            <Tooltip title="Retry failed sites">
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                color="warning"
+                                onClick={() => handleRetry(run.id)}
+                              >
+                                Retry ({run.failedSites})
+                              </Button>
+                            </Tooltip>
+                          )}
+                        </TableCell>
+                      </TableRow>
 
-                    {/* Expandable section for tasks */}
-                    <TableRow>
-                      <TableCell
-                        style={{ paddingBottom: 0, paddingTop: 0 }}
-                        colSpan={9}
-                      >
-                        <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                          <Box sx={{ margin: 2 }}>
-                            <Typography
-                              variant="h6"
-                              gutterBottom
-                              component="div"
-                            >
-                              Site Scan Details
-                            </Typography>
-                            <Table size="small">
-                              <TableHead>
-                                <TableRow>
-                                  <TableCell>
-                                    <TableSortLabel
-                                      active={taskSortField === 'siteUrl'}
-                                      direction={
-                                        taskSortField === 'siteUrl'
-                                          ? taskSortDirection
-                                          : 'asc'
-                                      }
-                                      onClick={() => handleTaskSort('siteUrl')}
-                                    >
-                                      Company
-                                    </TableSortLabel>
-                                  </TableCell>
-                                  <TableCell>
-                                    <TableSortLabel
-                                      active={taskSortField === 'status'}
-                                      direction={
-                                        taskSortField === 'status'
-                                          ? taskSortDirection
-                                          : 'asc'
-                                      }
-                                      onClick={() => handleTaskSort('status')}
-                                    >
-                                      Status
-                                    </TableSortLabel>
-                                  </TableCell>
-                                  <TableCell>
-                                    <TableSortLabel
-                                      active={
-                                        taskSortField === 'newPostingsFound'
-                                      }
-                                      direction={
-                                        taskSortField === 'newPostingsFound'
-                                          ? taskSortDirection
-                                          : 'asc'
-                                      }
-                                      onClick={() =>
-                                        handleTaskSort('newPostingsFound')
-                                      }
-                                    >
-                                      New Postings
-                                    </TableSortLabel>
-                                  </TableCell>
-                                  <TableCell>Error Message</TableCell>
-                                  <TableCell>
-                                    <TableSortLabel
-                                      active={taskSortField === 'completedAt'}
-                                      direction={
-                                        taskSortField === 'completedAt'
-                                          ? taskSortDirection
-                                          : 'asc'
-                                      }
-                                      onClick={() =>
-                                        handleTaskSort('completedAt')
-                                      }
-                                    >
-                                      Completed At
-                                    </TableSortLabel>
-                                  </TableCell>
-                                </TableRow>
-                              </TableHead>
-                              <TableBody>
-                                {sortedTasks.length === 0 ? (
+                      {/* Expandable section for tasks */}
+                      <TableRow>
+                        <TableCell
+                          style={{ paddingBottom: 0, paddingTop: 0 }}
+                          colSpan={9}
+                        >
+                          <Collapse
+                            in={isExpanded}
+                            timeout="auto"
+                            unmountOnExit
+                          >
+                            <Box sx={{ margin: 2 }}>
+                              <Typography
+                                variant="h6"
+                                gutterBottom
+                                component="div"
+                              >
+                                Site Scan Details
+                              </Typography>
+                              <Table size="small">
+                                <TableHead>
                                   <TableRow>
-                                    <TableCell colSpan={5} align="center">
-                                      <Typography
-                                        variant="body2"
-                                        color="textSecondary"
+                                    <TableCell>
+                                      <TableSortLabel
+                                        active={taskSortField === 'siteUrl'}
+                                        direction={
+                                          taskSortField === 'siteUrl'
+                                            ? taskSortDirection
+                                            : 'asc'
+                                        }
+                                        onClick={() =>
+                                          handleTaskSort('siteUrl')
+                                        }
                                       >
-                                        No task details available
-                                      </Typography>
+                                        Company
+                                      </TableSortLabel>
+                                    </TableCell>
+                                    <TableCell>
+                                      <TableSortLabel
+                                        active={taskSortField === 'status'}
+                                        direction={
+                                          taskSortField === 'status'
+                                            ? taskSortDirection
+                                            : 'asc'
+                                        }
+                                        onClick={() => handleTaskSort('status')}
+                                      >
+                                        Status
+                                      </TableSortLabel>
+                                    </TableCell>
+                                    <TableCell>
+                                      <TableSortLabel
+                                        active={
+                                          taskSortField === 'newPostingsFound'
+                                        }
+                                        direction={
+                                          taskSortField === 'newPostingsFound'
+                                            ? taskSortDirection
+                                            : 'asc'
+                                        }
+                                        onClick={() =>
+                                          handleTaskSort('newPostingsFound')
+                                        }
+                                      >
+                                        New Postings
+                                      </TableSortLabel>
+                                    </TableCell>
+                                    <TableCell>Error Message</TableCell>
+                                    <TableCell>
+                                      <TableSortLabel
+                                        active={taskSortField === 'completedAt'}
+                                        direction={
+                                          taskSortField === 'completedAt'
+                                            ? taskSortDirection
+                                            : 'asc'
+                                        }
+                                        onClick={() =>
+                                          handleTaskSort('completedAt')
+                                        }
+                                      >
+                                        Completed At
+                                      </TableSortLabel>
                                     </TableCell>
                                   </TableRow>
-                                ) : (
-                                  sortedTasks.map(task => (
-                                    <TableRow key={task.id}>
-                                      <TableCell>
-                                        {getSiteTitle(task.siteId)}
-                                      </TableCell>
-                                      <TableCell>
-                                        <Chip
-                                          label={formatStatus(task.status)}
-                                          color={getStatusColor(task.status)}
-                                          size="small"
-                                        />
-                                      </TableCell>
-                                      <TableCell>
-                                        {task.newPostingsFound}
-                                      </TableCell>
-                                      <TableCell>
-                                        {task.errorMessage || '-'}
-                                      </TableCell>
-                                      <TableCell>
-                                        {task.completedAt
-                                          ? new Date(
-                                              task.completedAt,
-                                            ).toLocaleString()
-                                          : '-'}
+                                </TableHead>
+                                <TableBody>
+                                  {sortedTasks.length === 0 ? (
+                                    <TableRow>
+                                      <TableCell colSpan={5} align="center">
+                                        <Typography
+                                          variant="body2"
+                                          color="textSecondary"
+                                        >
+                                          No task details available
+                                        </Typography>
                                       </TableCell>
                                     </TableRow>
-                                  ))
-                                )}
-                              </TableBody>
-                            </Table>
-                          </Box>
-                        </Collapse>
-                      </TableCell>
-                    </TableRow>
-                  </Fragment>
-                )
-              })
-            )}
-          </TableBody>
-        </Table>
+                                  ) : (
+                                    sortedTasks.map(task => (
+                                      <TableRow key={task.id}>
+                                        <TableCell>
+                                          {getSiteTitle(task.siteId)}
+                                        </TableCell>
+                                        <TableCell>
+                                          <Chip
+                                            label={formatStatus(task.status)}
+                                            color={getStatusColor(task.status)}
+                                            size="small"
+                                          />
+                                        </TableCell>
+                                        <TableCell>
+                                          {task.newPostingsFound}
+                                        </TableCell>
+                                        <TableCell>
+                                          {task.errorMessage || '-'}
+                                        </TableCell>
+                                        <TableCell>
+                                          {task.completedAt
+                                            ? new Date(
+                                                task.completedAt,
+                                              ).toLocaleString()
+                                            : '-'}
+                                        </TableCell>
+                                      </TableRow>
+                                    ))
+                                  )}
+                                </TableBody>
+                              </Table>
+                            </Box>
+                          </Collapse>
+                        </TableCell>
+                      </TableRow>
+                    </Fragment>
+                  )
+                })
+              )}
+            </TableBody>
+          </Table>
+        </Box>
         <TablePagination
           rowsPerPageOptions={PAGINATION.ROWS_PER_PAGE_OPTIONS}
           component="div"
