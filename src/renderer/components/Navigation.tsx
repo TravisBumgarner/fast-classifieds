@@ -16,8 +16,8 @@ import { SPACING } from '../styles/consts'
 
 const NAV_ROUTES: Array<keyof typeof ROUTES> = [
   'postings',
-  'sites',
   'prompts',
+  'sites',
   'scrapeRuns',
 ]
 

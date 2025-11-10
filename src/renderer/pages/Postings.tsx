@@ -168,13 +168,6 @@ const Postings = () => {
     }
   }
 
-  const handleOpenAllInBrowser = () => {
-    filteredPostings.forEach(posting => {
-      // @ts-expect-error - shell:openExternal is not in typed IPC but is defined in messages.ts
-      window.electron.ipcRenderer.invoke('shell:openExternal', posting.siteUrl)
-    })
-  }
-
   const handleOpenSelectedInBrowser = () => {
     const postingsToOpen = filteredPostings.filter(posting =>
       selectedPostings.has(posting.id),
@@ -224,6 +217,14 @@ const Postings = () => {
   useEffect(() => {
     const checkFirstLaunch = async () => {
       if (hasCheckedOnboarding) return
+
+      // Check if user has already completed onboarding
+      const onboardingCompleted = localStorage.getItem('onboarding-completed')
+      if (onboardingCompleted === 'true') {
+        setHasCheckedOnboarding(true)
+        onboardingCompletedSignal.value = true
+        return
+      }
 
       try {
         // Check if user has any prompts or sites

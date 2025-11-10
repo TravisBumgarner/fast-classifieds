@@ -419,7 +419,6 @@ const Sites = () => {
                           }
                         >
                           <IconButton
-                            size="small"
                             onClick={() => handleToggleExpand(site.id)}
                           >
                             <Icon name={isExpanded ? 'down' : 'right'} />
@@ -440,7 +439,6 @@ const Sites = () => {
                           color={
                             site.status === 'active' ? 'success' : 'default'
                           }
-                          size="small"
                         />
                       </TableCell>
                       <TableCell>
@@ -454,7 +452,6 @@ const Sites = () => {
                         </Tooltip>
                         <Tooltip title="Debug scraper">
                           <IconButton
-                            size="small"
                             onClick={() =>
                               (activeModalSignal.value = {
                                 id: MODAL_ID.DEBUG_SCRAPE_MODAL,
@@ -466,16 +463,12 @@ const Sites = () => {
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Edit site">
-                          <IconButton
-                            size="small"
-                            onClick={() => handleEditSite(site)}
-                          >
+                          <IconButton onClick={() => handleEditSite(site)}>
                             <Icon name="edit" />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Delete site">
                           <IconButton
-                            size="small"
                             onClick={() =>
                               handleDeleteSite(site.id, site.siteTitle)
                             }
@@ -502,7 +495,7 @@ const Sites = () => {
                                 No jobs found for this site.
                               </Typography>
                             ) : (
-                              <Table size="small">
+                              <Table>
                                 <TableHead>
                                   <TableRow>
                                     <TableCell>Title</TableCell>
@@ -535,10 +528,7 @@ const Sites = () => {
                                         </Typography>
                                       </TableCell>
                                       <TableCell>
-                                        <FormControl
-                                          size="small"
-                                          sx={{ minWidth: 120 }}
-                                        >
+                                        <FormControl sx={{ minWidth: 120 }}>
                                           <Select
                                             value={job.status}
                                             onChange={e =>
@@ -556,7 +546,6 @@ const Sites = () => {
                                                 <Chip
                                                   label={option?.label}
                                                   color={option?.color}
-                                                  size="small"
                                                 />
                                               )
                                             }}

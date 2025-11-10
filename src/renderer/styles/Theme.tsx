@@ -48,9 +48,11 @@ const getThemeOptions = (isDark: boolean): ThemeOptions => {
       },
       body1: {
         fontSize: FONT_SIZES.MEDIUM.PX,
+        padding: `${SPACING.TINY.PX} 0px`,
       },
       body2: {
         fontSize: FONT_SIZES.SMALL.PX,
+        padding: `${SPACING.TINY.PX} 0px`,
       },
     },
     palette: {

@@ -12,7 +12,9 @@ import {
   Typography,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { CHANNEL } from '../../../../shared/messages.types'
+import { ROUTES } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
 import { activeModalSignal } from '../../../signals'
 import { SPACING } from '../../../styles/consts'
@@ -35,6 +37,7 @@ type SiteProgress = {
 }
 
 const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
+  const navigate = useNavigate()
   const [sites, setSites] = useState<SiteProgress[]>([])
   const [isComplete, setIsComplete] = useState(false)
   const [totalNewJobs, setTotalNewJobs] = useState(0)
@@ -188,20 +191,34 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
   const errorCount = sites.filter(s => s.status === 'error').length
   const progress = sites.length > 0 ? (completedCount / sites.length) * 100 : 0
 
+  const handleGoToSites = () => {
+    activeModalSignal.value = null
+    navigate(ROUTES.sites.href())
+  }
+
   if (error) {
+    const isNoActiveSites = error.includes('No active sites')
+
     return (
       <DefaultModal title="Scraping Error">
         <Box sx={{ minWidth: 500 }}>
           <Typography color="error" gutterBottom>
             {error}
           </Typography>
-          <Button
-            variant="contained"
-            onClick={() => (activeModalSignal.value = null)}
-            fullWidth
-          >
-            Close
-          </Button>
+          <Stack spacing={SPACING.SMALL.PX} sx={{ mt: SPACING.MEDIUM.PX }}>
+            {isNoActiveSites && (
+              <Button variant="contained" onClick={handleGoToSites} fullWidth>
+                Go to Sites
+              </Button>
+            )}
+            <Button
+              variant={isNoActiveSites ? 'outlined' : 'contained'}
+              onClick={() => (activeModalSignal.value = null)}
+              fullWidth
+            >
+              Close
+            </Button>
+          </Stack>
         </Box>
       </DefaultModal>
     )
