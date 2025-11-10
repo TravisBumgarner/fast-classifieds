@@ -69,9 +69,24 @@ const getThemeOptions = (isDark: boolean): ThemeOptions => {
     components: {
       MuiCssBaseline: {
         styleOverrides: {
+          html: {
+            overflow: 'hidden',
+            height: '100%',
+            padding: 0,
+            margin: 0,
+          },
           body: {
+            padding: 0,
+            margin: 0,
+            overflow: 'hidden',
+            height: '100%',
             backgroundColor: colors.background,
             color: colors.text.primary,
+          },
+          '#root': {
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
           },
         },
       },

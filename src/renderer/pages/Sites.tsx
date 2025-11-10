@@ -283,7 +283,7 @@ const Sites = () => {
   }
 
   return (
-    <Box sx={{ p: SPACING.LARGE.PX }}>
+    <Box>
       <Stack
         direction="row"
         justifyContent="space-between"
@@ -312,7 +312,7 @@ const Sites = () => {
               (activeModalSignal.value = { id: MODAL_ID.DEBUG_SCRAPE_MODAL })
             }
           >
-            Debug Scraper
+            Debug New Site
           </Button>
           <Button variant="outlined" onClick={handleImportSites}>
             Import Sites
@@ -450,7 +450,7 @@ const Sites = () => {
                             <Link url={site.siteUrl} />
                           </span>
                         </Tooltip>
-                        <Tooltip title="Debug scraper">
+                        <Tooltip title="Debug Site">
                           <IconButton
                             onClick={() =>
                               (activeModalSignal.value = {

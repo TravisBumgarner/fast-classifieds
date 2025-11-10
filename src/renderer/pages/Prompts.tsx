@@ -177,7 +177,7 @@ const Prompts = () => {
   }
 
   return (
-    <Box sx={{ p: SPACING.LARGE.PX }}>
+    <Box>
       <Stack
         direction="row"
         justifyContent="space-between"
@@ -198,7 +198,7 @@ const Prompts = () => {
           <Typography variant="body2" paragraph>
             1. Upload your resume(s) to ChatGPT and ask: &quot;Take my resume
             and extract all useful tokens and keywords for finding relevant
-            jobs, return as a JSON list.&quot;
+            jobs, return this as a prompt I can give you in the future..&quot;
           </Typography>
           <Typography variant="body2" paragraph>
             2. Create a prompt like: &quot;I&apos;m looking for jobs that match

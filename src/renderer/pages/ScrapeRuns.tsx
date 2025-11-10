@@ -253,7 +253,7 @@ const ScrapeRuns = () => {
   }
 
   return (
-    <Box sx={{ p: SPACING.LARGE.PX }}>
+    <Box>
       <Stack
         direction="row"
         justifyContent="space-between"
