@@ -22,6 +22,7 @@ import { Fragment, useEffect, useState } from 'react'
 import { CHANNEL } from '../../shared/messages.types'
 import { PAGINATION } from '../consts'
 import ipcMessenger from '../ipcMessenger'
+import Icon from '../sharedComponents/Icon'
 import Message from '../sharedComponents/Message'
 import { MODAL_ID } from '../sharedComponents/Modal/Modal.consts'
 import { activeModalSignal } from '../signals'
@@ -434,7 +435,7 @@ const ScrapeRuns = () => {
                               size="small"
                               onClick={() => loadTasksForRun(run.id)}
                             >
-                              {isExpanded ? '▲' : '▼'}
+                              <Icon name={isExpanded ? 'down' : 'right'} />
                             </IconButton>
                           </Tooltip>
                         </TableCell>
