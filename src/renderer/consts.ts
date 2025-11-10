@@ -9,6 +9,11 @@ export const ROUTES = {
     label: 'Sites',
     target: '_self',
   },
+  siteJobs: {
+    href: (siteId: number) => `/sites/${siteId}/jobs`,
+    label: 'Site Jobs',
+    target: '_self',
+  },
   prompts: {
     href: () => '/prompts',
     label: 'Prompts',
@@ -22,6 +27,11 @@ export const ROUTES = {
 } as const
 
 export const QUERY_KEYS = {}
+
+export const PAGINATION = {
+  DEFAULT_ROWS_PER_PAGE: 10 as number,
+  ROWS_PER_PAGE_OPTIONS: [10, 25, 50, 100] as readonly number[],
+} as const
 
 export const TOOLTIPS = {
   CSS_SELECTOR:

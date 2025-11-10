@@ -12,6 +12,7 @@ import {
   TableCell,
   TableContainer,
   TableHead,
+  TablePagination,
   TableRow,
   TableSortLabel,
   Tooltip,
@@ -19,6 +20,7 @@ import {
 } from '@mui/material'
 import { Fragment, useEffect, useState } from 'react'
 import { CHANNEL } from '../../shared/messages.types'
+import { PAGINATION } from '../consts'
 import ipcMessenger from '../ipcMessenger'
 import Message from '../sharedComponents/Message'
 import { MODAL_ID } from '../sharedComponents/Modal/Modal.consts'
@@ -78,6 +80,10 @@ const ScrapeRuns = () => {
   const [taskSortField, setTaskSortField] = useState<TaskSortField>('siteUrl')
   const [taskSortDirection, setTaskSortDirection] =
     useState<SortDirection>('asc')
+  const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(
+    PAGINATION.DEFAULT_ROWS_PER_PAGE,
+  )
 
   const handleRunSort = (field: RunSortField) => {
     if (runSortField === field) {
@@ -133,6 +139,24 @@ const ScrapeRuns = () => {
     if (aVal > bVal) return runSortDirection === 'asc' ? 1 : -1
     return 0
   })
+
+  const paginatedRuns = sortedRuns.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage,
+  )
+
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setPage(newPage)
+    setExpandedRunId(null) // Collapse expanded rows when changing pages
+  }
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10))
+    setPage(0)
+    setExpandedRunId(null)
+  }
 
   const loadScrapeRuns = async () => {
     try {
@@ -338,7 +362,7 @@ const ScrapeRuns = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              sortedRuns.map(run => {
+              paginatedRuns.map(run => {
                 const isExpanded = expandedRunId === run.id
                 const runTasks = tasks[run.id] || []
 
@@ -564,6 +588,15 @@ const ScrapeRuns = () => {
             )}
           </TableBody>
         </Table>
+        <TablePagination
+          rowsPerPageOptions={PAGINATION.ROWS_PER_PAGE_OPTIONS}
+          component="div"
+          count={sortedRuns.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
       </TableContainer>
     </Box>
   )

@@ -87,6 +87,22 @@ typedIpcMain.handle(CHANNEL.SITES.GET_ALL, async () => {
   }
 })
 
+typedIpcMain.handle(CHANNEL.SITES.GET_ALL_WITH_JOB_COUNTS, async () => {
+  try {
+    const sites = await queries.getAllSitesWithJobCounts()
+    return {
+      type: 'get_all_sites_with_job_counts',
+      sites,
+    }
+  } catch (error) {
+    console.error('Error getting sites with job counts:', error)
+    return {
+      type: 'get_all_sites_with_job_counts',
+      sites: [],
+    }
+  }
+})
+
 typedIpcMain.handle(CHANNEL.SITES.GET_BY_ID, async (_event, params) => {
   try {
     const site = await queries.getSiteById(params.id)
@@ -402,6 +418,25 @@ typedIpcMain.handle(CHANNEL.JOB_POSTINGS.GET_ALL, async () => {
     }
   }
 })
+
+typedIpcMain.handle(
+  CHANNEL.JOB_POSTINGS.GET_BY_SITE_ID,
+  async (_event, params) => {
+    try {
+      const postings = await queries.getJobPostingsBySiteId(params.siteId)
+      return {
+        type: 'get_job_postings_by_site_id',
+        postings,
+      }
+    } catch (error) {
+      console.error('Error getting job postings by site:', error)
+      return {
+        type: 'get_job_postings_by_site_id',
+        postings: [],
+      }
+    }
+  },
+)
 
 typedIpcMain.handle(
   CHANNEL.JOB_POSTINGS.UPDATE_STATUS,

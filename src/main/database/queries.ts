@@ -133,6 +133,29 @@ async function getAllSites() {
 }
 
 /**
+ * Get all sites with job counts
+ */
+async function getAllSitesWithJobCounts() {
+  const allSites = await db.select().from(sites)
+
+  const sitesWithCounts = await Promise.all(
+    allSites.map(async site => {
+      const jobs = await db
+        .select()
+        .from(jobPostings)
+        .where(eq(jobPostings.siteId, site.id))
+
+      return {
+        ...site,
+        totalJobs: jobs.length,
+      }
+    }),
+  )
+
+  return sitesWithCounts
+}
+
+/**
  * Get a site by ID
  */
 async function getSiteById(id: number) {
@@ -270,6 +293,17 @@ async function getAllJobPostings() {
 }
 
 /**
+ * Get job postings for a specific site (ordered by most recent first)
+ */
+async function getJobPostingsBySiteId(siteId: number) {
+  return db
+    .select()
+    .from(jobPostings)
+    .where(eq(jobPostings.siteId, siteId))
+    .orderBy(desc(jobPostings.createdAt))
+}
+
+/**
  * Update job posting status
  */
 async function updateJobPostingStatus(
@@ -308,6 +342,7 @@ export default {
   insertJobPosting,
   insertJobPostings,
   getAllSites,
+  getAllSitesWithJobCounts,
   getSiteById,
   insertSite,
   updateSite,
@@ -321,6 +356,7 @@ export default {
   getScrapeTasksByRunId,
   getFailedTasksByRunId,
   getAllJobPostings,
+  getJobPostingsBySiteId,
   updateJobPostingStatus,
   nukeDatabase,
 }
