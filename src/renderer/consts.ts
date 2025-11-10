@@ -9,11 +9,6 @@ export const ROUTES = {
     label: 'Sites',
     target: '_self',
   },
-  siteJobs: {
-    href: (siteId: number) => `/sites/${siteId}/jobs`,
-    label: 'Site Jobs',
-    target: '_self',
-  },
   prompts: {
     href: () => '/prompts',
     label: 'Prompts',
