@@ -5,13 +5,11 @@ import {
   Checkbox,
   Chip,
   FormControl,
-  InputLabel,
-  ListItemText,
+  FormControlLabel,
+  FormGroup,
   MenuItem,
-  OutlinedInput,
   Paper,
   Select,
-  SelectChangeEvent,
   Stack,
   Table,
   TableBody,
@@ -136,14 +134,6 @@ const Postings = () => {
     setPage(0)
   }
 
-  const handleStatusFilterChange = (
-    event: SelectChangeEvent<PostingStatus[]>,
-  ) => {
-    const value = event.target.value
-    setStatusFilter(typeof value === 'string' ? [] : value)
-    setPage(0)
-  }
-
   const loadJobPostings = async () => {
     try {
       setLoading(true)
@@ -257,7 +247,7 @@ const Postings = () => {
 
   const getStatusColor = (
     status: PostingStatus,
-  ): 'default' | 'primary' | 'success' | 'warning' | 'error' | 'info' => {
+  ): 'primary' | 'success' | 'error' | 'info' => {
     switch (status) {
       case 'new':
         return 'primary'
@@ -268,11 +258,11 @@ const Postings = () => {
       case 'offer':
         return 'success'
       case 'skipped':
-        return 'default'
+        return 'info'
       case 'rejected':
         return 'error'
       default:
-        return 'default'
+        return 'primary'
     }
   }
 
@@ -292,61 +282,58 @@ const Postings = () => {
         direction="row"
         justifyContent="space-between"
         alignItems="center"
-        sx={{ mb: SPACING.MEDIUM.PX }}
+        sx={{ marginBottom: SPACING.MEDIUM.PX }}
       >
-        <Typography variant="h4">Job Postings</Typography>
         <Stack direction="row" spacing={SPACING.SMALL.PX} alignItems="center">
+          <Button size="small" variant="contained" onClick={handleFindJobs}>
+            Find Jobs
+          </Button>
           {selectedPostings.size > 0 && (
-            <Button variant="outlined" onClick={handleOpenSelectedInBrowser}>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={handleOpenSelectedInBrowser}
+            >
               Open Selected ({selectedPostings.size})
             </Button>
           )}
-          <Button variant="contained" onClick={handleFindJobs}>
-            Find Jobs
-          </Button>
-          <FormControl size="small" sx={{ minWidth: 200 }}>
-            <InputLabel>Status Filter</InputLabel>
-            <Select
-              multiple
-              value={statusFilter}
-              onChange={handleStatusFilterChange}
-              input={<OutlinedInput label="Status Filter" />}
-              renderValue={selected => {
-                if (selected.length === 0) return 'None'
-                if (selected.length === 6) return 'All'
-                return `${selected.length} selected`
-              }}
-            >
-              <MenuItem value="new">
-                <Checkbox checked={statusFilter.includes('new')} />
-                <ListItemText primary="New" />
-              </MenuItem>
-              <MenuItem value="applied">
-                <Checkbox checked={statusFilter.includes('applied')} />
-                <ListItemText primary="Applied" />
-              </MenuItem>
-              <MenuItem value="interview">
-                <Checkbox checked={statusFilter.includes('interview')} />
-                <ListItemText primary="Interview" />
-              </MenuItem>
-              <MenuItem value="offer">
-                <Checkbox checked={statusFilter.includes('offer')} />
-                <ListItemText primary="Offer" />
-              </MenuItem>
-              <MenuItem value="skipped">
-                <Checkbox checked={statusFilter.includes('skipped')} />
-                <ListItemText primary="Skipped" />
-              </MenuItem>
-              <MenuItem value="rejected">
-                <Checkbox checked={statusFilter.includes('rejected')} />
-                <ListItemText primary="Rejected" />
-              </MenuItem>
-            </Select>
-          </FormControl>
         </Stack>
+
+        <FormControl component="fieldset">
+          <FormGroup row>
+            {(
+              [
+                'new',
+                'applied',
+                'interview',
+                'offer',
+                'skipped',
+                'rejected',
+              ] as PostingStatus[]
+            ).map(status => (
+              <FormControlLabel
+                key={status}
+                control={
+                  <Checkbox
+                    checked={statusFilter.includes(status)}
+                    onChange={() => {
+                      const newFilter = statusFilter.includes(status)
+                        ? statusFilter.filter(s => s !== status)
+                        : [...statusFilter, status]
+                      setStatusFilter(newFilter)
+                      setPage(0)
+                    }}
+                    size="small"
+                  />
+                }
+                label={status.charAt(0).toUpperCase() + status.slice(1)}
+              />
+            ))}
+          </FormGroup>
+        </FormControl>
       </Stack>
 
-      {filteredPostings.length === 0 && !error && !loading && (
+      {jobPostings.length === 0 && !error && !loading && (
         <Alert severity="info" sx={{ mb: SPACING.MEDIUM.PX }}>
           <Typography variant="subtitle2" gutterBottom>
             <strong>No job postings yet</strong>
@@ -443,6 +430,18 @@ const Postings = () => {
                           ? 'No job postings found. Run your first scrape to find jobs.'
                           : 'No postings match the current filter.'}
                       </Typography>
+                      {jobPostings.length > 0 && statusFilter.length > 0 && (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => {
+                            setStatusFilter([])
+                            setPage(0)
+                          }}
+                        >
+                          Clear Filters
+                        </Button>
+                      )}
                     </Stack>
                   </TableCell>
                 </TableRow>

@@ -13,6 +13,7 @@ import {
 import { useEffect, useState } from 'react'
 import { CHANNEL } from '../../../../shared/messages.types'
 import ipcMessenger from '../../../ipcMessenger'
+import { activeModalSignal } from '../../../signals'
 import { SPACING } from '../../../styles/consts'
 import { MODAL_ID } from '../Modal.consts'
 import DefaultModal from './DefaultModal'
@@ -148,9 +149,7 @@ const ImportSitesModal = (props: ImportSitesModalProps) => {
           }`,
         )
         setUrls('')
-        setTimeout(() => {
-          props.onSuccess?.()
-        }, 1500)
+        activeModalSignal.value = null
       } else {
         setError(`Failed to import all ${failCount} sites`)
       }
@@ -221,7 +220,7 @@ https://company.com/openings`}
           >
             <Button
               variant="outlined"
-              onClick={() => props.onSuccess?.()}
+              onClick={() => (activeModalSignal.value = null)}
               disabled={loading}
             >
               Cancel

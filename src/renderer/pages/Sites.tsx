@@ -2,11 +2,13 @@ import {
   Alert,
   Box,
   Button,
+  Checkbox,
   Chip,
   Collapse,
   FormControl,
+  FormControlLabel,
+  FormGroup,
   IconButton,
-  InputLabel,
   MenuItem,
   Paper,
   Select,
@@ -73,7 +75,10 @@ const Sites = () => {
   const [sites, setSites] = useState<Site[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [statusFilter, setStatusFilter] = useState<'all' | SiteStatus>('all')
+  const [statusFilter, setStatusFilter] = useState<SiteStatus[]>([
+    'active',
+    'inactive',
+  ])
   const [sortField, setSortField] = useState<SortField>('siteTitle')
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
   const [expandedSiteId, setExpandedSiteId] = useState<number | null>(null)
@@ -118,8 +123,8 @@ const Sites = () => {
   })
 
   const filteredSites = sortedSites.filter(site => {
-    if (statusFilter === 'all') return true
-    return site.status === statusFilter
+    if (statusFilter.length === 0) return true
+    return statusFilter.includes(site.status)
   })
 
   const paginatedSites = filteredSites.slice(
@@ -296,23 +301,12 @@ const Sites = () => {
         alignItems="center"
         sx={{ mb: SPACING.MEDIUM.PX }}
       >
-        <Typography variant="h4">Sites</Typography>
         <Stack direction="row" spacing={SPACING.SMALL.PX} alignItems="center">
-          <FormControl size="small" sx={{ minWidth: 150 }}>
-            <InputLabel>Status Filter</InputLabel>
-            <Select
-              value={statusFilter}
-              onChange={e =>
-                setStatusFilter(e.target.value as 'all' | SiteStatus)
-              }
-              label="Status Filter"
-            >
-              <MenuItem value="all">All Sites</MenuItem>
-              <MenuItem value="active">Active</MenuItem>
-              <MenuItem value="inactive">Inactive</MenuItem>
-            </Select>
-          </FormControl>
+          <Button size="small" variant="contained" onClick={handleAddSite}>
+            Add Site
+          </Button>
           <Button
+            size="small"
             variant="outlined"
             onClick={() =>
               (activeModalSignal.value = { id: MODAL_ID.DEBUG_SCRAPE_MODAL })
@@ -320,13 +314,34 @@ const Sites = () => {
           >
             Debug New Site
           </Button>
-          <Button variant="outlined" onClick={handleImportSites}>
+          <Button size="small" variant="outlined" onClick={handleImportSites}>
             Import Sites
           </Button>
-          <Button variant="contained" onClick={handleAddSite}>
-            Add Site
-          </Button>
         </Stack>
+
+        <FormControl component="fieldset">
+          <FormGroup row>
+            {(['active', 'inactive'] as SiteStatus[]).map(status => (
+              <FormControlLabel
+                key={status}
+                control={
+                  <Checkbox
+                    checked={statusFilter.includes(status)}
+                    onChange={() => {
+                      const newFilter = statusFilter.includes(status)
+                        ? statusFilter.filter(s => s !== status)
+                        : [...statusFilter, status]
+                      setStatusFilter(newFilter)
+                      setPage(0)
+                    }}
+                    size="small"
+                  />
+                }
+                label={status.charAt(0).toUpperCase() + status.slice(1)}
+              />
+            ))}
+          </FormGroup>
+        </FormControl>
       </Stack>
 
       {sites.length === 0 && !error && !loading && (
@@ -424,6 +439,18 @@ const Sites = () => {
                           ? 'No sites found. Click "Add Site" or "Import Sites" to get started.'
                           : 'No sites match the current filter.'}
                       </Typography>
+                      {sites.length > 0 && statusFilter.length > 0 && (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => {
+                            setStatusFilter(['active', 'inactive'])
+                            setPage(0)
+                          }}
+                        >
+                          Clear Filters
+                        </Button>
+                      )}
                     </Stack>
                   </TableCell>
                 </TableRow>
@@ -566,7 +593,10 @@ const Sites = () => {
                                           </Typography>
                                         </TableCell>
                                         <TableCell>
-                                          <FormControl sx={{ minWidth: 120 }}>
+                                          <FormControl
+                                            size="small"
+                                            sx={{ minWidth: 150 }}
+                                          >
                                             <Select
                                               value={job.status}
                                               onChange={e =>

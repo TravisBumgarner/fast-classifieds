@@ -2,7 +2,11 @@ import {
   Alert,
   Box,
   Button,
+  Checkbox,
   Chip,
+  FormControl,
+  FormControlLabel,
+  FormGroup,
   IconButton,
   Paper,
   Stack,
@@ -46,6 +50,10 @@ const Prompts = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set())
+  const [statusFilter, setStatusFilter] = useState<PromptStatus[]>([
+    'active',
+    'inactive',
+  ])
   const [sortField, setSortField] = useState<SortField>('title')
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
   const [page, setPage] = useState(0)
@@ -86,7 +94,12 @@ const Prompts = () => {
     return 0
   })
 
-  const paginatedPrompts = sortedPrompts.slice(
+  const filteredPrompts = sortedPrompts.filter(prompt => {
+    if (statusFilter.length === 0) return true
+    return statusFilter.includes(prompt.status)
+  })
+
+  const paginatedPrompts = filteredPrompts.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage,
   )
@@ -188,12 +201,35 @@ const Prompts = () => {
         direction="row"
         justifyContent="space-between"
         alignItems="center"
-        sx={{ mb: SPACING.MEDIUM.PX }}
+        sx={{ marginBottom: SPACING.MEDIUM.PX }}
       >
-        <Typography variant="h4">Prompts</Typography>
-        <Button variant="contained" onClick={handleAddPrompt}>
+        <Button variant="contained" onClick={handleAddPrompt} size="small">
           Add Prompt
         </Button>
+
+        <FormControl component="fieldset">
+          <FormGroup row>
+            {(['active', 'inactive'] as PromptStatus[]).map(status => (
+              <FormControlLabel
+                key={status}
+                control={
+                  <Checkbox
+                    checked={statusFilter.includes(status)}
+                    onChange={() => {
+                      const newFilter = statusFilter.includes(status)
+                        ? statusFilter.filter(s => s !== status)
+                        : [...statusFilter, status]
+                      setStatusFilter(newFilter)
+                      setPage(0)
+                    }}
+                    size="small"
+                  />
+                }
+                label={status.charAt(0).toUpperCase() + status.slice(1)}
+              />
+            ))}
+          </FormGroup>
+        </FormControl>
       </Stack>
 
       {prompts.length === 0 && !error && (
@@ -268,7 +304,7 @@ const Prompts = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {sortedPrompts.length === 0 ? (
+              {filteredPrompts.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} align="center">
                     <Stack
@@ -277,17 +313,32 @@ const Prompts = () => {
                       sx={{ py: 4 }}
                     >
                       <Typography variant="body2" color="textSecondary">
-                        No prompts found. Click &quot;Add Prompt&quot; to create
-                        your first one.
+                        {prompts.length === 0
+                          ? 'No prompts found. Click "Add Prompt" to create your first one.'
+                          : 'No prompts match the current filter.'}
                       </Typography>
-                      <Typography
-                        variant="caption"
-                        color="textSecondary"
-                        sx={{ fontStyle: 'italic' }}
-                      >
-                        Example: &quot;Senior Full Stack Engineer&quot; with
-                        keywords like React, TypeScript, Node.js, Remote
-                      </Typography>
+                      {prompts.length > 0 && statusFilter.length > 0 && (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => {
+                            setStatusFilter(['active', 'inactive'])
+                            setPage(0)
+                          }}
+                        >
+                          Clear Filters
+                        </Button>
+                      )}
+                      {prompts.length === 0 && (
+                        <Typography
+                          variant="caption"
+                          color="textSecondary"
+                          sx={{ fontStyle: 'italic' }}
+                        >
+                          Example: &quot;Senior Full Stack Engineer&quot; with
+                          keywords like React, TypeScript, Node.js, Remote
+                        </Typography>
+                      )}
                     </Stack>
                   </TableCell>
                 </TableRow>
@@ -376,7 +427,7 @@ const Prompts = () => {
         <TablePagination
           rowsPerPageOptions={PAGINATION.ROWS_PER_PAGE_OPTIONS}
           component="div"
-          count={sortedPrompts.length}
+          count={filteredPrompts.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
