@@ -1,6 +1,7 @@
 export const CHANNEL = {
   SITES: {
     GET_ALL: 'sites:get-all',
+    GET_ALL_WITH_JOB_COUNTS: 'sites:get-all-with-job-counts',
     GET_BY_ID: 'sites:get-by-id',
     CREATE: 'sites:create',
     UPDATE: 'sites:update',
@@ -32,6 +33,7 @@ export const CHANNEL = {
   },
   JOB_POSTINGS: {
     GET_ALL: 'job-postings:get-all',
+    GET_BY_SITE_ID: 'job-postings:get-by-site-id',
     UPDATE_STATUS: 'job-postings:update-status',
   },
 } as const
@@ -102,6 +104,22 @@ export type Invokes = {
         status: 'active' | 'inactive'
         createdAt: Date
         updatedAt: Date
+      }>
+    }
+  }
+  [CHANNEL.SITES.GET_ALL_WITH_JOB_COUNTS]: {
+    args: undefined
+    result: {
+      sites: Array<{
+        id: number
+        siteTitle: string
+        siteUrl: string
+        prompt: string
+        selector: string
+        status: 'active' | 'inactive'
+        createdAt: Date
+        updatedAt: Date
+        totalJobs: number
       }>
     }
   }
@@ -261,6 +279,27 @@ export type Invokes = {
   }
   [CHANNEL.JOB_POSTINGS.GET_ALL]: {
     args: undefined
+    result: {
+      postings: Array<{
+        id: number
+        title: string
+        siteUrl: string
+        siteId?: number | null
+        explanation?: string | null
+        status:
+          | 'new'
+          | 'applied'
+          | 'skipped'
+          | 'interview'
+          | 'rejected'
+          | 'offer'
+        createdAt: Date
+        updatedAt: Date
+      }>
+    }
+  }
+  [CHANNEL.JOB_POSTINGS.GET_BY_SITE_ID]: {
+    args: { siteId: number }
     result: {
       postings: Array<{
         id: number

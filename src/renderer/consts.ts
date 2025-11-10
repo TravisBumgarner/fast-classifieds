@@ -23,6 +23,11 @@ export const ROUTES = {
 
 export const QUERY_KEYS = {}
 
+export const PAGINATION = {
+  DEFAULT_ROWS_PER_PAGE: 10 as number,
+  ROWS_PER_PAGE_OPTIONS: [10, 25, 50, 100] as readonly number[],
+} as const
+
 export const TOOLTIPS = {
   CSS_SELECTOR:
     "Use the CSS Selector to target the HTML element wrapping all the jobs. Tip: To save on AI costs, use specific selectors like '.careers-list' instead of 'body'.",

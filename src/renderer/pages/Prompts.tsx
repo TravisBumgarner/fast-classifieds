@@ -11,6 +11,7 @@ import {
   TableCell,
   TableContainer,
   TableHead,
+  TablePagination,
   TableRow,
   TableSortLabel,
   Tooltip,
@@ -18,6 +19,7 @@ import {
 } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { CHANNEL } from '../../shared/messages.types'
+import { PAGINATION } from '../consts'
 import ipcMessenger from '../ipcMessenger'
 import Icon from '../sharedComponents/Icon'
 import Message from '../sharedComponents/Message'
@@ -46,6 +48,10 @@ const Prompts = () => {
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set())
   const [sortField, setSortField] = useState<SortField>('title')
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
+  const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(
+    PAGINATION.DEFAULT_ROWS_PER_PAGE,
+  )
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -79,6 +85,22 @@ const Prompts = () => {
     if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1
     return 0
   })
+
+  const paginatedPrompts = sortedPrompts.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage,
+  )
+
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setPage(newPage)
+  }
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10))
+    setPage(0)
+  }
 
   const loadPrompts = async () => {
     try {
@@ -117,20 +139,26 @@ const Prompts = () => {
   }
 
   const handleDeletePrompt = async (id: number, title: string) => {
-    if (!confirm(`Are you sure you want to delete "${title}"?`)) {
-      return
-    }
-
-    try {
-      const result = await ipcMessenger.invoke(CHANNEL.PROMPTS.DELETE, { id })
-      if (result.success) {
-        await loadPrompts()
-      } else {
-        setError('Failed to delete prompt')
-      }
-    } catch (err) {
-      setError('Failed to delete prompt')
-      console.error(err)
+    activeModalSignal.value = {
+      id: MODAL_ID.CONFIRMATION_MODAL,
+      title: 'Delete Prompt',
+      body: `Are you sure you want to delete "${title}"?`,
+      showCancel: true,
+      confirmationCallback: async () => {
+        try {
+          const result = await ipcMessenger.invoke(CHANNEL.PROMPTS.DELETE, {
+            id,
+          })
+          if (result.success) {
+            await loadPrompts()
+          } else {
+            setError('Failed to delete prompt')
+          }
+        } catch (err) {
+          setError('Failed to delete prompt')
+          console.error(err)
+        }
+      },
     }
   }
 
@@ -200,7 +228,7 @@ const Prompts = () => {
                   Title
                 </TableSortLabel>
               </TableCell>
-              <TableCell>Content Preview</TableCell>
+              <TableCell>Prompt</TableCell>
               <TableCell>
                 <TableSortLabel
                   active={sortField === 'status'}
@@ -247,13 +275,16 @@ const Prompts = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              sortedPrompts.map(prompt => {
+              paginatedPrompts.map(prompt => {
                 const isExpanded = expandedRows.has(prompt.id)
+                const contentLength = prompt.content.length
+                const showToggle = contentLength > 100 // Only show if content is longer than 100 characters
+
                 return (
                   <TableRow key={prompt.id} hover>
                     <TableCell>{prompt.title}</TableCell>
                     <TableCell>
-                      {isExpanded ? (
+                      {isExpanded || !showToggle ? (
                         <Typography
                           variant="body2"
                           sx={{ whiteSpace: 'pre-wrap' }}
@@ -273,13 +304,15 @@ const Prompts = () => {
                           {prompt.content}
                         </Typography>
                       )}
-                      <Button
-                        size="small"
-                        onClick={() => toggleRowExpansion(prompt.id)}
-                        sx={{ mt: 0.5 }}
-                      >
-                        {isExpanded ? 'Show less' : 'Show more'}
-                      </Button>
+                      {showToggle && (
+                        <Button
+                          size="small"
+                          onClick={() => toggleRowExpansion(prompt.id)}
+                          sx={{ mt: 0.5 }}
+                        >
+                          {isExpanded ? 'Show less' : 'Show more'}
+                        </Button>
+                      )}
                     </TableCell>
                     <TableCell>
                       <Chip
@@ -322,6 +355,15 @@ const Prompts = () => {
             )}
           </TableBody>
         </Table>
+        <TablePagination
+          rowsPerPageOptions={PAGINATION.ROWS_PER_PAGE_OPTIONS}
+          component="div"
+          count={sortedPrompts.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
       </TableContainer>
     </Box>
   )

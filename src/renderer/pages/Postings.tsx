@@ -6,15 +6,19 @@ import {
   Chip,
   FormControl,
   InputLabel,
+  ListItemText,
   MenuItem,
+  OutlinedInput,
   Paper,
   Select,
+  SelectChangeEvent,
   Stack,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
+  TablePagination,
   TableRow,
   TableSortLabel,
   Tooltip,
@@ -22,6 +26,7 @@ import {
 } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { CHANNEL } from '../../shared/messages.types'
+import { PAGINATION } from '../consts'
 import ipcMessenger from '../ipcMessenger'
 import Link from '../sharedComponents/Link'
 import Message from '../sharedComponents/Message'
@@ -57,11 +62,20 @@ const Postings = () => {
   const [jobPostings, setJobPostings] = useState<JobPosting[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [statusFilter, setStatusFilter] = useState<'all' | PostingStatus>('all')
+  const [statusFilter, setStatusFilter] = useState<PostingStatus[]>([
+    'new',
+    'applied',
+    'interview',
+    'offer',
+  ])
   const [sortField, setSortField] = useState<SortField>('createdAt')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [selectedPostings, setSelectedPostings] = useState<Set<number>>(
     new Set(),
+  )
+  const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(
+    PAGINATION.DEFAULT_ROWS_PER_PAGE,
   )
 
   const handleSort = (field: SortField) => {
@@ -102,9 +116,33 @@ const Postings = () => {
   })
 
   const filteredPostings = sortedPostings.filter(posting => {
-    if (statusFilter === 'all') return true
-    return posting.status === statusFilter
+    if (statusFilter.length === 0) return true
+    return statusFilter.includes(posting.status)
   })
+
+  const paginatedPostings = filteredPostings.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage,
+  )
+
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setPage(newPage)
+  }
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10))
+    setPage(0)
+  }
+
+  const handleStatusFilterChange = (
+    event: SelectChangeEvent<PostingStatus[]>,
+  ) => {
+    const value = event.target.value
+    setStatusFilter(typeof value === 'string' ? [] : value)
+    setPage(0)
+  }
 
   const loadJobPostings = async () => {
     try {
@@ -259,22 +297,43 @@ const Postings = () => {
           <Button variant="contained" onClick={handleFindJobs}>
             Find Jobs
           </Button>
-          <FormControl size="small" sx={{ minWidth: 150 }}>
+          <FormControl size="small" sx={{ minWidth: 200 }}>
             <InputLabel>Status Filter</InputLabel>
             <Select
+              multiple
               value={statusFilter}
-              onChange={e =>
-                setStatusFilter(e.target.value as 'all' | PostingStatus)
-              }
-              label="Status Filter"
+              onChange={handleStatusFilterChange}
+              input={<OutlinedInput label="Status Filter" />}
+              renderValue={selected => {
+                if (selected.length === 0) return 'None'
+                if (selected.length === 6) return 'All'
+                return `${selected.length} selected`
+              }}
             >
-              <MenuItem value="all">All Postings</MenuItem>
-              <MenuItem value="new">New</MenuItem>
-              <MenuItem value="applied">Applied</MenuItem>
-              <MenuItem value="interview">Interview</MenuItem>
-              <MenuItem value="offer">Offer</MenuItem>
-              <MenuItem value="skipped">Skipped</MenuItem>
-              <MenuItem value="rejected">Rejected</MenuItem>
+              <MenuItem value="new">
+                <Checkbox checked={statusFilter.includes('new')} />
+                <ListItemText primary="New" />
+              </MenuItem>
+              <MenuItem value="applied">
+                <Checkbox checked={statusFilter.includes('applied')} />
+                <ListItemText primary="Applied" />
+              </MenuItem>
+              <MenuItem value="interview">
+                <Checkbox checked={statusFilter.includes('interview')} />
+                <ListItemText primary="Interview" />
+              </MenuItem>
+              <MenuItem value="offer">
+                <Checkbox checked={statusFilter.includes('offer')} />
+                <ListItemText primary="Offer" />
+              </MenuItem>
+              <MenuItem value="skipped">
+                <Checkbox checked={statusFilter.includes('skipped')} />
+                <ListItemText primary="Skipped" />
+              </MenuItem>
+              <MenuItem value="rejected">
+                <Checkbox checked={statusFilter.includes('rejected')} />
+                <ListItemText primary="Rejected" />
+              </MenuItem>
             </Select>
           </FormControl>
         </Stack>
@@ -370,7 +429,7 @@ const Postings = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredPostings.map(posting => (
+              paginatedPostings.map(posting => (
                 <TableRow key={posting.id} hover>
                   <TableCell padding="checkbox">
                     <Checkbox
@@ -425,13 +484,26 @@ const Postings = () => {
                     {new Date(posting.createdAt).toLocaleDateString()}
                   </TableCell>
                   <TableCell align="right">
-                    <Link url={posting.siteUrl} />
+                    <Tooltip title="Open job posting in browser">
+                      <span>
+                        <Link url={posting.siteUrl} />
+                      </span>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               ))
             )}
           </TableBody>
         </Table>
+        <TablePagination
+          rowsPerPageOptions={PAGINATION.ROWS_PER_PAGE_OPTIONS}
+          component="div"
+          count={filteredPostings.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
       </TableContainer>
     </Box>
   )
