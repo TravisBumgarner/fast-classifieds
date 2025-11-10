@@ -2,7 +2,11 @@ import {
   Alert,
   Box,
   Button,
+  Checkbox,
   Chip,
+  FormControl,
+  FormControlLabel,
+  FormGroup,
   IconButton,
   Paper,
   Stack,
@@ -46,6 +50,10 @@ const Prompts = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set())
+  const [statusFilter, setStatusFilter] = useState<PromptStatus[]>([
+    'active',
+    'inactive',
+  ])
   const [sortField, setSortField] = useState<SortField>('title')
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
   const [page, setPage] = useState(0)
@@ -86,7 +94,12 @@ const Prompts = () => {
     return 0
   })
 
-  const paginatedPrompts = sortedPrompts.slice(
+  const filteredPrompts = sortedPrompts.filter(prompt => {
+    if (statusFilter.length === 0) return true
+    return statusFilter.includes(prompt.status)
+  })
+
+  const paginatedPrompts = filteredPrompts.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage,
   )
@@ -177,17 +190,46 @@ const Prompts = () => {
   }
 
   return (
-    <Box sx={{ p: SPACING.LARGE.PX }}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+      }}
+    >
       <Stack
         direction="row"
         justifyContent="space-between"
         alignItems="center"
-        sx={{ mb: SPACING.MEDIUM.PX }}
+        sx={{ marginBottom: SPACING.MEDIUM.PX }}
       >
-        <Typography variant="h4">Prompts</Typography>
-        <Button variant="contained" onClick={handleAddPrompt}>
+        <Button variant="contained" onClick={handleAddPrompt} size="small">
           Add Prompt
         </Button>
+
+        <FormControl component="fieldset">
+          <FormGroup row>
+            {(['active', 'inactive'] as PromptStatus[]).map(status => (
+              <FormControlLabel
+                key={status}
+                control={
+                  <Checkbox
+                    checked={statusFilter.includes(status)}
+                    onChange={() => {
+                      const newFilter = statusFilter.includes(status)
+                        ? statusFilter.filter(s => s !== status)
+                        : [...statusFilter, status]
+                      setStatusFilter(newFilter)
+                      setPage(0)
+                    }}
+                    size="small"
+                  />
+                }
+                label={status.charAt(0).toUpperCase() + status.slice(1)}
+              />
+            ))}
+          </FormGroup>
+        </FormControl>
       </Stack>
 
       {prompts.length === 0 && !error && (
@@ -198,7 +240,7 @@ const Prompts = () => {
           <Typography variant="body2" paragraph>
             1. Upload your resume(s) to ChatGPT and ask: &quot;Take my resume
             and extract all useful tokens and keywords for finding relevant
-            jobs, return as a JSON list.&quot;
+            jobs, return this as a prompt I can give you in the future..&quot;
           </Typography>
           <Typography variant="body2" paragraph>
             2. Create a prompt like: &quot;I&apos;m looking for jobs that match
@@ -215,150 +257,177 @@ const Prompts = () => {
 
       {error && <Message message={error} color="error" />}
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>
-                <TableSortLabel
-                  active={sortField === 'title'}
-                  direction={sortField === 'title' ? sortDirection : 'asc'}
-                  onClick={() => handleSort('title')}
-                >
-                  Title
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>Prompt</TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortField === 'status'}
-                  direction={sortField === 'status' ? sortDirection : 'asc'}
-                  onClick={() => handleSort('status')}
-                >
-                  Status
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortField === 'updatedAt'}
-                  direction={sortField === 'updatedAt' ? sortDirection : 'asc'}
-                  onClick={() => handleSort('updatedAt')}
-                >
-                  Updated
-                </TableSortLabel>
-              </TableCell>
-              <TableCell align="right">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {sortedPrompts.length === 0 ? (
+      <TableContainer
+        component={Paper}
+        sx={{
+          flexGrow: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+        }}
+      >
+        <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
+          <Table stickyHeader>
+            <TableHead>
               <TableRow>
-                <TableCell colSpan={5} align="center">
-                  <Stack
-                    spacing={SPACING.SMALL.PX}
-                    alignItems="center"
-                    sx={{ py: 4 }}
+                <TableCell>
+                  <TableSortLabel
+                    active={sortField === 'title'}
+                    direction={sortField === 'title' ? sortDirection : 'asc'}
+                    onClick={() => handleSort('title')}
                   >
-                    <Typography variant="body2" color="textSecondary">
-                      No prompts found. Click &quot;Add Prompt&quot; to create
-                      your first one.
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      color="textSecondary"
-                      sx={{ fontStyle: 'italic' }}
-                    >
-                      Example: &quot;Senior Full Stack Engineer&quot; with
-                      keywords like React, TypeScript, Node.js, Remote
-                    </Typography>
-                  </Stack>
+                    Title
+                  </TableSortLabel>
                 </TableCell>
+                <TableCell>Prompt</TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortField === 'status'}
+                    direction={sortField === 'status' ? sortDirection : 'asc'}
+                    onClick={() => handleSort('status')}
+                  >
+                    Status
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortField === 'updatedAt'}
+                    direction={
+                      sortField === 'updatedAt' ? sortDirection : 'asc'
+                    }
+                    onClick={() => handleSort('updatedAt')}
+                  >
+                    Updated
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell align="right">Actions</TableCell>
               </TableRow>
-            ) : (
-              paginatedPrompts.map(prompt => {
-                const isExpanded = expandedRows.has(prompt.id)
-                const contentLength = prompt.content.length
-                const showToggle = contentLength > 100 // Only show if content is longer than 100 characters
-
-                return (
-                  <TableRow key={prompt.id} hover>
-                    <TableCell>{prompt.title}</TableCell>
-                    <TableCell>
-                      {isExpanded || !showToggle ? (
-                        <Typography
-                          variant="body2"
-                          sx={{ whiteSpace: 'pre-wrap' }}
-                        >
-                          {prompt.content}
-                        </Typography>
-                      ) : (
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            maxWidth: 400,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          {prompt.content}
-                        </Typography>
-                      )}
-                      {showToggle && (
+            </TableHead>
+            <TableBody>
+              {filteredPrompts.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} align="center">
+                    <Stack
+                      spacing={SPACING.SMALL.PX}
+                      alignItems="center"
+                      sx={{ py: 4 }}
+                    >
+                      <Typography variant="body2" color="textSecondary">
+                        {prompts.length === 0
+                          ? 'No prompts found. Click "Add Prompt" to create your first one.'
+                          : 'No prompts match the current filter.'}
+                      </Typography>
+                      {prompts.length > 0 && statusFilter.length > 0 && (
                         <Button
                           size="small"
-                          onClick={() => toggleRowExpansion(prompt.id)}
-                          sx={{ mt: 0.5 }}
+                          variant="outlined"
+                          onClick={() => {
+                            setStatusFilter(['active', 'inactive'])
+                            setPage(0)
+                          }}
                         >
-                          {isExpanded ? 'Show less' : 'Show more'}
+                          Clear Filters
                         </Button>
                       )}
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={
-                          prompt.status === 'active' ? 'Active' : 'Inactive'
-                        }
-                        color={
-                          prompt.status === 'active' ? 'success' : 'default'
-                        }
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {new Date(prompt.updatedAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell align="right">
-                      <Tooltip title="Edit prompt">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleEditPrompt(prompt)}
+                      {prompts.length === 0 && (
+                        <Typography
+                          variant="caption"
+                          color="textSecondary"
+                          sx={{ fontStyle: 'italic' }}
                         >
-                          <Icon name="edit" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete prompt">
-                        <IconButton
-                          size="small"
-                          onClick={() =>
-                            handleDeletePrompt(prompt.id, prompt.title)
+                          Example: &quot;Senior Full Stack Engineer&quot; with
+                          keywords like React, TypeScript, Node.js, Remote
+                        </Typography>
+                      )}
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedPrompts.map(prompt => {
+                  const isExpanded = expandedRows.has(prompt.id)
+                  const contentLength = prompt.content.length
+                  const showToggle = contentLength > 100 // Only show if content is longer than 100 characters
+
+                  return (
+                    <TableRow key={prompt.id} hover>
+                      <TableCell>{prompt.title}</TableCell>
+                      <TableCell>
+                        {isExpanded || !showToggle ? (
+                          <Typography
+                            variant="body2"
+                            sx={{ whiteSpace: 'pre-wrap' }}
+                          >
+                            {prompt.content}
+                          </Typography>
+                        ) : (
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              maxWidth: 400,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {prompt.content}
+                          </Typography>
+                        )}
+                        {showToggle && (
+                          <Button
+                            size="small"
+                            onClick={() => toggleRowExpansion(prompt.id)}
+                            sx={{ mt: 0.5 }}
+                          >
+                            {isExpanded ? 'Show less' : 'Show more'}
+                          </Button>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={
+                            prompt.status === 'active' ? 'Active' : 'Inactive'
                           }
-                          color="error"
-                        >
-                          <Icon name="delete" />
-                        </IconButton>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                )
-              })
-            )}
-          </TableBody>
-        </Table>
+                          color={
+                            prompt.status === 'active' ? 'success' : 'default'
+                          }
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {new Date(prompt.updatedAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell align="right">
+                        <Tooltip title="Edit prompt">
+                          <IconButton
+                            size="small"
+                            onClick={() => handleEditPrompt(prompt)}
+                          >
+                            <Icon name="edit" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete prompt">
+                          <IconButton
+                            size="small"
+                            onClick={() =>
+                              handleDeletePrompt(prompt.id, prompt.title)
+                            }
+                            color="error"
+                          >
+                            <Icon name="delete" />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })
+              )}
+            </TableBody>
+          </Table>
+        </Box>
         <TablePagination
           rowsPerPageOptions={PAGINATION.ROWS_PER_PAGE_OPTIONS}
           component="div"
-          count={sortedPrompts.length}
+          count={filteredPrompts.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}

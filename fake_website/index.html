@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Acme Corp - Careers</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+          Cantarell, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: #f5f5f5;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 60px 20px;
+        text-align: center;
+        margin-bottom: 40px;
+        border-radius: 8px;
+      }
+
+      h1 {
+        font-size: 3em;
+        margin-bottom: 10px;
+        font-weight: 700;
+      }
+
+      h2 {
+        font-size: 2em;
+        margin: 40px 0 20px;
+        color: #667eea;
+        border-bottom: 3px solid #667eea;
+        padding-bottom: 10px;
+      }
+
+      .about-section {
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        margin-bottom: 40px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .about-text {
+        font-size: 1.1em;
+        color: #555;
+      }
+
+      #job-listings {
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .jobs-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      .jobs-table thead {
+        background: #667eea;
+        color: white;
+      }
+
+      .jobs-table th {
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+      }
+
+      .jobs-table td {
+        padding: 15px;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .jobs-table tbody tr {
+        transition: background-color 0.2s;
+      }
+
+      .jobs-table tbody tr:hover {
+        background-color: #f8f9ff;
+      }
+
+      .job-title {
+        font-weight: 600;
+        color: #667eea;
+      }
+
+      .job-link {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 8px 16px;
+        border: 2px solid #667eea;
+        border-radius: 4px;
+        display: inline-block;
+        transition: all 0.3s;
+      }
+
+      .job-link:hover {
+        background: #667eea;
+        color: white;
+      }
+
+      .department-tag {
+        background: #e8eaf6;
+        color: #667eea;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 0.9em;
+        font-weight: 500;
+      }
+
+      .location {
+        color: #666;
+        font-size: 0.95em;
+      }
+
+      footer {
+        text-align: center;
+        margin-top: 60px;
+        padding: 20px;
+        color: #888;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header id="hero-section">
+        <h1>Acme Corporation!</h1>
+        <p>Join our team and build the future</p>
+      </header>
+
+      <section class="about-section" id="about">
+        <h2>About Company</h2>
+        <p class="about-text">
+          Acme Corporation is a leading innovator in cutting-edge technology
+          solutions. Founded in 2010, we've grown from a small startup to a
+          global enterprise with over 5,000 employees across 20 countries. Our
+          mission is to empower businesses and individuals through innovative
+          software and services that make a real difference in people's lives.
+        </p>
+        <p class="about-text" style="margin-top: 15px">
+          We believe in fostering a culture of creativity, collaboration, and
+          continuous learning. Our team members are our greatest asset, and we
+          invest heavily in their growth and development. Join us to work on
+          challenging problems, learn from the best, and make an impact on
+          millions of users worldwide.
+        </p>
+      </section>
+
+      <section id="job-listings">
+        <h2>Job Postings!</h2>
+        <table class="jobs-table">
+          <thead>
+            <tr>
+              <th>Position</th>
+              <th>Department</th>
+              <th>Location</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody class="job-list">
+            <tr class="job-row" data-job-id="1">
+              <td class="job-title">Senior Software Engineer</td>
+              <td><span class="department-tag">Engineering</span></td>
+              <td class="location">San Francisco, CA</td>
+              <td>
+                <a href="/jobs/senior-software-engineer" class="job-link"
+                  >View Details</a
+                >
+              </td>
+            </tr>
+            <tr class="job-row" data-job-id="2">
+              <td class="job-title">Product Manager</td>
+              <td><span class="department-tag">Product</span></td>
+              <td class="location">New York, NY</td>
+              <td>
+                <a href="/jobs/product-manager" class="job-link"
+                  >View Details</a
+                >
+              </td>
+            </tr>
+            <tr class="job-row" data-job-id="3">
+              <td class="job-title">UX Designer</td>
+              <td><span class="department-tag">Design</span></td>
+              <td class="location">Remote</td>
+              <td>
+                <a href="/jobs/ux-designer" class="job-link">View Details</a>
+              </td>
+            </tr>
+            <tr class="job-row" data-job-id="4">
+              <td class="job-title">DevOps Engineer</td>
+              <td><span class="department-tag">Engineering</span></td>
+              <td class="location">Austin, TX</td>
+              <td>
+                <a href="/jobs/devops-engineer" class="job-link"
+                  >View Details</a
+                >
+              </td>
+            </tr>
+            <tr class="job-row" data-job-id="5">
+              <td class="job-title">Data Scientist</td>
+              <td><span class="department-tag">Data</span></td>
+              <td class="location">Seattle, WA</td>
+              <td>
+                <a href="/jobs/data-scientist" class="job-link">View Details</a>
+              </td>
+            </tr>
+            <tr class="job-row" data-job-id="6">
+              <td class="job-title">Marketing Manager</td>
+              <td><span class="department-tag">Marketing</span></td>
+              <td class="location">Los Angeles, CA</td>
+              <td>
+                <a href="/jobs/marketing-manager" class="job-link"
+                  >View Details</a
+                >
+              </td>
+            </tr>
+            <tr class="job-row" data-job-id="7">
+              <td class="job-title">Frontend Developer</td>
+              <td><span class="department-tag">Engineering</span></td>
+              <td class="location">Remote</td>
+              <td>
+                <a href="/jobs/frontend-developer" class="job-link"
+                  >View Details</a
+                >
+              </td>
+            </tr>
+            <tr class="job-row" data-job-id="8">
+              <td class="job-title">Customer Success Manager</td>
+              <td><span class="department-tag">Customer Success</span></td>
+              <td class="location">Boston, MA</td>
+              <td>
+                <a href="/jobs/customer-success-manager" class="job-link"
+                  >View Details</a
+                >
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <footer>
+        <p>&copy; 2025 Acme Corporation. All rights reserved.</p>
+      </footer>
+    </div>
+  </body>
+</html>

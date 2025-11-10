@@ -5,13 +5,11 @@ import {
   Checkbox,
   Chip,
   FormControl,
-  InputLabel,
-  ListItemText,
+  FormControlLabel,
+  FormGroup,
   MenuItem,
-  OutlinedInput,
   Paper,
   Select,
-  SelectChangeEvent,
   Stack,
   Table,
   TableBody,
@@ -136,14 +134,6 @@ const Postings = () => {
     setPage(0)
   }
 
-  const handleStatusFilterChange = (
-    event: SelectChangeEvent<PostingStatus[]>,
-  ) => {
-    const value = event.target.value
-    setStatusFilter(typeof value === 'string' ? [] : value)
-    setPage(0)
-  }
-
   const loadJobPostings = async () => {
     try {
       setLoading(true)
@@ -166,13 +156,6 @@ const Postings = () => {
       id: MODAL_ID.SCRAPE_PROGRESS_MODAL,
       onComplete: loadJobPostings,
     }
-  }
-
-  const handleOpenAllInBrowser = () => {
-    filteredPostings.forEach(posting => {
-      // @ts-expect-error - shell:openExternal is not in typed IPC but is defined in messages.ts
-      window.electron.ipcRenderer.invoke('shell:openExternal', posting.siteUrl)
-    })
   }
 
   const handleOpenSelectedInBrowser = () => {
@@ -225,6 +208,14 @@ const Postings = () => {
     const checkFirstLaunch = async () => {
       if (hasCheckedOnboarding) return
 
+      // Check if user has already completed onboarding
+      const onboardingCompleted = localStorage.getItem('onboarding-completed')
+      if (onboardingCompleted === 'true') {
+        setHasCheckedOnboarding(true)
+        onboardingCompletedSignal.value = true
+        return
+      }
+
       try {
         // Check if user has any prompts or sites
         const [promptsResult, sitesResult] = await Promise.all([
@@ -256,7 +247,7 @@ const Postings = () => {
 
   const getStatusColor = (
     status: PostingStatus,
-  ): 'default' | 'primary' | 'success' | 'warning' | 'error' | 'info' => {
+  ): 'primary' | 'success' | 'error' | 'info' => {
     switch (status) {
       case 'new':
         return 'primary'
@@ -267,11 +258,11 @@ const Postings = () => {
       case 'offer':
         return 'success'
       case 'skipped':
-        return 'default'
+        return 'info'
       case 'rejected':
         return 'error'
       default:
-        return 'default'
+        return 'primary'
     }
   }
 
@@ -280,66 +271,69 @@ const Postings = () => {
   }
 
   return (
-    <Box sx={{ p: SPACING.LARGE.PX }}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+      }}
+    >
       <Stack
         direction="row"
         justifyContent="space-between"
         alignItems="center"
-        sx={{ mb: SPACING.MEDIUM.PX }}
+        sx={{ marginBottom: SPACING.MEDIUM.PX }}
       >
-        <Typography variant="h4">Job Postings</Typography>
         <Stack direction="row" spacing={SPACING.SMALL.PX} alignItems="center">
+          <Button size="small" variant="contained" onClick={handleFindJobs}>
+            Find Jobs
+          </Button>
           {selectedPostings.size > 0 && (
-            <Button variant="outlined" onClick={handleOpenSelectedInBrowser}>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={handleOpenSelectedInBrowser}
+            >
               Open Selected ({selectedPostings.size})
             </Button>
           )}
-          <Button variant="contained" onClick={handleFindJobs}>
-            Find Jobs
-          </Button>
-          <FormControl size="small" sx={{ minWidth: 200 }}>
-            <InputLabel>Status Filter</InputLabel>
-            <Select
-              multiple
-              value={statusFilter}
-              onChange={handleStatusFilterChange}
-              input={<OutlinedInput label="Status Filter" />}
-              renderValue={selected => {
-                if (selected.length === 0) return 'None'
-                if (selected.length === 6) return 'All'
-                return `${selected.length} selected`
-              }}
-            >
-              <MenuItem value="new">
-                <Checkbox checked={statusFilter.includes('new')} />
-                <ListItemText primary="New" />
-              </MenuItem>
-              <MenuItem value="applied">
-                <Checkbox checked={statusFilter.includes('applied')} />
-                <ListItemText primary="Applied" />
-              </MenuItem>
-              <MenuItem value="interview">
-                <Checkbox checked={statusFilter.includes('interview')} />
-                <ListItemText primary="Interview" />
-              </MenuItem>
-              <MenuItem value="offer">
-                <Checkbox checked={statusFilter.includes('offer')} />
-                <ListItemText primary="Offer" />
-              </MenuItem>
-              <MenuItem value="skipped">
-                <Checkbox checked={statusFilter.includes('skipped')} />
-                <ListItemText primary="Skipped" />
-              </MenuItem>
-              <MenuItem value="rejected">
-                <Checkbox checked={statusFilter.includes('rejected')} />
-                <ListItemText primary="Rejected" />
-              </MenuItem>
-            </Select>
-          </FormControl>
         </Stack>
+
+        <FormControl component="fieldset">
+          <FormGroup row>
+            {(
+              [
+                'new',
+                'applied',
+                'interview',
+                'offer',
+                'skipped',
+                'rejected',
+              ] as PostingStatus[]
+            ).map(status => (
+              <FormControlLabel
+                key={status}
+                control={
+                  <Checkbox
+                    checked={statusFilter.includes(status)}
+                    onChange={() => {
+                      const newFilter = statusFilter.includes(status)
+                        ? statusFilter.filter(s => s !== status)
+                        : [...statusFilter, status]
+                      setStatusFilter(newFilter)
+                      setPage(0)
+                    }}
+                    size="small"
+                  />
+                }
+                label={status.charAt(0).toUpperCase() + status.slice(1)}
+              />
+            ))}
+          </FormGroup>
+        </FormControl>
       </Stack>
 
-      {filteredPostings.length === 0 && !error && !loading && (
+      {jobPostings.length === 0 && !error && !loading && (
         <Alert severity="info" sx={{ mb: SPACING.MEDIUM.PX }}>
           <Typography variant="subtitle2" gutterBottom>
             <strong>No job postings yet</strong>
@@ -354,147 +348,171 @@ const Postings = () => {
 
       {error && <Message message={error} color="error" />}
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  indeterminate={
-                    selectedPostings.size > 0 &&
-                    selectedPostings.size < filteredPostings.length
-                  }
-                  checked={
-                    filteredPostings.length > 0 &&
-                    selectedPostings.size === filteredPostings.length
-                  }
-                  onChange={handleSelectAll}
-                />
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortField === 'company'}
-                  direction={sortField === 'company' ? sortDirection : 'asc'}
-                  onClick={() => handleSort('company')}
-                >
-                  Company
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortField === 'title'}
-                  direction={sortField === 'title' ? sortDirection : 'asc'}
-                  onClick={() => handleSort('title')}
-                >
-                  Title
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortField === 'status'}
-                  direction={sortField === 'status' ? sortDirection : 'asc'}
-                  onClick={() => handleSort('status')}
-                >
-                  Status
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>Explanation</TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortField === 'createdAt'}
-                  direction={sortField === 'createdAt' ? sortDirection : 'asc'}
-                  onClick={() => handleSort('createdAt')}
-                >
-                  Found On
-                </TableSortLabel>
-              </TableCell>
-              <TableCell align="right">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredPostings.length === 0 ? (
+      <TableContainer
+        component={Paper}
+        sx={{
+          flexGrow: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+        }}
+      >
+        <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
+          <Table stickyHeader>
+            <TableHead>
               <TableRow>
-                <TableCell colSpan={7} align="center">
-                  <Stack
-                    spacing={SPACING.SMALL.PX}
-                    alignItems="center"
-                    sx={{ py: 4 }}
-                  >
-                    <Typography variant="body2" color="textSecondary">
-                      {jobPostings.length === 0
-                        ? 'No job postings found. Run your first scrape to find jobs.'
-                        : 'No postings match the current filter.'}
-                    </Typography>
-                  </Stack>
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    indeterminate={
+                      selectedPostings.size > 0 &&
+                      selectedPostings.size < filteredPostings.length
+                    }
+                    checked={
+                      filteredPostings.length > 0 &&
+                      selectedPostings.size === filteredPostings.length
+                    }
+                    onChange={handleSelectAll}
+                  />
                 </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortField === 'company'}
+                    direction={sortField === 'company' ? sortDirection : 'asc'}
+                    onClick={() => handleSort('company')}
+                  >
+                    Company
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortField === 'title'}
+                    direction={sortField === 'title' ? sortDirection : 'asc'}
+                    onClick={() => handleSort('title')}
+                  >
+                    Title
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortField === 'status'}
+                    direction={sortField === 'status' ? sortDirection : 'asc'}
+                    onClick={() => handleSort('status')}
+                  >
+                    Status
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>Explanation</TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortField === 'createdAt'}
+                    direction={
+                      sortField === 'createdAt' ? sortDirection : 'asc'
+                    }
+                    onClick={() => handleSort('createdAt')}
+                  >
+                    Found On
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell align="right">Actions</TableCell>
               </TableRow>
-            ) : (
-              paginatedPostings.map(posting => (
-                <TableRow key={posting.id} hover>
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      checked={selectedPostings.has(posting.id)}
-                      onChange={() => handleTogglePosting(posting.id)}
-                    />
-                  </TableCell>
-                  <TableCell>{posting.company || '-'}</TableCell>
-                  <TableCell>{posting.title}</TableCell>
-                  <TableCell>
-                    <FormControl size="small" sx={{ minWidth: 120 }}>
-                      <Select
-                        value={posting.status}
-                        onChange={e =>
-                          handleUpdateStatus(
-                            posting.id,
-                            e.target.value as PostingStatus,
-                          )
-                        }
-                        renderValue={value => (
-                          <Chip
-                            label={
-                              value.charAt(0).toUpperCase() + value.slice(1)
-                            }
-                            color={getStatusColor(value)}
-                            size="small"
-                          />
-                        )}
-                      >
-                        <MenuItem value="new">New</MenuItem>
-                        <MenuItem value="applied">Applied</MenuItem>
-                        <MenuItem value="interview">Interview</MenuItem>
-                        <MenuItem value="offer">Offer</MenuItem>
-                        <MenuItem value="skipped">Skipped</MenuItem>
-                        <MenuItem value="rejected">Rejected</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </TableCell>
-                  <TableCell>
-                    <Tooltip title={posting.explanation || 'No explanation'}>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          maxWidth: 275,
-                        }}
-                      >
-                        {posting.explanation?.slice(0, 75) + '...' || '-'}
+            </TableHead>
+            <TableBody>
+              {filteredPostings.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} align="center">
+                    <Stack
+                      spacing={SPACING.SMALL.PX}
+                      alignItems="center"
+                      sx={{ py: 4 }}
+                    >
+                      <Typography variant="body2" color="textSecondary">
+                        {jobPostings.length === 0
+                          ? 'No job postings found. Run your first scrape to find jobs.'
+                          : 'No postings match the current filter.'}
                       </Typography>
-                    </Tooltip>
-                  </TableCell>
-                  <TableCell>
-                    {new Date(posting.createdAt).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell align="right">
-                    <Tooltip title="Open job posting in browser">
-                      <span>
-                        <Link url={posting.siteUrl} />
-                      </span>
-                    </Tooltip>
+                      {jobPostings.length > 0 && statusFilter.length > 0 && (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => {
+                            setStatusFilter([])
+                            setPage(0)
+                          }}
+                        >
+                          Clear Filters
+                        </Button>
+                      )}
+                    </Stack>
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : (
+                paginatedPostings.map(posting => (
+                  <TableRow key={posting.id} hover>
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        checked={selectedPostings.has(posting.id)}
+                        onChange={() => handleTogglePosting(posting.id)}
+                      />
+                    </TableCell>
+                    <TableCell>{posting.company || '-'}</TableCell>
+                    <TableCell>{posting.title}</TableCell>
+                    <TableCell>
+                      <FormControl size="small" sx={{ minWidth: 120 }}>
+                        <Select
+                          value={posting.status}
+                          onChange={e =>
+                            handleUpdateStatus(
+                              posting.id,
+                              e.target.value as PostingStatus,
+                            )
+                          }
+                          renderValue={value => (
+                            <Chip
+                              label={
+                                value.charAt(0).toUpperCase() + value.slice(1)
+                              }
+                              color={getStatusColor(value)}
+                              size="small"
+                            />
+                          )}
+                        >
+                          <MenuItem value="new">New</MenuItem>
+                          <MenuItem value="applied">Applied</MenuItem>
+                          <MenuItem value="interview">Interview</MenuItem>
+                          <MenuItem value="offer">Offer</MenuItem>
+                          <MenuItem value="skipped">Skipped</MenuItem>
+                          <MenuItem value="rejected">Rejected</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </TableCell>
+                    <TableCell>
+                      <Tooltip title={posting.explanation || 'No explanation'}>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            maxWidth: 275,
+                          }}
+                        >
+                          {posting.explanation?.slice(0, 75) + '...' || '-'}
+                        </Typography>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell>
+                      {new Date(posting.createdAt).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell align="right">
+                      <Tooltip title="Open job posting in browser">
+                        <span>
+                          <Link url={posting.siteUrl} />
+                        </span>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </Box>
         <TablePagination
           rowsPerPageOptions={PAGINATION.ROWS_PER_PAGE_OPTIONS}
           component="div"

@@ -48,9 +48,11 @@ const getThemeOptions = (isDark: boolean): ThemeOptions => {
       },
       body1: {
         fontSize: FONT_SIZES.MEDIUM.PX,
+        padding: `${SPACING.TINY.PX} 0px`,
       },
       body2: {
         fontSize: FONT_SIZES.SMALL.PX,
+        padding: `${SPACING.TINY.PX} 0px`,
       },
     },
     palette: {
@@ -67,9 +69,37 @@ const getThemeOptions = (isDark: boolean): ThemeOptions => {
     components: {
       MuiCssBaseline: {
         styleOverrides: {
+          html: {
+            overflow: 'hidden',
+            height: '100%',
+            padding: 0,
+            margin: 0,
+          },
           body: {
+            padding: 0,
+            margin: 0,
+            overflow: 'hidden',
+            height: '100%',
             backgroundColor: colors.background,
             color: colors.text.primary,
+          },
+          '#root': {
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+          },
+        },
+      },
+      MuiTableContainer: {
+        styleOverrides: {
+          root: {
+            boxShadow: isDark
+              ? `0 2px 8px rgba(0, 0, 0, 0.3)`
+              : `0 2px 8px ${PALETTE.grayscale[200]}`,
+            borderRadius: SPACING.SMALL.PX,
+            backgroundColor: colors.surface,
+            maxHeight: '100%',
+            overflow: 'auto',
           },
         },
       },
@@ -80,7 +110,6 @@ const getThemeOptions = (isDark: boolean): ThemeOptions => {
             borderSpacing: 0,
             border: `1px solid ${colors.border.light}`,
             borderRadius: SPACING.SMALL.PX,
-            overflow: 'hidden',
             backgroundColor: colors.surface,
           },
         },
@@ -105,6 +134,9 @@ const getThemeOptions = (isDark: boolean): ThemeOptions => {
             fontWeight: 600,
             color: colors.text.primary,
             borderBottom: `2px solid ${colors.border.medium}`,
+            position: 'sticky',
+            top: 0,
+            zIndex: 10,
           },
           body: {
             color: colors.text.tertiary,
@@ -120,14 +152,14 @@ const getThemeOptions = (isDark: boolean): ThemeOptions => {
           },
         },
       },
-      MuiTableContainer: {
+      MuiTablePagination: {
         styleOverrides: {
           root: {
-            boxShadow: isDark
-              ? `0 2px 8px rgba(0, 0, 0, 0.3)`
-              : `0 2px 8px ${PALETTE.grayscale[200]}`,
-            borderRadius: SPACING.SMALL.PX,
+            borderTop: `1px solid ${colors.border.light}`,
             backgroundColor: colors.surface,
+            position: 'sticky',
+            bottom: 0,
+            zIndex: 10,
           },
         },
       },

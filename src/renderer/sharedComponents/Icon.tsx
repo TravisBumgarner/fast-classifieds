@@ -1,8 +1,10 @@
 import { CgDebug } from 'react-icons/cg'
 import { FaExternalLinkAlt } from 'react-icons/fa'
+import { GiHamburgerMenu } from 'react-icons/gi'
 import { IoMdSettings } from 'react-icons/io'
 import { IoInformationCircleOutline } from 'react-icons/io5'
 import { LuPartyPopper } from 'react-icons/lu'
+
 import {
   MdAdd,
   MdClose,
@@ -15,6 +17,7 @@ import {
 
 export const iconMap = {
   edit: MdEdit,
+  menu: GiHamburgerMenu,
   delete: MdDelete,
   add: MdAdd,
   close: MdClose,

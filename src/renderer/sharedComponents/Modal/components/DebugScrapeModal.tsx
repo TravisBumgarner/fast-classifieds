@@ -20,6 +20,7 @@ const DebugScrapeModal = ({ siteId }: DebugScrapeModalProps) => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [hasLoadedSite, setHasLoadedSite] = useState(false)
+  const [hasUserEdited, setHasUserEdited] = useState(false)
 
   // Auto-generate title from URL
   useEffect(() => {
@@ -145,6 +146,12 @@ const DebugScrapeModal = ({ siteId }: DebugScrapeModalProps) => {
     }
   }
 
+  const handleFieldChange =
+    (setter: (value: string) => void) => (value: string) => {
+      setter(value)
+      setHasUserEdited(true)
+    }
+
   return (
     <DefaultModal
       title={siteId ? 'Debug & Update Site' : 'Debug & Add Site'}
@@ -157,7 +164,7 @@ const DebugScrapeModal = ({ siteId }: DebugScrapeModalProps) => {
             fullWidth
             label="URL"
             value={url}
-            onChange={e => setUrl(e.target.value)}
+            onChange={e => handleFieldChange(setUrl)(e.target.value)}
             placeholder="https://example.com"
           />
 
@@ -166,25 +173,23 @@ const DebugScrapeModal = ({ siteId }: DebugScrapeModalProps) => {
             fullWidth
             label="Site Title"
             value={siteTitle}
-            onChange={e => setSiteTitle(e.target.value)}
+            onChange={e => handleFieldChange(setSiteTitle)(e.target.value)}
             placeholder="Auto-generated from URL"
           />
 
-          <Stack direction="row" spacing={SPACING.SMALL.PX} alignItems="center">
-            <TextField
-              size="small"
-              fullWidth
-              label="CSS Selector"
-              value={selector}
-              onChange={e => setSelector(e.target.value)}
-              placeholder="body"
-            />
-            <Tooltip title={TOOLTIPS.CSS_SELECTOR} arrow>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Icon name="info" size={20} />
-              </Box>
-            </Tooltip>
-          </Stack>
+          <TextField
+            size="small"
+            fullWidth
+            label="CSS Selector"
+            value={selector}
+            onChange={e => handleFieldChange(setSelector)(e.target.value)}
+            placeholder="body"
+          />
+          <Tooltip title={TOOLTIPS.CSS_SELECTOR} arrow>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Icon name="info" size={20} />
+            </Box>
+          </Tooltip>
         </Stack>
         <Paper sx={{ p: SPACING.MEDIUM.PX }}>
           <Box
@@ -216,8 +221,10 @@ const DebugScrapeModal = ({ siteId }: DebugScrapeModalProps) => {
           <Button
             variant="outlined"
             onClick={handleSave}
-            disabled={loading || !url}
             fullWidth
+            disabled={
+              loading || !url || !siteTitle || !selector || !hasUserEdited
+            }
           >
             {siteId ? 'Update' : 'Add'}
           </Button>

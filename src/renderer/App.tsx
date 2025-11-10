@@ -34,39 +34,32 @@ function App() {
   }, [])
 
   return (
-    <>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Navigation />
       <Box
         sx={{
-          padding: SPACING.SMALL.PX,
-          height: '100%',
-          paddingBottom: '20px', // Lazy way to ensure content is visible.
+          flexGrow: 1,
+          overflow: 'auto',
+          marginBottom: SPACING.MEDIUM.PX,
+          padding: SPACING.MEDIUM.PX,
         }}
       >
         <Router />
       </Box>
       <RenderModal />
-    </>
+    </Box>
   )
 }
 
 const WrappedApp = () => {
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-      }}
-    >
-      <MemoryRouter>
-        <AppThemeProvider>
-          <QueryClientProvider client={queryClient}>
-            <App />
-          </QueryClientProvider>
-        </AppThemeProvider>
-      </MemoryRouter>
-    </Box>
+    <MemoryRouter>
+      <AppThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <App />
+        </QueryClientProvider>
+      </AppThemeProvider>
+    </MemoryRouter>
   )
 }
 

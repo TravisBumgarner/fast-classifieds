@@ -2,7 +2,11 @@ import { Tooltip } from '@mui/material'
 import AppBar from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import IconButton from '@mui/material/IconButton'
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
 import Toolbar from '@mui/material/Toolbar'
+import { useState } from 'react'
 import { Link as RouterLink, useLocation } from 'react-router-dom'
 import { ROUTES } from '../consts'
 import Icon from '../sharedComponents/Icon'
@@ -12,13 +16,34 @@ import { SPACING } from '../styles/consts'
 
 const NAV_ROUTES: Array<keyof typeof ROUTES> = [
   'postings',
-  'sites',
   'prompts',
+  'sites',
   'scrapeRuns',
 ]
 
 const Navigation = () => {
   const location = useLocation()
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const open = Boolean(anchorEl)
+
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handleMenuClose = () => {
+    setAnchorEl(null)
+  }
+
+  const handleSettingsClick = () => {
+    handleMenuClose()
+    activeModalSignal.value = { id: MODAL_ID.SETTINGS_MODAL }
+  }
+
+  const handleExternalLink = (url: string) => {
+    handleMenuClose()
+    // @ts-expect-error - shell:openExternal is not in typed IPC but is defined in messages.ts
+    window.electron.ipcRenderer.invoke('shell:openExternal', url)
+  }
 
   return (
     <AppBar position="static" color="default" elevation={1}>
@@ -66,15 +91,49 @@ const Navigation = () => {
               alignItems: 'center',
             }}
           >
-            <Tooltip title={'Settings'}>
-              <Button
+            <Tooltip title="Menu">
+              <IconButton onClick={handleMenuClick}>
+                <Icon name="menu" />
+              </IconButton>
+            </Tooltip>
+            <Menu
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleMenuClose}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+            >
+              <MenuItem onClick={handleSettingsClick}>Settings</MenuItem>
+              <MenuItem
                 onClick={() =>
-                  (activeModalSignal.value = { id: MODAL_ID.SETTINGS_MODAL })
+                  handleExternalLink(
+                    'https://github.com/TravisBumgarner/fast-classifieds',
+                  )
                 }
               >
-                <Icon name="settings" />
-              </Button>
-            </Tooltip>
+                GitHub
+              </MenuItem>
+              <MenuItem
+                onClick={() =>
+                  handleExternalLink('https://travisbumgarner.dev/')
+                }
+              >
+                More from Creator
+              </MenuItem>
+              <MenuItem
+                onClick={() =>
+                  handleExternalLink('https://discord.gg/xSZwF7PQ')
+                }
+              >
+                Join the Community
+              </MenuItem>
+            </Menu>
           </Box>
         </Box>
       </Toolbar>

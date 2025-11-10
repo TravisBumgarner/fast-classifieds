@@ -9,7 +9,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useState } from 'react'
-import { activeModalSignal } from '../../../signals'
+import { activeModalSignal, onboardingCompletedSignal } from '../../../signals'
 import { SPACING } from '../../../styles/consts'
 import { MODAL_ID } from '../Modal.consts'
 import DefaultModal from './DefaultModal'
@@ -23,43 +23,38 @@ const OnboardingModal = () => {
 
   const steps = [
     {
-      label: 'Create Prompts',
+      label: 'Get an OpenAI API Key',
       description: (
         <>
           <Typography variant="body2">
-            First, create prompts that describe the types of jobs you&apos;re
-            looking for.
-          </Typography>
-          <Typography variant="body2">
-            <strong>Tip:</strong> Upload your resume to ChatGPT and ask:
-            &quot;Take my resume and extract all useful tokens and keywords for
-            finding relevant jobs, return as a JSON list.&quot;
-          </Typography>
-          <Typography variant="body2">
-            Then create a prompt like: &quot;I&apos;m looking for jobs that
-            match my background. Use the following tokens and keywords to find
-            highly relevant roles for me: Full Stack Software Engineer, Senior
-            Software Engineer, Tech Lead, React, TypeScript, Remote&quot;
+            In the menu, go to Settings &gt; OpenAI and enter your API key to
+            get started. There are instructions and a link to get your key.
           </Typography>
         </>
       ),
     },
     {
-      label: 'Add Sites',
+      label: 'Create a Prompt',
       description: (
         <>
           <Typography variant="body2">
-            Add company career pages you want to monitor. For each site
-            you&apos;ll need:
+            A prompt tells the AI what kind of jobs you&apos;re looking for.
           </Typography>
-          <Typography variant="body2" component="div">
-            • <strong>Site Title:</strong> Company name
-            <br />• <strong>URL:</strong> Link to their careers page
-            <br />• <strong>CSS Selector:</strong> Target the job listings
-            container. Use &quot;body&quot; if unsure, but specific selectors
-            save on AI costs.
-            <br />• <strong>Prompt:</strong> Select which prompt to use for
-            matching
+          <Typography variant="body2">
+            <strong>Tip:</strong> Upload your resume to ChatGPT and ask:
+            &quot;Take my resume and extract all useful tokens and keywords for
+            finding relevant jobs, return this as a prompt I can give you in the
+            future..&quot;
+          </Typography>
+        </>
+      ),
+    },
+    {
+      label: 'Add a Site',
+      description: (
+        <>
+          <Typography variant="body2">
+            Add company career pages you want to monitor.
           </Typography>
         </>
       ),
@@ -76,10 +71,6 @@ const OnboardingModal = () => {
             Review matched jobs, mark them as applied, skipped, or track them
             through the interview process.
           </Typography>
-          <Typography variant="body2">
-            <strong>Note:</strong> You can re-open this guide anytime from
-            Settings.
-          </Typography>
         </>
       ),
     },
@@ -95,6 +86,8 @@ const OnboardingModal = () => {
 
   const handleClose = () => {
     activeModalSignal.value = null
+    onboardingCompletedSignal.value = true
+    localStorage.setItem('onboarding-completed', 'true')
   }
 
   return (
@@ -102,6 +95,11 @@ const OnboardingModal = () => {
       <Box>
         <Typography variant="body1">
           Let&apos;s get you started finding relevant job opportunities!
+        </Typography>
+
+        <Typography variant="body2">
+          <strong>Note:</strong> You can re-open this guide anytime from
+          Settings.
         </Typography>
 
         <Stepper activeStep={activeStep} orientation="vertical">
