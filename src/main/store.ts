@@ -1,13 +1,5 @@
 import Store from 'electron-store'
-
-export interface StoreSchema {
-  openaiApiKey: string
-  openaiModel: string
-  changelogLastSeenVersion: string | null
-  scrapeDelay: number
-  showStatusBarProgress: boolean
-  onboardingCompleted: boolean
-}
+import { StoreSchema } from '../shared/types'
 
 const defaults: StoreSchema = {
   openaiApiKey: '',

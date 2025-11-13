@@ -10,8 +10,6 @@ import { useState } from 'react'
 import { Link as RouterLink, useLocation } from 'react-router-dom'
 import { ROUTES } from '../consts'
 import Icon from '../sharedComponents/Icon'
-import { MODAL_ID } from '../sharedComponents/Modal/Modal.consts'
-import { activeModalSignal } from '../signals'
 import { SPACING } from '../styles/consts'
 
 const NAV_ROUTES: Array<keyof typeof ROUTES> = [
@@ -19,6 +17,7 @@ const NAV_ROUTES: Array<keyof typeof ROUTES> = [
   'prompts',
   'sites',
   'scrapeRuns',
+  'settings',
 ]
 
 const Navigation = () => {
@@ -32,11 +31,6 @@ const Navigation = () => {
 
   const handleMenuClose = () => {
     setAnchorEl(null)
-  }
-
-  const handleSettingsClick = () => {
-    handleMenuClose()
-    activeModalSignal.value = { id: MODAL_ID.SETTINGS_MODAL }
   }
 
   const handleExternalLink = (url: string) => {
@@ -109,7 +103,6 @@ const Navigation = () => {
                 horizontal: 'right',
               }}
             >
-              <MenuItem onClick={handleSettingsClick}>Settings</MenuItem>
               <MenuItem
                 onClick={() =>
                   handleExternalLink(

@@ -67,6 +67,13 @@ const getThemeOptions = (isDark: boolean): ThemeOptions => {
       },
     },
     components: {
+      MuiTab: {
+        styleOverrides: {
+          root: {
+            textTransform: 'none',
+          },
+        },
+      },
       MuiCssBaseline: {
         styleOverrides: {
           html: {
