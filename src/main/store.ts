@@ -11,7 +11,7 @@ export interface StoreSchema {
 
 const defaults: StoreSchema = {
   openaiApiKey: '',
-  openaiModel: 'gpt-4o-mini',
+  openaiModel: 'gpt-5-nano',
   changelogLastSeenVersion: null,
   scrapeDelay: 3000,
   showStatusBarProgress: true,
