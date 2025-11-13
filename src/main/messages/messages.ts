@@ -270,34 +270,6 @@ typedIpcMain.handle(CHANNEL.PROMPTS.DELETE, async (_event, params) => {
   }
 })
 
-// Scraper handlers
-typedIpcMain.handle(CHANNEL.SCRAPER.GET_API_SETTINGS, async event => {
-  try {
-    // Request the API settings from the renderer
-    const apiKey =
-      (await event.sender.executeJavaScript(
-        "localStorage.getItem('openai_api_key')",
-      )) || ''
-    const model =
-      (await event.sender.executeJavaScript(
-        "localStorage.getItem('openai_model')",
-      )) || 'gpt-4o-mini'
-
-    return {
-      type: 'get_api_settings',
-      apiKey,
-      model,
-    }
-  } catch (error) {
-    console.error('Error getting API settings:', error)
-    return {
-      type: 'get_api_settings',
-      apiKey: '',
-      model: 'gpt-4o-mini',
-    }
-  }
-})
-
 typedIpcMain.handle(CHANNEL.SCRAPER.START, async (_event, params) => {
   try {
     const result = await scraper.startScraping(

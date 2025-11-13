@@ -30,7 +30,6 @@ export const CHANNEL = {
     START: 'scraper:start',
     RETRY: 'scraper:retry',
     GET_PROGRESS: 'scraper:get-progress',
-    GET_API_SETTINGS: 'scraper:get-api-settings',
     DEBUG_SCRAPE: 'scraper:debug-scrape',
   },
   SCRAPE_RUNS: {
@@ -255,10 +254,6 @@ export type Invokes = {
   [CHANNEL.SCRAPER.DEBUG_SCRAPE]: {
     args: { url: string; selector: string; delay: number }
     result: { success: boolean; html?: string; error?: string }
-  }
-  [CHANNEL.SCRAPER.GET_API_SETTINGS]: {
-    args: undefined
-    result: { apiKey: string; model: string }
   }
   [CHANNEL.SCRAPE_RUNS.GET_ALL]: {
     args: undefined
