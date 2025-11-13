@@ -213,7 +213,6 @@ const Postings = () => {
         CHANNEL.STORE.GET,
         undefined,
       )
-      console.log('Onboarding completed:', onboardingCompleted)
       if (onboardingCompleted) {
         setHasCheckedOnboarding(true)
         onboardingCompletedSignal.value = true
