@@ -1,3 +1,5 @@
+import { StoreSchema } from 'src/main/store'
+
 export const CHANNEL = {
   SITES: {
     GET_ALL: 'sites:get-all',
@@ -6,6 +8,10 @@ export const CHANNEL = {
     CREATE: 'sites:create',
     UPDATE: 'sites:update',
     DELETE: 'sites:delete',
+  },
+  STORE: {
+    GET: 'store:get',
+    SET: 'store:set',
   },
   PROMPTS: {
     GET_ALL: 'prompts:get-all',
@@ -69,6 +75,14 @@ export type FromMain = {
 }
 
 export type Invokes = {
+  [CHANNEL.STORE.GET]: {
+    args: undefined
+    result: StoreSchema
+  }
+  [CHANNEL.STORE.SET]: {
+    args: Partial<StoreSchema>
+    result: { success: boolean }
+  }
   [CHANNEL.APP.GET_BACKUP_DIRECTORY]: {
     args: undefined
     result: { backupDirectory: string }

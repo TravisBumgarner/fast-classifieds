@@ -4,6 +4,7 @@ import { CHANNEL } from '../../shared/messages.types'
 import queries from '../database/queries'
 import * as scraper from '../scraper'
 import { scrape } from '../scraper/scrape'
+import store, { getStore } from '../store'
 import { typedIpcMain } from './index'
 
 let mainWindow: BrowserWindow | null = null
@@ -17,6 +18,17 @@ typedIpcMain.handle(CHANNEL.APP.GET_BACKUP_DIRECTORY, async () => {
     type: 'get_backup_directory',
     backupDirectory: path.resolve(process.cwd(), 'db_backups'),
   }
+})
+
+typedIpcMain.handle(CHANNEL.STORE.GET, async () => {
+  return getStore()
+})
+
+typedIpcMain.handle(CHANNEL.STORE.SET, async (_event, params) => {
+  for (const [key, value] of Object.entries(params)) {
+    store.set(key as keyof typeof params, value)
+  }
+  return { type: 'store_set', success: true }
 })
 
 typedIpcMain.handle(CHANNEL.APP.EXPORT_ALL_DATA, async () => {

@@ -69,24 +69,24 @@ const SettingsModal = ({ id }: SettingsModalProps) => {
       }
     }
 
-    const loadApiSettings = () => {
-      // Load from localStorage
-      const savedApiKey = localStorage.getItem('openai_api_key') || ''
-      const savedModel = localStorage.getItem('openai_model') || 'gpt-4o-mini'
-      const savedDelay = localStorage.getItem('scrape_delay') || '3000'
-      setApiKey(savedApiKey)
-      setModel(savedModel)
-      setScrapeDelay(Number(savedDelay))
+    const loadStoreSettings = async () => {
+      const store = await ipcMessenger.invoke(CHANNEL.STORE.GET, undefined)
+      console.log('store', store)
+      setModel(store.openaiModel)
+      setScrapeDelay(store.scrapeDelay)
+      setApiKey(store.openaiApiKey)
     }
 
     getBackupDirectory()
-    loadApiSettings()
+    loadStoreSettings()
   }, [])
 
   const handleSaveApiSettings = () => {
     try {
-      localStorage.setItem('openai_api_key', apiKey)
-      localStorage.setItem('openai_model', model)
+      ipcMessenger.invoke(CHANNEL.STORE.SET, {
+        openaiApiKey: apiKey,
+        openaiModel: model,
+      })
       setApiMessage({
         type: 'success',
         text: 'API settings saved successfully',
@@ -525,7 +525,9 @@ const SettingsModal = ({ id }: SettingsModalProps) => {
                 variant="contained"
                 onClick={() => {
                   try {
-                    localStorage.setItem('scrape_delay', String(scrapeDelay))
+                    ipcMessenger.invoke(CHANNEL.STORE.SET, {
+                      scrapeDelay,
+                    })
                     setScrapeMessage({
                       type: 'success',
                       text: 'Scraper settings saved successfully',
