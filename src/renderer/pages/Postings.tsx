@@ -209,8 +209,12 @@ const Postings = () => {
       if (hasCheckedOnboarding) return
 
       // Check if user has already completed onboarding
-      const onboardingCompleted = localStorage.getItem('onboarding-completed')
-      if (onboardingCompleted === 'true') {
+      const { onboardingCompleted } = await ipcMessenger.invoke(
+        CHANNEL.STORE.GET,
+        undefined,
+      )
+      console.log('Onboarding completed:', onboardingCompleted)
+      if (onboardingCompleted) {
         setHasCheckedOnboarding(true)
         onboardingCompletedSignal.value = true
         return

@@ -33,8 +33,8 @@ const SettingsModal = ({ id }: SettingsModalProps) => {
   const [activeTab, setActiveTab] = useState(0)
   const [backupDirectory, setBackupDirectory] = useState<string>('')
   const [apiKey, setApiKey] = useState<string>('')
-  const [model, setModel] = useState<string>('gpt-4o-mini')
-  const [scrapeDelay, setScrapeDelay] = useState<number>(3000)
+  const [model, setModel] = useState<string>('')
+  const [scrapeDelay, setScrapeDelay] = useState<number>(0)
   const [isExporting, setIsExporting] = useState(false)
   const [isRestoring, setIsRestoring] = useState(false)
   const [apiMessage, setApiMessage] = useState<{

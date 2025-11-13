@@ -2,9 +2,11 @@ import { Box } from '@mui/material'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { MemoryRouter } from 'react-router-dom'
-import { CHANGELOG_VERSION_KEY, CURRENT_VERSION } from '../shared/changelog'
+import { CURRENT_VERSION } from '../shared/changelog'
+import { CHANNEL } from '../shared/messages.types'
 import Navigation from './components/Navigation'
 import Router from './components/Router'
+import ipcMessenger from './ipcMessenger'
 import RenderModal from './sharedComponents/Modal'
 import { MODAL_ID } from './sharedComponents/Modal/Modal.consts'
 import { activeModalSignal, onboardingCompletedSignal } from './signals'
@@ -18,19 +20,23 @@ function App() {
     // Wait for onboarding check to complete before showing changelog
     if (!onboardingCompletedSignal.value) return
 
-    const lastSeenVersion = localStorage.getItem(CHANGELOG_VERSION_KEY)
-
-    if (lastSeenVersion !== CURRENT_VERSION) {
-      // Show changelog modal after a short delay to let the app render
-      setTimeout(() => {
-        activeModalSignal.value = {
-          id: MODAL_ID.CHANGELOG_MODAL,
-          showLatestOnly: true,
+    ipcMessenger
+      .invoke(CHANNEL.STORE.GET, undefined)
+      .then(({ changelogLastSeenVersion }) => {
+        if (changelogLastSeenVersion !== CURRENT_VERSION) {
+          // Show changelog modal after a short delay to let the app render
+          setTimeout(() => {
+            activeModalSignal.value = {
+              id: MODAL_ID.CHANGELOG_MODAL,
+              showLatestOnly: true,
+            }
+            // Update the last seen version
+            ipcMessenger.invoke(CHANNEL.STORE.SET, {
+              changelogLastSeenVersion: CURRENT_VERSION,
+            })
+          }, 500)
         }
-        // Update the last seen version
-        localStorage.setItem(CHANGELOG_VERSION_KEY, CURRENT_VERSION)
-      }, 500)
-    }
+      })
   }, [])
 
   return (

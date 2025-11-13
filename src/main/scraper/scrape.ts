@@ -1,6 +1,7 @@
 import crypto from 'crypto'
 import { JSDOM } from 'jsdom'
 import puppeteer from 'puppeteer'
+import store from '../store'
 
 function extractTextAndLinks(html: string, baseUrl = '') {
   const { window } = new JSDOM(html)
@@ -52,12 +53,11 @@ function hashContent(content: string): string {
 export const scrape = async ({
   siteUrl,
   selector,
-  delay,
 }: {
   siteUrl: string
   selector: string
-  delay: number
 }): Promise<{ siteContent: string; hash: string }> => {
+  const delay = store.get('scrapeDelay')
   const browser = await puppeteer.launch({
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],

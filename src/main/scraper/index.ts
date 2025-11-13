@@ -1,5 +1,6 @@
 import { BrowserWindow } from 'electron'
 import queries from '../database/queries'
+import store from '../store'
 import { processText } from './ai'
 import { scrape } from './scrape'
 
@@ -138,13 +139,12 @@ async function processSite({
   }
 }
 
-export async function startScraping(
-  mainWindow: BrowserWindow | null,
-  apiKey: string,
-  model: string,
-  delay: number,
-) {
+export async function startScraping(mainWindow: BrowserWindow | null) {
   try {
+    const model = store.get('openaiModel')
+    const delay = store.get('scrapeDelay')
+    const apiKey = store.get('openaiApiKey')
+
     if (!model) {
       return {
         success: false,
@@ -338,11 +338,12 @@ export function getProgress(scrapeRunId: number) {
 export async function retryFailedScrapes(
   mainWindow: BrowserWindow | null,
   originalRunId: number,
-  apiKey: string,
-  model: string,
-  delay: number,
 ) {
   try {
+    const apiKey = store.get('openaiApiKey')
+    const model = store.get('openaiModel')
+    const delay = store.get('scrapeDelay')
+
     if (!apiKey) {
       return {
         success: false,
