@@ -252,7 +252,7 @@ export type Invokes = {
     }
   }
   [CHANNEL.SCRAPER.DEBUG_SCRAPE]: {
-    args: { url: string; selector: string; delay: number }
+    args: { url: string; selector: string }
     result: { success: boolean; html?: string; error?: string }
   }
   [CHANNEL.SCRAPE_RUNS.GET_ALL]: {
