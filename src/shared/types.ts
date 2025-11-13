@@ -24,3 +24,13 @@ export const JobsResponseSchema = z.array(JobSchema)
 
 export type Job = z.infer<typeof JobSchema>
 export type JobsResponse = z.infer<typeof JobsResponseSchema>
+
+
+export interface StoreSchema {
+  openaiApiKey: string
+  openaiModel: string
+  changelogLastSeenVersion: string | null
+  scrapeDelay: number
+  showStatusBarProgress: boolean
+  onboardingCompleted: boolean
+}

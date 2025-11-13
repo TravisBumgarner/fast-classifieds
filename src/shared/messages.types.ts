@@ -1,4 +1,4 @@
-import { StoreSchema } from 'src/main/store'
+import { StoreSchema } from '../shared/types'
 
 export const CHANNEL = {
   SITES: {
