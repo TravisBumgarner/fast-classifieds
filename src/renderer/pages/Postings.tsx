@@ -29,6 +29,7 @@ import ipcMessenger from '../ipcMessenger'
 import Link from '../sharedComponents/Link'
 import Message from '../sharedComponents/Message'
 import { MODAL_ID } from '../sharedComponents/Modal/Modal.consts'
+import PageWrapper from '../sharedComponents/PageWrapper'
 import { activeModalSignal, onboardingCompletedSignal } from '../signals'
 import { SPACING } from '../styles/consts'
 
@@ -274,13 +275,7 @@ const Postings = () => {
   }
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-      }}
-    >
+    <PageWrapper>
       <Stack
         direction="row"
         justifyContent="space-between"
@@ -526,7 +521,7 @@ const Postings = () => {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </TableContainer>
-    </Box>
+    </PageWrapper>
   )
 }
 

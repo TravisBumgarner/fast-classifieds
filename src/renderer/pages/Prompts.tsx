@@ -28,6 +28,7 @@ import ipcMessenger from '../ipcMessenger'
 import Icon from '../sharedComponents/Icon'
 import Message from '../sharedComponents/Message'
 import { MODAL_ID } from '../sharedComponents/Modal/Modal.consts'
+import PageWrapper from '../sharedComponents/PageWrapper'
 import { activeModalSignal } from '../signals'
 import { SPACING } from '../styles/consts'
 
@@ -190,13 +191,7 @@ const Prompts = () => {
   }
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-      }}
-    >
+    <PageWrapper>
       <Stack
         direction="row"
         justifyContent="space-between"
@@ -434,7 +429,7 @@ const Prompts = () => {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </TableContainer>
-    </Box>
+    </PageWrapper>
   )
 }
 

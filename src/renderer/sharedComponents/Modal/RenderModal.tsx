@@ -22,7 +22,6 @@ import PromptModal, {
 import ScrapeProgressModal, {
   type ScrapeProgressModalProps,
 } from './components/ScrapeProgressModal'
-import SettingsModal, { SettingsModalProps } from './components/Settings'
 import SiteModal, {
   AddSiteModalProps,
   EditSiteModalProps,
@@ -36,7 +35,6 @@ export type DebugScrapeModalProps = {
 
 export type ActiveModal =
   | ConfirmationModalProps
-  | SettingsModalProps
   | AddSiteModalProps
   | EditSiteModalProps
   | ImportSitesModalProps
@@ -57,8 +55,6 @@ const RenderModal: FC = () => {
   switch (activeModalSignal.value.id) {
     case MODAL_ID.CONFIRMATION_MODAL:
       return <ConfirmationModal {...activeModalSignal.value} />
-    case MODAL_ID.SETTINGS_MODAL:
-      return <SettingsModal {...activeModalSignal.value} />
     case MODAL_ID.ADD_SITE_MODAL:
       return <SiteModal {...(activeModalSignal.value as AddSiteModalProps)} />
     case MODAL_ID.EDIT_SITE_MODAL:

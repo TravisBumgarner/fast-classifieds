@@ -16,20 +16,16 @@ import {
   Typography,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
-import { CHANNEL } from '../../../../shared/messages.types'
-import ipcMessenger from '../../../ipcMessenger'
-import { activeModalSignal } from '../../../signals'
-import { SPACING } from '../../../styles/consts'
-import Icon from '../../Icon'
-import { MODAL_ID } from '../Modal.consts'
-import DefaultModal from './DefaultModal'
-
-export interface SettingsModalProps {
-  id: typeof MODAL_ID.SETTINGS_MODAL
-}
+import { CHANNEL } from '../../../shared/messages.types'
+import ipcMessenger from '../../ipcMessenger'
+import Icon from '../../sharedComponents/Icon'
+import { MODAL_ID } from '../../sharedComponents/Modal/Modal.consts'
+import PageWrapper from '../../sharedComponents/PageWrapper'
+import { activeModalSignal } from '../../signals'
+import { SPACING } from '../../styles/consts'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const SettingsModal = ({ id }: SettingsModalProps) => {
+const Settings = () => {
   const [activeTab, setActiveTab] = useState(0)
   const [backupDirectory, setBackupDirectory] = useState<string>('')
   const [apiKey, setApiKey] = useState<string>('')
@@ -224,10 +220,7 @@ const SettingsModal = ({ id }: SettingsModalProps) => {
   }
 
   const handleConfirmNuke = async () => {
-    if (
-      nukeConfirmationText !== 'NUKE' &&
-      nukeConfirmationText !== 'ELIMINAR'
-    ) {
+    if (nukeConfirmationText !== 'NUKE') {
       setDataMessage({
         type: 'error',
         text: 'Confirmation required',
@@ -273,24 +266,16 @@ const SettingsModal = ({ id }: SettingsModalProps) => {
   }
 
   return (
-    <DefaultModal
-      title="Settings"
-      sx={{
-        height: '600px',
-        width: '800px',
-        maxWidth: '90hw',
-        overflowY: 'auto',
-      }}
-    >
+    <PageWrapper>
       <Box sx={{ minWidth: 500 }}>
         <Tabs
           value={activeTab}
           onChange={(_e, newValue) => setActiveTab(newValue)}
           sx={{ borderBottom: 1, borderColor: 'divider' }}
         >
-          <Tab label="OpenAI Config" />
-          <Tab label="Scraper Config" />
-          <Tab label="Data Management" />
+          <Tab label="OpenAI" />
+          <Tab label="Job Finder" />
+          <Tab label="Data" />
           <Tab label="Help & Onboarding" />
         </Tabs>
 
@@ -701,8 +686,8 @@ const SettingsModal = ({ id }: SettingsModalProps) => {
           </Button>
         </DialogActions>
       </Dialog>
-    </DefaultModal>
+    </PageWrapper>
   )
 }
 
-export default SettingsModal
+export default Settings
