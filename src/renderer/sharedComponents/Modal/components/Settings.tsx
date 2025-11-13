@@ -71,7 +71,6 @@ const SettingsModal = ({ id }: SettingsModalProps) => {
 
     const loadStoreSettings = async () => {
       const store = await ipcMessenger.invoke(CHANNEL.STORE.GET, undefined)
-      console.log('store', store)
       setModel(store.openaiModel)
       setScrapeDelay(store.scrapeDelay)
       setApiKey(store.openaiApiKey)
