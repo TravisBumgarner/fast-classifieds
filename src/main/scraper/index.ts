@@ -57,6 +57,7 @@ async function processSite({
   try {
     console.log(`Processing: ${siteUrl}`)
     onProgress?.('scraping')
+    
 
     const { siteContent, hash } = await scrape({ siteUrl, selector, delay })
     console.log(
@@ -199,13 +200,14 @@ export async function startScraping(
 
     activeRuns.set(scrapeRunId, progress)
 
-    // Send initial progress to renderer
+    // Send initial progress to renderer and main process
     if (mainWindow && !mainWindow.isDestroyed()) {
       console.log('[Scraper] Sending initial progress for runId:', scrapeRunId)
       mainWindow.webContents.send('scraper:progress', {
         scrapeRunId,
         progress,
       })
+      // No need to emit to main process; main process listens to renderer events
     }
 
     // Process sites asynchronously (don't await)
@@ -224,7 +226,7 @@ export async function startScraping(
           activeRuns.set(scrapeRunId, currentProgress)
         }
 
-        // Send progress update to renderer
+        // Send progress update to renderer and main process
         if (mainWindow && !mainWindow.isDestroyed()) {
           console.log(
             '[Scraper] Sending progress update for site',
@@ -232,10 +234,12 @@ export async function startScraping(
             'runId:',
             scrapeRunId,
           )
+          const prog = activeRuns.get(scrapeRunId)
           mainWindow.webContents.send('scraper:progress', {
             scrapeRunId,
-            progress: activeRuns.get(scrapeRunId),
+            progress: prog,
           })
+          // No need to emit to main process; main process listens to renderer events
         }
 
         const result = await processSite({
@@ -283,10 +287,12 @@ export async function startScraping(
 
         // Send final progress update for this site
         if (mainWindow && !mainWindow.isDestroyed()) {
+          const prog = activeRuns.get(scrapeRunId)
           mainWindow.webContents.send('scraper:progress', {
             scrapeRunId,
-            progress: activeRuns.get(scrapeRunId),
+            progress: prog,
           })
+          // No need to emit to main process; main process listens to renderer events
         }
       }
 
@@ -313,6 +319,7 @@ export async function startScraping(
           successfulSites,
           failedSites,
         })
+        // No need to emit to main process; main process listens to renderer events
       }
     }
 

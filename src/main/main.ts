@@ -8,6 +8,7 @@ import log from 'electron-log/main'
 import started from 'electron-squirrel-startup'
 import path from 'node:path'
 import { updateElectronApp } from 'update-electron-app'
+import { setupMenuBarProgress } from './menuBarProgress'
 import { setMainWindow } from './messages/messages'
 
 log.initialize()
@@ -69,6 +70,7 @@ const createWindow = () => {
 
 app.on('ready', () => {
   createWindow()
+  setupMenuBarProgress()
 })
 
 app.on('window-all-closed', () => {

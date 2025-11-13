@@ -32,9 +32,13 @@ export interface SettingsModalProps {
 const SettingsModal = ({ id }: SettingsModalProps) => {
   const [activeTab, setActiveTab] = useState(0)
   const [backupDirectory, setBackupDirectory] = useState<string>('')
-  const [apiKey, setApiKey] = useState<string>('')
-  const [model, setModel] = useState<string>('gpt-4o-mini')
-  const [scrapeDelay, setScrapeDelay] = useState<number>(3000)
+  const [apiKey, setApiKey] = useState<string>(
+    window.appStore.get('openaiApiKey') || '',
+  )
+  const [model, setModel] = useState<string>(window.appStore.get('openaiModel'))
+  const [scrapeDelay, setScrapeDelay] = useState<number>(
+    window.appStore.get('scrapeDelay'),
+  )
   const [isExporting, setIsExporting] = useState(false)
   const [isRestoring, setIsRestoring] = useState(false)
   const [apiMessage, setApiMessage] = useState<{
@@ -49,6 +53,9 @@ const SettingsModal = ({ id }: SettingsModalProps) => {
     type: 'success' | 'error'
     text: string
   } | null>(null)
+  const [showStatusBarProgress, setShowStatusBarProgress] = useState<boolean>(
+    window.appStore.get('showStatusBarProgress'),
+  )
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [confirmationText, setConfirmationText] = useState('')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -69,24 +76,13 @@ const SettingsModal = ({ id }: SettingsModalProps) => {
       }
     }
 
-    const loadApiSettings = () => {
-      // Load from localStorage
-      const savedApiKey = localStorage.getItem('openai_api_key') || ''
-      const savedModel = localStorage.getItem('openai_model') || 'gpt-4o-mini'
-      const savedDelay = localStorage.getItem('scrape_delay') || '3000'
-      setApiKey(savedApiKey)
-      setModel(savedModel)
-      setScrapeDelay(Number(savedDelay))
-    }
-
     getBackupDirectory()
-    loadApiSettings()
   }, [])
 
   const handleSaveApiSettings = () => {
     try {
-      localStorage.setItem('openai_api_key', apiKey)
-      localStorage.setItem('openai_model', model)
+      window.appStore.set('openaiApiKey', apiKey)
+      window.appStore.set('openaiModel', model)
       setApiMessage({
         type: 'success',
         text: 'API settings saved successfully',
@@ -521,11 +517,55 @@ const SettingsModal = ({ id }: SettingsModalProps) => {
                 </Tooltip>
               </Stack>
 
+              <Stack
+                direction="row"
+                spacing={SPACING.SMALL.PX}
+                alignItems="center"
+              >
+                <input
+                  type="checkbox"
+                  id="show-status-bar-progress"
+                  checked={showStatusBarProgress}
+                  onChange={e => {
+                    setShowStatusBarProgress(e.target.checked)
+                    // Immediately notify main process of change
+                    if (window?.electron?.ipcRenderer) {
+                      window.electron.ipcRenderer.send(
+                        'set:show_status_bar_progress',
+                        e.target.checked,
+                      )
+                    }
+                  }}
+                />
+                <label htmlFor="show-status-bar-progress">
+                  Show progress in{' '}
+                  {window?.process?.platform === 'darwin'
+                    ? 'menu bar'
+                    : 'status bar'}
+                </label>
+                <Tooltip
+                  title={
+                    window?.process?.platform === 'darwin'
+                      ? 'Show scraping progress in the macOS menu bar at the top of the screen.'
+                      : 'Show scraping progress in the application status bar.'
+                  }
+                  arrow
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Icon name="info" size={20} />
+                  </Box>
+                </Tooltip>
+              </Stack>
+
               <Button
                 variant="contained"
                 onClick={() => {
                   try {
-                    localStorage.setItem('scrape_delay', String(scrapeDelay))
+                    window.appStore.set('scrapeDelay', scrapeDelay)
+                    window.appStore.set(
+                      'showStatusBarProgress',
+                      showStatusBarProgress,
+                    )
                     setScrapeMessage({
                       type: 'success',
                       text: 'Scraper settings saved successfully',

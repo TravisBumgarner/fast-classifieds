@@ -24,7 +24,6 @@ export const CHANNEL = {
     START: 'scraper:start',
     RETRY: 'scraper:retry',
     GET_PROGRESS: 'scraper:get-progress',
-    GET_API_SETTINGS: 'scraper:get-api-settings',
     DEBUG_SCRAPE: 'scraper:debug-scrape',
   },
   SCRAPE_RUNS: {
@@ -40,6 +39,7 @@ export const CHANNEL = {
 
 export type FromRenderer = {
   ['does-not-exist']: { id: number }
+  'set:show_status_bar_progress': boolean
 }
 
 export type FromMain = {
@@ -66,6 +66,7 @@ export type FromMain = {
     successfulSites: number
     failedSites: number
   }
+  ['get:show_status_bar_progress']: undefined
 }
 
 export type Invokes = {
@@ -239,12 +240,8 @@ export type Invokes = {
     }
   }
   [CHANNEL.SCRAPER.DEBUG_SCRAPE]: {
-    args: { url: string; selector: string; delay: number }
+    args: { url: string; selector: string }
     result: { success: boolean; html?: string; error?: string }
-  }
-  [CHANNEL.SCRAPER.GET_API_SETTINGS]: {
-    args: undefined
-    result: { apiKey: string; model: string }
   }
   [CHANNEL.SCRAPE_RUNS.GET_ALL]: {
     args: undefined

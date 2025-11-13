@@ -95,9 +95,9 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
       console.log('[ScrapeProgressModal] Starting scrape...')
 
       // Get settings from localStorage
-      const apiKey = localStorage.getItem('openai_api_key') || ''
-      const model = localStorage.getItem('openai_model') || 'gpt-4o-mini'
-      const delay = Number(localStorage.getItem('scrape_delay') || '3000')
+      const apiKey = window.window.appStore.get('openaiApiKey')
+      const model = window.appStore.get('openaiModel')
+      const delay = window.appStore.get('scrapeDelay')
 
       // If retryRunId is provided, call retry instead of start
       const result = props.retryRunId

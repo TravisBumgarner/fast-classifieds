@@ -1,5 +1,35 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron'
+import Store from 'electron-store'
+import { StoreSchema } from 'src/shared/types'
 import { FromMain, FromRenderer, Invokes } from '../shared/messages.types'
+
+const defaults: StoreSchema = {
+  openaiApiKey: '',
+  openaiModel: 'gpt-4o-mini',
+  changelogLastSeenVersion: null,
+  scrapeDelay: 3000,
+  showStatusBarProgress: true,
+  onboardingCompleted: false,
+}
+
+const store = new Store<StoreSchema>({ defaults })
+
+contextBridge.exposeInMainWorld('appStore', {
+  get<K extends keyof StoreSchema>(key: K): StoreSchema[K] {
+    return store.get(key)
+  },
+
+  set<K extends keyof StoreSchema>(key: K, value: StoreSchema[K]): void {
+    store.set(key, value)
+  },
+
+  onChange<K extends keyof StoreSchema>(
+    key: K,
+    cb: (newValue: StoreSchema[K], oldValue: StoreSchema[K]) => void,
+  ): void {
+    store.onDidChange(key, cb)
+  },
+})
 
 const electronHandler = {
   ipcRenderer: {

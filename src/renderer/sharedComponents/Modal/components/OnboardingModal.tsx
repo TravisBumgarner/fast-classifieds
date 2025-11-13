@@ -87,7 +87,7 @@ const OnboardingModal = () => {
   const handleClose = () => {
     activeModalSignal.value = null
     onboardingCompletedSignal.value = true
-    localStorage.setItem('onboarding-completed', 'true')
+    window.appStore.set('onboardingCompleted', true)
   }
 
   return (

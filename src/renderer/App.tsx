@@ -2,7 +2,7 @@ import { Box } from '@mui/material'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { MemoryRouter } from 'react-router-dom'
-import { CHANGELOG_VERSION_KEY, CURRENT_VERSION } from '../shared/changelog'
+import { CURRENT_VERSION } from '../shared/changelog'
 import Navigation from './components/Navigation'
 import Router from './components/Router'
 import RenderModal from './sharedComponents/Modal'
@@ -18,7 +18,7 @@ function App() {
     // Wait for onboarding check to complete before showing changelog
     if (!onboardingCompletedSignal.value) return
 
-    const lastSeenVersion = localStorage.getItem(CHANGELOG_VERSION_KEY)
+    const lastSeenVersion = window.appStore.get('changelogLastSeenVersion')
 
     if (lastSeenVersion !== CURRENT_VERSION) {
       // Show changelog modal after a short delay to let the app render
@@ -28,7 +28,7 @@ function App() {
           showLatestOnly: true,
         }
         // Update the last seen version
-        localStorage.setItem(CHANGELOG_VERSION_KEY, CURRENT_VERSION)
+        window.appStore.set('changelogLastSeenVersion', CURRENT_VERSION)
       }, 500)
     }
   }, [])
