@@ -15,14 +15,36 @@ import { SPACING } from '../../../styles/consts'
 
 const TabJobFinder = ({
   initialScrapeDelay,
+  loadStoreSettings,
 }: {
   initialScrapeDelay: number
+  loadStoreSettings: () => Promise<void>
 }) => {
   const [scrapeDelay, setScrapeDelay] = useState<number>(initialScrapeDelay)
   const [scrapeMessage, setScrapeMessage] = useState<{
     type: 'success' | 'error'
     text: string
   } | null>(null)
+
+  const hasChanges = scrapeDelay !== initialScrapeDelay
+
+  const handleSubmit = async () => {
+    try {
+      await ipcMessenger.invoke(CHANNEL.STORE.SET, {
+        scrapeDelay,
+      })
+      setScrapeMessage({
+        type: 'success',
+        text: 'Scraper settings saved successfully',
+      })
+      loadStoreSettings()
+    } catch {
+      setScrapeMessage({
+        type: 'error',
+        text: 'Failed to save scraper settings',
+      })
+    }
+  }
 
   return (
     <Box sx={{ p: SPACING.MEDIUM.PX }}>
@@ -74,23 +96,9 @@ const TabJobFinder = ({
 
         <Button
           variant="contained"
-          onClick={() => {
-            try {
-              ipcMessenger.invoke(CHANNEL.STORE.SET, {
-                scrapeDelay,
-              })
-              setScrapeMessage({
-                type: 'success',
-                text: 'Scraper settings saved successfully',
-              })
-            } catch {
-              setScrapeMessage({
-                type: 'error',
-                text: 'Failed to save scraper settings',
-              })
-            }
-          }}
+          onClick={handleSubmit}
           fullWidth
+          disabled={!hasChanges}
         >
           Save Scraper Settings
         </Button>

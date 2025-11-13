@@ -40,7 +40,6 @@ async function processSite({
   scrapeRunId,
   apiKey,
   model,
-  delay,
   onProgress,
 }: {
   siteId: number
@@ -59,7 +58,7 @@ async function processSite({
     console.log(`Processing: ${siteUrl}`)
     onProgress?.('scraping')
 
-    const { siteContent, hash } = await scrape({ siteUrl, selector, delay })
+    const { siteContent, hash } = await scrape({ siteUrl, selector })
     console.log(
       `Scraped content for: ${siteUrl}, hash: ${hash}, content: ${JSON.stringify(siteContent)}`,
     )
@@ -89,6 +88,7 @@ async function processSite({
       siteUrl,
       apiKey,
       model,
+      jobToJSONPrompt: store.get('openAiSiteHTMLToJSONJobsPrompt'),
     })
 
     await queries.insertApiUsage({

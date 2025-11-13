@@ -64,6 +64,7 @@
     "react/no-string-refs": "error",
     "react/no-unknown-property": "error",
     "react/require-render-return": "error",
+    "no-extra-semi": "off",
 
     // React Hooks rules
     "react-hooks/rules-of-hooks": "error",
