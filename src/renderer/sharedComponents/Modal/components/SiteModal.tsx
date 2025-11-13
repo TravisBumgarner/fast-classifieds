@@ -217,7 +217,7 @@ const SiteModal = (props: SiteModalProps) => {
                 // Navigate to Prompts page
               }}
             >
-              Activate Prompt
+              Manage Prompts
             </Button>
             <Button
               variant="contained"

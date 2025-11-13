@@ -4,6 +4,7 @@ import { CHANNEL } from '../../shared/messages.types'
 import queries from '../database/queries'
 import * as scraper from '../scraper'
 import { scrape } from '../scraper/scrape'
+import store, { getStore } from '../store'
 import { typedIpcMain } from './index'
 
 let mainWindow: BrowserWindow | null = null
@@ -17,6 +18,17 @@ typedIpcMain.handle(CHANNEL.APP.GET_BACKUP_DIRECTORY, async () => {
     type: 'get_backup_directory',
     backupDirectory: path.resolve(process.cwd(), 'db_backups'),
   }
+})
+
+typedIpcMain.handle(CHANNEL.STORE.GET, async () => {
+  return getStore()
+})
+
+typedIpcMain.handle(CHANNEL.STORE.SET, async (_event, params) => {
+  for (const [key, value] of Object.entries(params)) {
+    store.set(key as keyof typeof params, value)
+  }
+  return { type: 'store_set', success: true }
 })
 
 typedIpcMain.handle(CHANNEL.APP.EXPORT_ALL_DATA, async () => {
@@ -258,42 +270,9 @@ typedIpcMain.handle(CHANNEL.PROMPTS.DELETE, async (_event, params) => {
   }
 })
 
-// Scraper handlers
-typedIpcMain.handle(CHANNEL.SCRAPER.GET_API_SETTINGS, async event => {
+typedIpcMain.handle(CHANNEL.SCRAPER.START, async () => {
   try {
-    // Request the API settings from the renderer
-    const apiKey =
-      (await event.sender.executeJavaScript(
-        "localStorage.getItem('openai_api_key')",
-      )) || ''
-    const model =
-      (await event.sender.executeJavaScript(
-        "localStorage.getItem('openai_model')",
-      )) || 'gpt-4o-mini'
-
-    return {
-      type: 'get_api_settings',
-      apiKey,
-      model,
-    }
-  } catch (error) {
-    console.error('Error getting API settings:', error)
-    return {
-      type: 'get_api_settings',
-      apiKey: '',
-      model: 'gpt-4o-mini',
-    }
-  }
-})
-
-typedIpcMain.handle(CHANNEL.SCRAPER.START, async (_event, params) => {
-  try {
-    const result = await scraper.startScraping(
-      mainWindow,
-      params.apiKey,
-      params.model,
-      params.delay,
-    )
+    const result = await scraper.startScraping(mainWindow)
     return {
       type: 'start_scraping',
       ...result,
@@ -313,9 +292,6 @@ typedIpcMain.handle(CHANNEL.SCRAPER.RETRY, async (_event, params) => {
     const result = await scraper.retryFailedScrapes(
       mainWindow,
       params.scrapeRunId,
-      params.apiKey,
-      params.model,
-      params.delay,
     )
     return {
       type: 'retry_scraping',
@@ -353,7 +329,6 @@ typedIpcMain.handle(CHANNEL.SCRAPER.DEBUG_SCRAPE, async (_event, params) => {
     const result = await scrape({
       siteUrl: params.url,
       selector: params.selector,
-      delay: params.delay,
     })
 
     return {

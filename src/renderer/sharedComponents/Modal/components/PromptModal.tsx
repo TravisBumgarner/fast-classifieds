@@ -109,7 +109,6 @@ const PromptModal = (props: PromptModalProps) => {
 
       props.onSuccess?.()
       activeModalSignal.value = null
-      console.log('Prompt saved successfully')
     } catch (err) {
       setError('An error occurred')
       console.error(err)

@@ -71,6 +71,7 @@
     "drizzle-orm": "^0.44.7",
     "electron-log": "^5.4.3",
     "electron-squirrel-startup": "^1.0.1",
+    "electron-store": "^11.0.2",
     "esbuild-register": "^3.6.0",
     "jsdom": "^27.1.0",
     "openai": "^6.8.1",

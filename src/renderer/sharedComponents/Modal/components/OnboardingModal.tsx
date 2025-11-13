@@ -9,6 +9,8 @@ import {
   Typography,
 } from '@mui/material'
 import { useState } from 'react'
+import { CHANNEL } from '../../../../shared/messages.types'
+import ipcMessenger from '../../../ipcMessenger'
 import { activeModalSignal, onboardingCompletedSignal } from '../../../signals'
 import { SPACING } from '../../../styles/consts'
 import { MODAL_ID } from '../Modal.consts'
@@ -87,7 +89,7 @@ const OnboardingModal = () => {
   const handleClose = () => {
     activeModalSignal.value = null
     onboardingCompletedSignal.value = true
-    localStorage.setItem('onboarding-completed', 'true')
+    ipcMessenger.invoke(CHANNEL.STORE.SET, { onboardingCompleted: true })
   }
 
   return (

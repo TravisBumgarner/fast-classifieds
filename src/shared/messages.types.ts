@@ -1,3 +1,5 @@
+import { StoreSchema } from 'src/main/store'
+
 export const CHANNEL = {
   SITES: {
     GET_ALL: 'sites:get-all',
@@ -6,6 +8,10 @@ export const CHANNEL = {
     CREATE: 'sites:create',
     UPDATE: 'sites:update',
     DELETE: 'sites:delete',
+  },
+  STORE: {
+    GET: 'store:get',
+    SET: 'store:set',
   },
   PROMPTS: {
     GET_ALL: 'prompts:get-all',
@@ -24,7 +30,6 @@ export const CHANNEL = {
     START: 'scraper:start',
     RETRY: 'scraper:retry',
     GET_PROGRESS: 'scraper:get-progress',
-    GET_API_SETTINGS: 'scraper:get-api-settings',
     DEBUG_SCRAPE: 'scraper:debug-scrape',
   },
   SCRAPE_RUNS: {
@@ -69,6 +74,14 @@ export type FromMain = {
 }
 
 export type Invokes = {
+  [CHANNEL.STORE.GET]: {
+    args: undefined
+    result: StoreSchema
+  }
+  [CHANNEL.STORE.SET]: {
+    args: Partial<StoreSchema>
+    result: { success: boolean }
+  }
   [CHANNEL.APP.GET_BACKUP_DIRECTORY]: {
     args: undefined
     result: { backupDirectory: string }
@@ -211,11 +224,11 @@ export type Invokes = {
     result: { success: boolean; error?: string }
   }
   [CHANNEL.SCRAPER.START]: {
-    args: { apiKey: string; model: string; delay: number }
+    args: undefined
     result: { success: boolean; scrapeRunId?: number; error?: string }
   }
   [CHANNEL.SCRAPER.RETRY]: {
-    args: { scrapeRunId: number; apiKey: string; model: string; delay: number }
+    args: { scrapeRunId: number }
     result: { success: boolean; scrapeRunId?: number; error?: string }
   }
   [CHANNEL.SCRAPER.GET_PROGRESS]: {
@@ -239,12 +252,8 @@ export type Invokes = {
     }
   }
   [CHANNEL.SCRAPER.DEBUG_SCRAPE]: {
-    args: { url: string; selector: string; delay: number }
+    args: { url: string; selector: string }
     result: { success: boolean; html?: string; error?: string }
-  }
-  [CHANNEL.SCRAPER.GET_API_SETTINGS]: {
-    args: undefined
-    result: { apiKey: string; model: string }
   }
   [CHANNEL.SCRAPE_RUNS.GET_ALL]: {
     args: undefined
