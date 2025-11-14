@@ -9,7 +9,7 @@ import {
   Stack,
   TextField,
 } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { CHANNEL } from '../../../../shared/messages.types'
 import ipcMessenger from '../../../ipcMessenger'
 import { activeModalSignal } from '../../../signals'
@@ -41,14 +41,7 @@ const PromptModal = (props: PromptModalProps) => {
 
   const isEdit = props.id === MODAL_ID.EDIT_PROMPT_MODAL
 
-  useEffect(() => {
-    if (isEdit && 'promptId' in props) {
-      loadPrompt(props.promptId)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const loadPrompt = async (id: number) => {
+  const loadPrompt = useCallback(async (id: number) => {
     try {
       setLoading(true)
       const result = await ipcMessenger.invoke(CHANNEL.PROMPTS.GET_BY_ID, {
@@ -65,7 +58,13 @@ const PromptModal = (props: PromptModalProps) => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    if (isEdit && 'promptId' in props) {
+      loadPrompt(props.promptId)
+    }
+  }, [isEdit, props, loadPrompt])
 
   const handleSave = async () => {
     setError(null)
