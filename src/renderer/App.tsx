@@ -1,4 +1,5 @@
 import { Box } from '@mui/material'
+import * as Sentry from '@sentry/electron/renderer'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { MemoryRouter } from 'react-router-dom'
@@ -12,6 +13,10 @@ import { MODAL_ID } from './sharedComponents/Modal/Modal.consts'
 import { activeModalSignal, onboardingCompletedSignal } from './signals'
 import AppThemeProvider from './styles/Theme'
 import { SPACING } from './styles/consts'
+
+Sentry.init({
+  dsn: 'https://aa9b99c0da19f5f16cde7295bcae0fa4@o196886.ingest.us.sentry.io/4510360742133760',
+})
 
 const queryClient = new QueryClient()
 

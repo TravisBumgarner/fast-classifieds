@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/electron/main'
 import {
   app,
   BrowserWindow,
@@ -9,6 +10,10 @@ import started from 'electron-squirrel-startup'
 import path from 'node:path'
 import { updateElectronApp } from 'update-electron-app'
 import { setMainWindow } from './messages/messages'
+
+Sentry.init({
+  dsn: 'https://aa9b99c0da19f5f16cde7295bcae0fa4@o196886.ingest.us.sentry.io/4510360742133760',
+})
 
 log.initialize()
 

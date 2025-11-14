@@ -1,5 +1,6 @@
 import { BrowserWindow } from 'electron'
 import queries from '../database/queries'
+import log from '../logger'
 import store from '../store'
 import { processText } from './ai'
 import { scrape } from './scrape'
@@ -55,19 +56,19 @@ async function processSite({
   ) => void
 }) {
   try {
-    console.log(`Processing: ${siteUrl}`)
+    log.info(`Processing: ${siteUrl}`)
     onProgress?.('scraping')
 
     const { siteContent, hash } = await scrape({ siteUrl, selector })
-    console.log(
+    log.info(
       `Scraped content for: ${siteUrl}, hash: ${hash}, content: ${JSON.stringify(siteContent)}`,
     )
 
     const { exists } = await queries.insertHashIfNotExists({ hash, siteUrl })
-    console.log(`Hash exists: ${exists}`)
+    log.info(`Hash exists: ${exists}`)
 
     if (exists) {
-      console.log(`Hash exists for: ${siteUrl}`)
+      log.info(`Hash exists for: ${siteUrl}`)
       await queries.insertScrapeTask({
         scrapeRunId,
         siteId,
@@ -79,7 +80,7 @@ async function processSite({
       return { newJobsFound: 0, status: 'complete' as const }
     }
 
-    console.log(`New data found for: ${siteUrl}`)
+    log.info(`New data found for: ${siteUrl}`)
     onProgress?.('processing')
 
     const { jobs, rawResponse } = await processText({
@@ -123,7 +124,7 @@ async function processSite({
     return { newJobsFound: jobs.length, status: 'complete' as const }
   } catch (error) {
     const errorMessage = sanitizeError(error, apiKey)
-    console.error(`✗ Error processing ${siteUrl}:`, errorMessage)
+    log.error(`✗ Error processing ${siteUrl}:`, errorMessage)
 
     await queries.insertScrapeTask({
       scrapeRunId,
@@ -201,7 +202,7 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
 
     // Send initial progress to renderer
     if (mainWindow && !mainWindow.isDestroyed()) {
-      console.log('[Scraper] Sending initial progress for runId:', scrapeRunId)
+      log.info('[Scraper] Sending initial progress for runId:', scrapeRunId)
       mainWindow.webContents.send('scraper:progress', {
         scrapeRunId,
         progress,
@@ -226,7 +227,7 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
 
         // Send progress update to renderer
         if (mainWindow && !mainWindow.isDestroyed()) {
-          console.log(
+          log.info(
             '[Scraper] Sending progress update for site',
             i,
             'runId:',
@@ -262,7 +263,7 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
           },
         })
 
-        console.log('ruda', result)
+        log.info('ruda', result)
 
         // Update progress with results
         const updatedProgress = activeRuns.get(scrapeRunId)
@@ -322,7 +323,7 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
     return { success: true, scrapeRunId }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
-    console.error('Failed to start scraping:', errorMessage)
+    log.error('Failed to start scraping:', errorMessage)
     return { success: false, error: errorMessage }
   }
 }
@@ -405,7 +406,7 @@ export async function retryFailedScrapes(
 
     // Send initial progress to renderer
     if (mainWindow && !mainWindow.isDestroyed()) {
-      console.log(
+      log.info(
         '[Scraper] Sending initial progress for retry runId:',
         scrapeRunId,
       )
@@ -520,7 +521,7 @@ export async function retryFailedScrapes(
     return { success: true, scrapeRunId }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
-    console.error('Failed to retry scraping:', errorMessage)
+    log.error('Failed to retry scraping:', errorMessage)
     return { success: false, error: errorMessage }
   }
 }

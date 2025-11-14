@@ -4,6 +4,7 @@ import { migrate } from 'drizzle-orm/better-sqlite3/migrator'
 import { app } from 'electron'
 import fs from 'node:fs'
 import path from 'node:path'
+import log from '../logger'
 
 // Use userData directory for the database in production, current directory in dev
 const dbPath = app.isPackaged
@@ -28,8 +29,9 @@ if (app.isPackaged) {
     // In production, migrations are bundled with the app
     const migrationsFolder = path.join(process.resourcesPath, 'drizzle')
     migrate(db, { migrationsFolder })
-    console.log('Database migrations applied successfully')
+
+    log.info('Database migrations applied successfully')
   } catch (error) {
-    console.error('Failed to apply migrations:', error)
+    log.error('Failed to apply migrations:', error)
   }
 }
