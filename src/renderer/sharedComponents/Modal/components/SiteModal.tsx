@@ -274,6 +274,25 @@ const SiteModal = (props: SiteModalProps) => {
               disabled={loading}
               placeholder=".job-list or #jobs"
             />
+            <Typography variant="body2">
+              New to selectors?{' '}
+              <a
+                href="https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  textDecoration: 'underline',
+                }}
+                onClick={e => {
+                  e.preventDefault()
+                  window.electron.shell.openExternal(
+                    'https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be',
+                  )
+                }}
+              >
+                Watch the tutorial
+              </a>
+            </Typography>
             <Tooltip title={TOOLTIPS.CSS_SELECTOR} arrow>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Icon name="info" size={20} />

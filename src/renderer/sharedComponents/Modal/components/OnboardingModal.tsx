@@ -99,6 +99,26 @@ const OnboardingModal = () => {
           Let&apos;s get you started finding relevant job opportunities!
         </Typography>
 
+        <Typography>
+          Prefer a video?{' '}
+          <a
+            href="https://www.youtube.com/watch?v=FQKY70r2288&feature=youtu.be"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              textDecoration: 'underline',
+            }}
+            onClick={e => {
+              e.preventDefault()
+              window.electron.shell.openExternal(
+                'https://www.youtube.com/watch?v=FQKY70r2288&feature=youtu.be',
+              )
+            }}
+          >
+            Watch the tutorial
+          </a>
+        </Typography>
+
         <Typography variant="body2">
           <strong>Note:</strong> You can re-open this guide anytime from
           Settings.

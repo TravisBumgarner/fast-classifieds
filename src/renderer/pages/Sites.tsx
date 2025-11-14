@@ -344,7 +344,23 @@ const Sites = () => {
             <br />• <strong>URL:</strong> Link to their careers page
             <br />• <strong>CSS Selector:</strong> Target the job listings
             container (e.g., &quot;.job-list&quot; or &quot;#jobs&quot;). Use
-            &quot;body&quot; if unsure.
+            &quot;body&quot; if unsure. New to selectors?{' '}
+            <a
+              href="https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                textDecoration: 'underline',
+              }}
+              onClick={e => {
+                e.preventDefault()
+                window.electron.shell.openExternal(
+                  'https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be',
+                )
+              }}
+            >
+              Watch the tutorial
+            </a>
             <br />• <strong>Prompt:</strong> Select which prompt to use for
             matching jobs
           </Typography>

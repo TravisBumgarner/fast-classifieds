@@ -1,4 +1,11 @@
-import { Box, Button, Stack, TextField, Tooltip } from '@mui/material'
+import {
+  Box,
+  Button,
+  Stack,
+  TextField,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { useState } from 'react'
 import { CHANNEL } from '../../../../shared/messages.types'
 import { TOOLTIPS } from '../../../consts'
@@ -84,6 +91,7 @@ const DebugSite = ({
         minHeight: 0,
         display: 'flex',
         flexDirection: 'column',
+        gap: SPACING.SMALL.PX,
       }}
     >
       <Stack direction="row" spacing={SPACING.SMALL.PX}>
@@ -104,7 +112,8 @@ const DebugSite = ({
           value={siteTitle}
           onChange={e => setSiteTitle(e.target.value)}
         />
-
+      </Stack>
+      <Stack direction="row" spacing={SPACING.SMALL.PX}>
         <TextField
           size="small"
           fullWidth
@@ -112,6 +121,25 @@ const DebugSite = ({
           value={selector}
           onChange={e => setSelector(e.target.value)}
         />
+        <Typography variant="body2">
+          New to selectors?{' '}
+          <a
+            href="https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              textDecoration: 'underline',
+            }}
+            onClick={e => {
+              e.preventDefault()
+              window.electron.shell.openExternal(
+                'https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be',
+              )
+            }}
+          >
+            Watch the tutorial
+          </a>
+        </Typography>
 
         <Tooltip title={TOOLTIPS.CSS_SELECTOR} arrow>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -125,7 +153,6 @@ const DebugSite = ({
         onClick={handleTest}
         disabled={loading || !url}
         fullWidth
-        sx={{ mt: SPACING.SMALL.PX }}
       >
         {loading ? 'Scraping...' : 'Scrape'}
       </Button>
@@ -137,7 +164,6 @@ const DebugSite = ({
           overflow: 'auto',
           whiteSpace: 'pre-wrap',
           wordBreak: 'break-word',
-          mt: SPACING.SMALL.PX,
           p: SPACING.SMALL.PX,
           minHeight: 0,
           border: '1px solid #ccc',

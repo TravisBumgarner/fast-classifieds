@@ -1,17 +1,7 @@
-# Setup
+# Fast Classifieds - Browse company job boards quickly.
 
-1. `npm install` dependencies
-1. `npm run dev` local run
-1. `npm run db:studio` to browse SQL lite 
+![screenshot](./readme//screenshot.png)
 
-# Gotchas
+Stop wasting hours manually browsing company career pages. Fast Classifieds uses AI to automatically scan multiple company websites, find relevant job postings, and explain why each opportunity matches your criteria. Keep your job search organized in one desktop application. No accounts, no subscriptions, your data stays local.
 
-- No HMR for main.ts. Need to restart debugger.
-
-# Dev Notes
-
-**Migrations**
-
-1. Add to `src/main/database/schema.ts`
-1. Generate migration `npm run db:generate`
-1. Push migration `npm run db:push`
+[Learn more on the marketing website.](https://travisbumgarner.dev/marketing/classifieds)
