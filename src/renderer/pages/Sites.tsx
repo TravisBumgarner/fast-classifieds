@@ -25,8 +25,9 @@ import {
   Typography,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { CHANNEL } from '../../shared/messages.types'
-import { PAGINATION } from '../consts'
+import { PAGINATION, ROUTES } from '../consts'
 import ipcMessenger from '../ipcMessenger'
 import Icon from '../sharedComponents/Icon'
 import Link from '../sharedComponents/Link'
@@ -86,6 +87,7 @@ const Sites = () => {
   const [siteJobs, setSiteJobs] = useState<Record<number, JobPosting[]>>({})
   const [loadingJobs, setLoadingJobs] = useState<Record<number, boolean>>({})
   const [page, setPage] = useState(0)
+  const navigate = useNavigate()
   const [rowsPerPage, setRowsPerPage] = useState(
     PAGINATION.DEFAULT_ROWS_PER_PAGE,
   )
@@ -303,11 +305,9 @@ const Sites = () => {
           <Button
             size="small"
             variant="outlined"
-            onClick={() =>
-              (activeModalSignal.value = { id: MODAL_ID.DEBUG_SCRAPE_MODAL })
-            }
+            onClick={() => navigate(ROUTES.debugger.href())}
           >
-            Debug New Site
+            Setup New Site
           </Button>
           <Button size="small" variant="outlined" onClick={handleImportSites}>
             Import Sites
@@ -501,10 +501,7 @@ const Sites = () => {
                           <Tooltip title="Debug Site">
                             <IconButton
                               onClick={() =>
-                                (activeModalSignal.value = {
-                                  id: MODAL_ID.DEBUG_SCRAPE_MODAL,
-                                  siteId: site.id,
-                                })
+                                navigate(ROUTES.debugger.href(site.id))
                               }
                             >
                               <Icon name="debug" />

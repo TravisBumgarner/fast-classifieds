@@ -1,5 +1,6 @@
 import { Alert, Box, Button, Divider, Typography } from '@mui/material'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { CHANNEL } from '../../../shared/messages.types'
 import ipcMessenger from '../../ipcMessenger'
 import PageWrapper from '../../sharedComponents/PageWrapper'
@@ -8,12 +9,36 @@ import DebugAI from './components/DebugAI'
 import DebugSite from './components/DebugSite'
 
 const Debugger = () => {
-  const [url, setUrl] = useState('http://localhost:3000')
-  const [selector, setSelector] = useState('body')
+  const [url, setUrl] = useState('')
+  const [selector, setSelector] = useState('')
   const [siteTitle, setSiteTitle] = useState('')
   const [scrapedHtml, setScrapedHtml] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [params] = useSearchParams()
+  const siteId = params.get('site_id')
+  console.log()
+
+  useEffect(() => {
+    if (siteId && !isNaN(Number(siteId))) {
+      // Load site data by siteId and populate fields
+      ipcMessenger
+        .invoke(CHANNEL.SITES.GET_BY_ID, { id: Number(siteId) })
+        .then(({ site }) => {
+          if (site) {
+            setUrl(site.siteUrl)
+            setSelector(site.selector)
+            setSiteTitle(site.siteTitle)
+          } else {
+            setError('Site not found')
+          }
+        })
+        .catch(err => {
+          setError('Failed to load site')
+          console.error(err)
+        })
+    }
+  }, [siteId])
 
   const handleSave = async () => {
     if (!url) {

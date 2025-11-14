@@ -8,7 +8,6 @@ import ChangelogModal, {
 import ConfirmationModal, {
   type ConfirmationModalProps,
 } from './components/ConfirmationModal'
-import DebugScrapeModal from './components/DebugScrapeModal'
 import ImportSitesModal, {
   type ImportSitesModalProps,
 } from './components/ImportSitesModal'
@@ -28,11 +27,6 @@ import SiteModal, {
 } from './components/SiteModal'
 import { MODAL_ID } from './Modal.consts'
 
-export type DebugScrapeModalProps = {
-  id: typeof MODAL_ID.DEBUG_SCRAPE_MODAL
-  siteId?: number
-}
-
 export type ActiveModal =
   | ConfirmationModalProps
   | AddSiteModalProps
@@ -43,7 +37,6 @@ export type ActiveModal =
   | OnboardingModalProps
   | ScrapeProgressModalProps
   | ChangelogModalProps
-  | DebugScrapeModalProps
 
 export type ModalId = (typeof MODAL_ID)[keyof typeof MODAL_ID]
 
@@ -84,12 +77,6 @@ const RenderModal: FC = () => {
     case MODAL_ID.CHANGELOG_MODAL:
       return (
         <ChangelogModal {...(activeModalSignal.value as ChangelogModalProps)} />
-      )
-    case MODAL_ID.DEBUG_SCRAPE_MODAL:
-      return (
-        <DebugScrapeModal
-          {...(activeModalSignal.value as DebugScrapeModalProps)}
-        />
       )
     default:
       return null
