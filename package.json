@@ -1,7 +1,7 @@
 {
   "name": "fast-classifieds",
   "productName": "Fast Classifieds",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "An Electron app to quickly browse classified ads sites.",
   "main": ".vite/build/main.js",
   "scripts": {
