@@ -8,6 +8,20 @@ export interface ChangelogEntry {
 }
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.0',
+    date: '2025-11-14',
+    changes: [
+      {
+        category: 'New',
+        description: 'YouTube tutorials',
+      },
+      {
+        category: 'New',
+        description: 'Support & Marketing Website',
+      },
+    ],
+  },
+  {
     version: '1.2.0',
     date: '2025-11-13',
     changes: [
