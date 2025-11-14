@@ -483,7 +483,9 @@ const Sites = () => {
                           {new Date(site.updatedAt).toLocaleDateString()}
                         </TableCell>
                         <TableCell align="right">
-                          <Tooltip title="Open site in browser">
+                          <Tooltip
+                            title={`Open site in browser: ` + site.siteUrl}
+                          >
                             <span>
                               <Link url={site.siteUrl} />
                             </span>

@@ -1,5 +1,5 @@
 import { Box, Button, Stack, TextField, Tooltip } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { CHANNEL } from '../../../../shared/messages.types'
 import { TOOLTIPS } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
@@ -30,15 +30,15 @@ const DebugSite = ({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (url) {
+  const handleUrlAndTitleSync = () => {
+    if (!siteTitle) {
       try {
         setSiteTitle(new URL(url).hostname)
       } catch {
         logger.error('Invalid URL provided')
       }
     }
-  }, [url, setSiteTitle])
+  }
 
   const handleTest = async () => {
     setError(null)
@@ -94,6 +94,7 @@ const DebugSite = ({
           value={url}
           onChange={e => setUrl(e.target.value)}
           placeholder="https://example.com"
+          onBlur={handleUrlAndTitleSync}
         />
 
         <TextField
