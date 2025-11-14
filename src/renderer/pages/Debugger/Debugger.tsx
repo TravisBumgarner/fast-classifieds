@@ -40,6 +40,38 @@ const Debugger = () => {
     }
   }, [siteId])
 
+  const handleUpdate = async () => {
+    if (!url) {
+      setError('Please enter a URL')
+      return
+    }
+
+    try {
+      setLoading(true)
+      const title = siteTitle || new URL(url).hostname
+
+      const result = await ipcMessenger.invoke(CHANNEL.SITES.UPDATE, {
+        id: Number(siteId),
+        siteTitle: title,
+        siteUrl: url,
+        selector,
+        prompt: '',
+        status: 'inactive',
+      })
+
+      if (result.success) {
+        setError(null)
+      } else {
+        setError(result.error || 'Failed to create site')
+      }
+    } catch (err) {
+      setError('Failed to create site')
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleSave = async () => {
     if (!url) {
       setError('Please enter a URL')
@@ -89,6 +121,7 @@ const Debugger = () => {
           minHeight: 0,
           minWidth: 0,
           gap: SPACING.MEDIUM.PX,
+          marginBottom: SPACING.MEDIUM.PX,
         }}
       >
         <DebugSite
@@ -108,11 +141,11 @@ const Debugger = () => {
 
       <Button
         variant="contained"
-        onClick={handleSave}
+        onClick={siteId ? handleUpdate : handleSave}
         fullWidth
         disabled={loading || !url || !siteTitle || !selector}
       >
-        Add Site
+        {siteId ? 'Update Site' : 'Add Site'}
       </Button>
     </PageWrapper>
   )

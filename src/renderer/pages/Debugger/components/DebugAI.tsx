@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Divider,
   FormControl,
   InputLabel,
   MenuItem,
@@ -89,13 +90,12 @@ const DebugAI = ({
         minHeight: 0,
         display: 'flex',
         flexDirection: 'column',
-        padding: SPACING.SMALL.PX,
-        overflow: 'hidden',
+        gap: SPACING.SMALL.PX,
       }}
     >
       {error && <Message message={error} color="error" />}
 
-      <FormControl required size="small" sx={{ mb: SPACING.SMALL.PX }}>
+      <FormControl required size="small" sx={{ gap: SPACING.SMALL.PX }}>
         <InputLabel>Prompt</InputLabel>
         <Select
           fullWidth
@@ -122,7 +122,6 @@ const DebugAI = ({
           wordBreak: 'break-word',
           border: '1px solid #ccc',
           p: SPACING.SMALL.PX,
-          mt: SPACING.SMALL.PX,
           minHeight: 0,
         }}
       >
@@ -139,11 +138,12 @@ const DebugAI = ({
         onClick={handleGenerateJobs}
         fullWidth
         variant="contained"
-        sx={{ mt: SPACING.SMALL.PX }}
         disabled={!promptId || !scrapedHtml || !url || loadingJobs}
       >
         {loadingJobs ? 'Generating Jobs...' : 'Generate Jobs'}
       </Button>
+
+      <Divider />
 
       <Typography>Generated Jobs</Typography>
 
@@ -155,7 +155,6 @@ const DebugAI = ({
           wordBreak: 'break-word',
           border: '1px solid #ccc',
           p: SPACING.SMALL.PX,
-          mt: SPACING.SMALL.PX,
           minHeight: 0,
         }}
       >

@@ -33,7 +33,9 @@ const DebugSite = ({
     if (url) {
       try {
         setSiteTitle(new URL(url).hostname)
-      } catch {}
+      } catch {
+        console.log('Invalid URL provided')
+      }
     }
   }, [url, setSiteTitle])
 
@@ -81,8 +83,6 @@ const DebugSite = ({
         minHeight: 0,
         display: 'flex',
         flexDirection: 'column',
-        overflow: 'hidden',
-        padding: SPACING.SMALL.PX,
       }}
     >
       <Stack direction="row" spacing={SPACING.SMALL.PX}>
@@ -138,6 +138,7 @@ const DebugSite = ({
           mt: SPACING.SMALL.PX,
           p: SPACING.SMALL.PX,
           minHeight: 0,
+          border: '1px solid #ccc',
         }}
       >
         {scrapedHtml || 'No HTML scraped yet.'}
