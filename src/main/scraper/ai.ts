@@ -6,7 +6,7 @@ const JobSchema = z.object({
   company: z.string().optional(),
   title: z.string(),
   siteUrl: z.string(),
-  explanation: z.string().optional(),
+  explanation: z.string(),
 })
 
 const JobsResponseSchema = z.array(JobSchema)

@@ -217,6 +217,7 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
 
       for (let i = 0; i < activeSites.length; i++) {
         const site = activeSites[i]
+        const prompt = await queries.getPromptById(site.promptId)
 
         // Update progress
         const currentProgress = activeRuns.get(scrapeRunId)
@@ -242,7 +243,7 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
         const result = await processSite({
           siteId: site.id,
           siteUrl: site.siteUrl,
-          prompt: site.prompt,
+          prompt: prompt.content,
           selector: site.selector,
           scrapeRunId,
           apiKey,
@@ -424,6 +425,7 @@ export async function retryFailedScrapes(
 
       for (let i = 0; i < sitesToRetry.length; i++) {
         const site = sitesToRetry[i]
+        const prompt = await queries.getPromptById(site.promptId)
 
         // Update progress
         const currentProgress = activeRuns.get(scrapeRunId)
@@ -442,7 +444,7 @@ export async function retryFailedScrapes(
         const result = await processSite({
           siteId: site.id,
           siteUrl: site.siteUrl,
-          prompt: site.prompt,
+          prompt: prompt.content,
           selector: site.selector,
           scrapeRunId,
           apiKey,
