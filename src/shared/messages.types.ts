@@ -9,6 +9,8 @@ import {
   StoreSchema,
   UpdatePromptDTO,
   UpdateSiteDTO,
+  HashDTO,
+  ApiUsageDTO,
 } from '../shared/types'
 
 export const CHANNEL = {
@@ -116,8 +118,15 @@ export type Invokes = {
   }
   [CHANNEL.APP.RESTORE_ALL_DATA]: {
     args: {
-      data: unknown
-      // Todo fix unknown type
+      data: {
+        sites: Array<SiteDTO>
+        prompts: Array<PromptDTO>
+        jobPostings: Array<JobDTO>
+        scrapeRuns: Array<ScrapeRunDTO>
+        scrapeTasks: Array<ScrapeTaskDTO>
+        hashes: Array<HashDTO>
+        apiUsage: Array<ApiUsageDTO>
+      }
     }
     result: { success: boolean; error?: string }
   }

@@ -1,4 +1,17 @@
-import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Stack, TextField, Typography } from '@mui/material'
+import {
+  Alert,
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Divider,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { useEffect, useState } from 'react'
 import { CHANNEL } from '../../../../shared/messages.types'
 import ipcMessenger from '../../../ipcMessenger'
@@ -87,10 +100,29 @@ const TabData = () => {
 
     try {
       const text = await selectedFile.text()
-      const data = JSON.parse(text)
+      // Reviver to convert ISO date strings to Date objects
+      const dateReviver = (key: string, value: unknown) => {
+        // ISO 8601 date string check
+        if (
+          typeof value === 'string' &&
+          /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d+)?Z$/.test(value)
+        ) {
+          return new Date(value)
+        }
+        return value
+      }
+      const data = JSON.parse(text, dateReviver)
 
       // Validate the data structure (basic check)
-      if (!data.ingredients || !data.recipes || !data.relations) {
+      if (
+        !data.sites ||
+        !data.prompts ||
+        !data.jobPostings ||
+        !data.scrapeRuns ||
+        !data.hashes ||
+        !data.apiUsage ||
+        !data.scrapeTasks
+      ) {
         throw new Error('Invalid backup file')
       }
 

@@ -12,6 +12,33 @@ export type Status = keyof typeof STATUS
 
 export type SiteStatus = 'active' | 'inactive'
 
+export type HashDTO = {
+  id: number
+  siteUrl: string
+  hash: string
+  createdAt: Date
+}
+
+export type ApiUsageDTO = {
+  id: number
+  responseId: string
+  model: string
+  createdAt: Date
+  status: string
+  inputTokens: number
+  outputTokens: number
+  totalTokens: number
+  cachedTokens: number
+  reasoningTokens: number
+  prompt: string
+  siteContent: string
+  siteUrl: string
+  outputText: string
+  temperature: number
+  servicetier: string
+  reasoningEffort: string
+}
+
 export type NewSiteDTO = {
   siteTitle: string
   siteUrl: string
