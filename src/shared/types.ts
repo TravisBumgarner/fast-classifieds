@@ -95,5 +95,6 @@ export interface ScrapeRunDTO {
   successfulSites: number
   failedSites: number
   status: Status
+  createdAt: Date
   comments?: string | null
 }

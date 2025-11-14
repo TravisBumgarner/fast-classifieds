@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { CHANNEL } from '../../../../shared/messages.types'
 import ipcMessenger from '../../../ipcMessenger'
 import { SPACING } from '../../../styles/consts'
+import { logger } from '../../../utilities'
 
 const TabData = () => {
   const [backupDirectory, setBackupDirectory] = useState<string>('')
@@ -201,7 +202,7 @@ const TabData = () => {
         )
         setBackupDirectory(result.backupDirectory)
       } catch (error) {
-        console.error('Error getting backup directory:', error)
+        logger.error('Error getting backup directory:', error)
       }
     }
 

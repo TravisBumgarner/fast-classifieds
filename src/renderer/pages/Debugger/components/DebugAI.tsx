@@ -10,7 +10,7 @@ import {
 } from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'
 import { CHANNEL } from '../../../../shared/messages.types'
-import { Prompt, StoreSchema } from '../../../../shared/types'
+import { PromptDTO, StoreSchema } from '../../../../shared/types'
 import { renderPrompt } from '../../../../shared/utils'
 import ipcMessenger from '../../../ipcMessenger'
 import Message from '../../../sharedComponents/Message'
@@ -27,7 +27,7 @@ const DebugAI = ({
   const [loadingSettings, setLoadingSettings] = useState(true)
   const [loadingJobs, setLoadingJobs] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [prompts, setPrompts] = useState<Prompt[]>([])
+  const [prompts, setPrompts] = useState<PromptDTO[]>([])
   const [promptId, setPromptId] = useState<number | ''>('')
   const [jobs, setJobs] = useState<string>('')
   const [storeFromServer, setStoreFromServer] = useState<StoreSchema | null>(
@@ -65,7 +65,6 @@ const DebugAI = ({
         siteUrl: url,
         jobToJSONPrompt: storeFromServer?.openAiSiteHTMLToJSONJobsPrompt || '',
       })
-      console.log('Response from DEBUG.AI:', response)
       setJobs(JSON.stringify(response.jobs, null, 2))
     } finally {
       setLoadingJobs(false)

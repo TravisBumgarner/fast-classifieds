@@ -1,4 +1,5 @@
 import { Box, Button, Stack, TextField, Tooltip } from '@mui/material'
+import { logger } from '@sentry/electron'
 import { useEffect, useState } from 'react'
 import { CHANNEL } from '../../../../shared/messages.types'
 import { TOOLTIPS } from '../../../consts'
@@ -34,7 +35,7 @@ const DebugSite = ({
       try {
         setSiteTitle(new URL(url).hostname)
       } catch {
-        console.log('Invalid URL provided')
+        logger.error('Invalid URL provided')
       }
     }
   }, [url, setSiteTitle])
