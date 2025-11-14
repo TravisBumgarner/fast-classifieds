@@ -90,7 +90,6 @@ export interface ScrapeTaskDTO {
 
 export interface ScrapeRunDTO {
   id: number
-  startedAt: Date
   completedAt?: Date | null
   totalSites: number
   successfulSites: number
