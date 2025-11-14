@@ -1,5 +1,5 @@
 import Store from 'electron-store'
-import { SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT } from 'src/shared/consts'
+import { SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT } from '../shared/consts'
 import { StoreSchema } from '../shared/types'
 
 const defaults: StoreSchema = {

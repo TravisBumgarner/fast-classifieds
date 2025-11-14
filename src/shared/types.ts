@@ -34,3 +34,13 @@ export interface StoreSchema {
   onboardingCompleted: boolean
   openAiSiteHTMLToJSONJobsPrompt: string
 }
+
+export type PromptStatus = 'active' | 'inactive'
+export interface Prompt {
+  id: number
+  title: string
+  content: string
+  status: PromptStatus
+  createdAt: Date
+  updatedAt: Date
+}

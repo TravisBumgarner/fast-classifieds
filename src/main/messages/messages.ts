@@ -3,6 +3,7 @@ import path from 'node:path'
 import { CHANNEL } from '../../shared/messages.types'
 import queries from '../database/queries'
 import * as scraper from '../scraper'
+import { processText } from '../scraper/ai'
 import { scrape } from '../scraper/scrape'
 import store, { getStore } from '../store'
 import { typedIpcMain } from './index'
@@ -324,7 +325,7 @@ typedIpcMain.handle(CHANNEL.SCRAPER.GET_PROGRESS, async (_event, params) => {
   }
 })
 
-typedIpcMain.handle(CHANNEL.SCRAPER.DEBUG_SCRAPE, async (_event, params) => {
+typedIpcMain.handle(CHANNEL.DEBUG.SCRAPE, async (_event, params) => {
   try {
     const result = await scrape({
       siteUrl: params.url,
@@ -337,6 +338,34 @@ typedIpcMain.handle(CHANNEL.SCRAPER.DEBUG_SCRAPE, async (_event, params) => {
     }
   } catch (error) {
     console.error('Error in debug scrape:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    }
+  }
+})
+
+typedIpcMain.handle(CHANNEL.DEBUG.AI, async (_event, params) => {
+  try {
+    console.log('Debug AI params:', params)
+    const storeData = getStore()
+    const result = await processText({
+      apiKey: storeData.openaiApiKey,
+      model: storeData.openaiModel,
+      prompt: params.prompt,
+      siteContent: params.siteContent,
+      siteUrl: params.siteUrl,
+      jobToJSONPrompt: storeData.openAiSiteHTMLToJSONJobsPrompt,
+    })
+    console.log('Debug AI result:', result.jobs)
+
+    return {
+      success: true,
+      jobs: result.jobs,
+      rawResponse: result.rawResponse,
+    }
+  } catch (error) {
+    console.error('Error in debug process text:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',

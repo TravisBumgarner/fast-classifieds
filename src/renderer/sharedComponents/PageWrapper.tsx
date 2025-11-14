@@ -6,7 +6,8 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        height: '100%',
+        height: '100%', // ensures the page is full height
+        minHeight: 0, // REQUIRED for nested flex scrolling
       }}
     >
       {children}

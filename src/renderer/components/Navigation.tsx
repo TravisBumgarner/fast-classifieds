@@ -18,6 +18,7 @@ const NAV_ROUTES: Array<keyof typeof ROUTES> = [
   'sites',
   'scrapeRuns',
   'settings',
+  'debugger',
 ]
 
 const Navigation = () => {

@@ -1,5 +1,6 @@
 import OpenAI from 'openai'
 import { z } from 'zod'
+import { renderPrompt } from '../../shared/utils'
 
 const JobSchema = z.object({
   company: z.string().optional(),
@@ -35,21 +36,14 @@ export async function processText({
 
   const client = new OpenAI({ apiKey })
 
-  const fullPrompt = `
-USER CRITERIA:
-${prompt}
-
-SCRAPED CONTENT:
-${siteContent}
-
-SITE_URL: ${siteUrl}
-
-${jobToJSONPrompt}
-`
-
   const response = await client.responses.create({
     model,
-    input: fullPrompt,
+    input: renderPrompt({
+      prompt,
+      siteContent,
+      siteUrl,
+      jobToJSONPrompt,
+    }),
   })
 
   const parsed = JobsResponseSchema.safeParse(

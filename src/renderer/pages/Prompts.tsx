@@ -31,17 +31,11 @@ import { MODAL_ID } from '../sharedComponents/Modal/Modal.consts'
 import PageWrapper from '../sharedComponents/PageWrapper'
 import { activeModalSignal } from '../signals'
 import { SPACING } from '../styles/consts'
+import { Prompt, PromptStatus } from '../../shared/types'
 
-type PromptStatus = 'active' | 'inactive'
 
-interface Prompt {
-  id: number
-  title: string
-  content: string
-  status: PromptStatus
-  createdAt: Date
-  updatedAt: Date
-}
+
+
 
 type SortField = 'title' | 'status' | 'updatedAt'
 type SortDirection = 'asc' | 'desc'
