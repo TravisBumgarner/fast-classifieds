@@ -58,29 +58,18 @@ const SiteModal = (props: SiteModalProps) => {
   const [error, setError] = useState<string | null>(null)
   const [prompts, setPrompts] = useState<Prompt[]>([])
 
-  const generateTitleFromUrl = (url: string) => {
-    try {
-      const urlObj = new URL(url)
-      const hostname = urlObj.hostname.replace('www.', '')
-      const parts = hostname.split('.')
-      // Get the domain name (before .com, .org, etc.)
-      const domainName = parts.length > 1 ? parts[0] : hostname
-      // Capitalize first letter
-      return domainName.charAt(0).toUpperCase() + domainName.slice(1)
-    } catch {
-      return ''
+  const handleUrlAndTitleSync = () => {
+    if (!siteTitle) {
+      try {
+        setSiteTitle(new URL(siteUrl).hostname)
+      } catch {
+        logger.error('Invalid URL provided')
+      }
     }
   }
 
   const handleUrlChange = (url: string) => {
     setSiteUrl(url)
-    // Only auto-generate title if it's empty or in add mode
-    if (!isEditMode || !siteTitle) {
-      const generatedTitle = generateTitleFromUrl(url)
-      if (generatedTitle) {
-        setSiteTitle(generatedTitle)
-      }
-    }
   }
 
   const loadPrompts = async () => {
@@ -178,7 +167,6 @@ const SiteModal = (props: SiteModalProps) => {
           setError(result.error || 'Failed to create site')
         }
       }
-      activeModalSignal.value = null
     } catch (err) {
       setError('An error occurred')
       logger.error(err)
@@ -255,6 +243,7 @@ const SiteModal = (props: SiteModalProps) => {
             label="Site URL"
             value={siteUrl}
             onChange={e => handleUrlChange(e.target.value)}
+            onBlur={handleUrlAndTitleSync}
             required
             fullWidth
             disabled={loading}
@@ -285,6 +274,25 @@ const SiteModal = (props: SiteModalProps) => {
               disabled={loading}
               placeholder=".job-list or #jobs"
             />
+            <Typography variant="body2">
+              New to selectors?{' '}
+              <a
+                href="https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  textDecoration: 'underline',
+                }}
+                onClick={e => {
+                  e.preventDefault()
+                  window.electron.shell.openExternal(
+                    'https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be',
+                  )
+                }}
+              >
+                Watch the tutorial
+              </a>
+            </Typography>
             <Tooltip title={TOOLTIPS.CSS_SELECTOR} arrow>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Icon name="info" size={20} />

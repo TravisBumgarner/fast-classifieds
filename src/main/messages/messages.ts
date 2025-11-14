@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain, shell } from 'electron'
+import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import path from 'node:path'
 import { CHANNEL } from '../../shared/messages.types'
 import { db } from '../database/client'
@@ -26,9 +26,11 @@ export function setMainWindow(window: BrowserWindow) {
 }
 
 typedIpcMain.handle(CHANNEL.APP.GET_BACKUP_DIRECTORY, async () => {
+  // Use Electron's userData directory for backups
+  const backupDirectory = path.join(app.getPath('userData'), 'db_backups')
   return {
     type: 'get_backup_directory',
-    backupDirectory: path.resolve(process.cwd(), 'db_backups'),
+    backupDirectory,
   }
 })
 
