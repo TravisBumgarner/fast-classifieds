@@ -1,5 +1,4 @@
 import { Box, Button, Stack, TextField, Tooltip } from '@mui/material'
-import { logger } from '@sentry/electron'
 import { useEffect, useState } from 'react'
 import { CHANNEL } from '../../../../shared/messages.types'
 import { TOOLTIPS } from '../../../consts'
@@ -7,6 +6,7 @@ import ipcMessenger from '../../../ipcMessenger'
 import Icon from '../../../sharedComponents/Icon'
 import Message from '../../../sharedComponents/Message'
 import { SPACING } from '../../../styles/consts'
+import { logger } from '../../../utilities'
 
 const DebugSite = ({
   url,
