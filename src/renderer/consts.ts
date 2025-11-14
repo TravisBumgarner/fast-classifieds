@@ -24,6 +24,11 @@ export const ROUTES = {
     label: 'Settings',
     target: '_self',
   },
+  debugger: {
+    href: (siteId?: number) => `/debugger${siteId ? `?site_id=${siteId}` : ''}`,
+    label: 'Debugger',
+    target: '_self',
+  },
 } as const
 
 export const QUERY_KEYS = {}

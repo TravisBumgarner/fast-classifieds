@@ -1,4 +1,4 @@
-import { StoreSchema } from '../shared/types'
+import { Job, StoreSchema } from '../shared/types'
 
 export const CHANNEL = {
   SITES: {
@@ -30,7 +30,10 @@ export const CHANNEL = {
     START: 'scraper:start',
     RETRY: 'scraper:retry',
     GET_PROGRESS: 'scraper:get-progress',
-    DEBUG_SCRAPE: 'scraper:debug-scrape',
+  },
+  DEBUG: {
+    SCRAPE: 'debug:scrape',
+    AI: 'debug:ai',
   },
   SCRAPE_RUNS: {
     GET_ALL: 'scrape-runs:get-all',
@@ -251,9 +254,23 @@ export type Invokes = {
       error?: string
     }
   }
-  [CHANNEL.SCRAPER.DEBUG_SCRAPE]: {
+  [CHANNEL.DEBUG.SCRAPE]: {
     args: { url: string; selector: string }
     result: { success: boolean; html?: string; error?: string }
+  }
+  [CHANNEL.DEBUG.AI]: {
+    args: {
+      prompt: string
+      siteContent: string
+      siteUrl: string
+      jobToJSONPrompt: string
+    }
+    result: {
+      success: boolean
+      jobs?: Array<Job>
+      rawResponse?: unknown
+      error?: string
+    }
   }
   [CHANNEL.SCRAPE_RUNS.GET_ALL]: {
     args: undefined

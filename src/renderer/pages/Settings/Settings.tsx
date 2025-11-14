@@ -1,5 +1,5 @@
 import { Box, Tab, Tabs, Typography } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { CHANNEL } from '../../../shared/messages.types'
 import { StoreSchema } from '../../../shared/types'
 import ipcMessenger from '../../ipcMessenger'
@@ -18,14 +18,16 @@ const Settings = () => {
 
   const [activeTab, setActiveTab] = useState(0)
 
-  useEffect(() => {
-    const loadStoreSettings = async () => {
-      const store = await ipcMessenger.invoke(CHANNEL.STORE.GET, undefined)
-      setStoreFromServer(store)
-    }
-
-    loadStoreSettings()
+  const loadStoreSettings = useCallback(async () => {
+    const store = await ipcMessenger.invoke(CHANNEL.STORE.GET, undefined)
+    setStoreFromServer(store)
   }, [])
+
+  useEffect(() => {
+    ;(async () => {
+      await loadStoreSettings()
+    })()
+  }, [loadStoreSettings])
 
   if (!storeFromServer) {
     return (
@@ -58,12 +60,19 @@ const Settings = () => {
         {activeTab === 0 && (
           <TabOpenAI
             initialOpenAiApiKey={storeFromServer.openaiApiKey}
+            loadStoreSettings={loadStoreSettings}
             initialOpenAIModel={storeFromServer.openaiModel}
+            initialOpenAiSiteHTMLToJSONJobsPrompt={
+              storeFromServer.openAiSiteHTMLToJSONJobsPrompt
+            }
           />
         )}
 
         {activeTab === 1 && (
-          <TabJobFinder initialScrapeDelay={storeFromServer.scrapeDelay} />
+          <TabJobFinder
+            loadStoreSettings={loadStoreSettings}
+            initialScrapeDelay={storeFromServer.scrapeDelay}
+          />
         )}
         {activeTab === 2 && <TabData />}
         {activeTab === 3 && <TabHelpAndOnboarding />}
