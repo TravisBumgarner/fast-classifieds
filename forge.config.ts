@@ -16,14 +16,17 @@ const config: ForgeConfig = {
     ignore: [],
     icon: './src/assets/icon',
     extraResource: ['./drizzle'],
-    osxSign: {
-      optionsForFile: () => {
-        return {
-          hardenedRuntime: true,
-          entitlements: 'entitlements.plist',
-        }
-      },
-    },
+    osxSign:
+      process.env.NODE_ENV === 'production'
+        ? {
+            optionsForFile: () => {
+              return {
+                hardenedRuntime: true,
+                entitlements: 'entitlements.plist',
+              }
+            },
+          }
+        : undefined,
   },
 
   rebuildConfig: {},
@@ -79,7 +82,10 @@ const config: ForgeConfig = {
       _forgeConfig,
       options: { outputPaths: string[]; platform: string; arch: string },
     ) => {
-      if (options.platform === 'darwin') {
+      if (
+        options.platform === 'darwin' &&
+        process.env.NODE_ENV === 'production'
+      ) {
         const { notarize } = await import('@electron/notarize')
         const appPath = `${options.outputPaths[0]}/Fast Classifieds.app`
         await notarize({
