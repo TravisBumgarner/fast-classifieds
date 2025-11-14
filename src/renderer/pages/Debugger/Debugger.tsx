@@ -1,7 +1,8 @@
 import { Alert, Box, Button, Divider, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { CHANNEL } from '../../../shared/messages.types'
+import { ROUTES } from '../../consts'
 import ipcMessenger from '../../ipcMessenger'
 import PageWrapper from '../../sharedComponents/PageWrapper'
 import { SPACING } from '../../styles/consts'
@@ -19,6 +20,7 @@ const Debugger = () => {
   const [params] = useSearchParams()
   const [promptId, setPromptId] = useState<number | null>(null)
   const siteId = params.get('site_id')
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (siteId && !isNaN(Number(siteId))) {
@@ -67,6 +69,7 @@ const Debugger = () => {
       })
 
       if (result.success) {
+        navigate(ROUTES.sites.href())
         setError(null)
       } else {
         setError(result.error || 'Failed to create site')
@@ -104,6 +107,7 @@ const Debugger = () => {
 
       if (result.success) {
         setError(null)
+        navigate(ROUTES.sites.href())
       } else {
         setError(result.error || 'Failed to create site')
       }
@@ -115,8 +119,6 @@ const Debugger = () => {
     }
   }
 
-  if (error) return <Typography>Error.</Typography>
-
   return (
     <PageWrapper>
       <Alert severity="info" sx={{ mb: SPACING.MEDIUM.PX }}>
@@ -125,6 +127,16 @@ const Debugger = () => {
           you to debug the postings finder and share data to help me debug.
         </Typography>
       </Alert>
+
+      {error && (
+        <Alert
+          severity="error"
+          onClose={() => setError(null)}
+          sx={{ mb: SPACING.MEDIUM.PX }}
+        >
+          {error}
+        </Alert>
+      )}
 
       <Box
         sx={{
@@ -148,7 +160,12 @@ const Debugger = () => {
         />
         <Divider orientation="vertical" flexItem />
 
-        <DebugAI url={url} scrapedHtml={scrapedHtml} />
+        <DebugAI
+          url={url}
+          scrapedHtml={scrapedHtml}
+          promptId={promptId}
+          setPromptId={setPromptId}
+        />
       </Box>
 
       <Button
