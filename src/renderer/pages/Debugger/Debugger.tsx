@@ -5,6 +5,7 @@ import { CHANNEL } from '../../../shared/messages.types'
 import ipcMessenger from '../../ipcMessenger'
 import PageWrapper from '../../sharedComponents/PageWrapper'
 import { SPACING } from '../../styles/consts'
+import { logger } from '../../utilities'
 import DebugAI from './components/DebugAI'
 import DebugSite from './components/DebugSite'
 
@@ -16,8 +17,8 @@ const Debugger = () => {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [params] = useSearchParams()
+  const [promptId, setPromptId] = useState<number | null>(null)
   const siteId = params.get('site_id')
-  console.log()
 
   useEffect(() => {
     if (siteId && !isNaN(Number(siteId))) {
@@ -29,13 +30,14 @@ const Debugger = () => {
             setUrl(site.siteUrl)
             setSelector(site.selector)
             setSiteTitle(site.siteTitle)
+            setPromptId(site.promptId)
           } else {
             setError('Site not found')
           }
         })
         .catch(err => {
           setError('Failed to load site')
-          console.error(err)
+          logger.error(err)
         })
     }
   }, [siteId])
@@ -43,6 +45,11 @@ const Debugger = () => {
   const handleUpdate = async () => {
     if (!url) {
       setError('Please enter a URL')
+      return
+    }
+
+    if (promptId === null) {
+      setError('Please select a prompt')
       return
     }
 
@@ -55,7 +62,7 @@ const Debugger = () => {
         siteTitle: title,
         siteUrl: url,
         selector,
-        prompt: '',
+        promptId,
         status: 'inactive',
       })
 
@@ -66,7 +73,7 @@ const Debugger = () => {
       }
     } catch (err) {
       setError('Failed to create site')
-      console.error(err)
+      logger.error(err)
     } finally {
       setLoading(false)
     }
@@ -78,6 +85,11 @@ const Debugger = () => {
       return
     }
 
+    if (promptId === null) {
+      setError('Please select a prompt')
+      return
+    }
+
     try {
       setLoading(true)
       const title = siteTitle || new URL(url).hostname
@@ -86,7 +98,7 @@ const Debugger = () => {
         siteTitle: title,
         siteUrl: url,
         selector,
-        prompt: '',
+        promptId,
         status: 'inactive',
       })
 
@@ -97,7 +109,7 @@ const Debugger = () => {
       }
     } catch (err) {
       setError('Failed to create site')
-      console.error(err)
+      logger.error(err)
     } finally {
       setLoading(false)
     }

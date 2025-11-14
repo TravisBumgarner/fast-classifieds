@@ -15,27 +15,17 @@ import { CHANNEL } from '../../../../shared/messages.types'
 import ipcMessenger from '../../../ipcMessenger'
 import { activeModalSignal } from '../../../signals'
 import { SPACING } from '../../../styles/consts'
-import { MODAL_ID } from '../Modal.consts'
+import { logger } from '../../../utilities'
 import DefaultModal from './DefaultModal'
+import { PromptDTO } from '../../../../shared/types'
 
-export interface ImportSitesModalProps {
-  id: typeof MODAL_ID.IMPORT_SITES_MODAL
-  onSuccess?: () => void
-}
-
-interface Prompt {
-  id: number
-  title: string
-  content: string
-}
-
-const ImportSitesModal = (props: ImportSitesModalProps) => {
+const ImportSitesModal = () => {
   const [urls, setUrls] = useState('')
   const [promptId, setPromptId] = useState<number | ''>('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  const [prompts, setPrompts] = useState<Prompt[]>([])
+  const [prompts, setPrompts] = useState<PromptDTO[]>([])
 
   useEffect(() => {
     loadPrompts()
@@ -53,7 +43,7 @@ const ImportSitesModal = (props: ImportSitesModalProps) => {
         setPromptId(result.prompts[0].id)
       }
     } catch (err) {
-      console.error('Failed to load prompts:', err)
+      logger.error('Failed to load prompts:', err)
     }
   }
 
@@ -105,7 +95,7 @@ const ImportSitesModal = (props: ImportSitesModalProps) => {
           new URL(url)
           validUrls.push(url)
         } catch {
-          console.warn(`Invalid URL: ${url}`)
+          logger.error(`Invalid URL: ${url}`)
         }
       }
 
@@ -126,19 +116,20 @@ const ImportSitesModal = (props: ImportSitesModalProps) => {
           const result = await ipcMessenger.invoke(CHANNEL.SITES.CREATE, {
             siteTitle: title,
             siteUrl: url,
-            prompt: selectedPrompt.content,
+            promptId: selectedPrompt.id,
             selector: 'body',
+            status: 'active',
           })
 
           if (result.success) {
             successCount++
           } else {
             failCount++
-            console.error(`Failed to create site for ${url}:`, result.error)
+            logger.error(`Failed to create site for ${url}:`, result.error)
           }
         } catch (err) {
           failCount++
-          console.error(`Error importing ${url}:`, err)
+          logger.error(`Error importing ${url}:`, err)
         }
       }
 
@@ -155,7 +146,7 @@ const ImportSitesModal = (props: ImportSitesModalProps) => {
       }
     } catch (err) {
       setError('An error occurred during import')
-      console.error(err)
+      logger.error(err)
     } finally {
       setLoading(false)
     }

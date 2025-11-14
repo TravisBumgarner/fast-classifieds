@@ -94,7 +94,7 @@ export const jobPostings = sqliteTable('job_postings', {
   title: text('title').notNull(),
   siteUrl: text('site_url').notNull(),
   siteId: integer('site_id'),
-  explanation: text('explanation'),
+  explanation: text('explanation').notNull(),
   status: text('status', {
     enum: Object.values(POSTING_STATUS) as [PostingStatus, ...PostingStatus[]],
   })

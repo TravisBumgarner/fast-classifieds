@@ -65,7 +65,7 @@ export type UpdateSiteDTO = {
 export const JobSchema = z.object({
   title: z.string(),
   siteUrl: z.string(),
-  explanation: z.string().optional(),
+  explanation: z.string(),
 })
 
 export const JobsResponseSchema = z.array(JobSchema)
