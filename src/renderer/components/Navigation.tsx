@@ -133,6 +133,15 @@ const Navigation = () => {
               </MenuItem>
               <MenuItem
                 onClick={() =>
+                  handleExternalLink(
+                    'https://travisbumgarner.dev/marketing/classifieds',
+                  )
+                }
+              >
+                Website
+              </MenuItem>
+              <MenuItem
+                onClick={() =>
                   handleExternalLink('https://travisbumgarner.dev/')
                 }
               >
