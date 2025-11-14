@@ -11,13 +11,14 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CHANNEL } from '../../../../shared/messages.types'
 import { ROUTES } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
 import { activeModalSignal } from '../../../signals'
 import { SPACING } from '../../../styles/consts'
+import { logger } from '../../../utilities'
 import { MODAL_ID } from '../Modal.consts'
 import DefaultModal from './DefaultModal'
 
@@ -45,14 +46,9 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    startScraping()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  useEffect(() => {
     if (scrapeRunId === null) return
 
-    console.log(
+    logger.info(
       '[ScrapeProgressModal] Setting up listeners for runId:',
       scrapeRunId,
     )
@@ -61,9 +57,9 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
     const unsubscribeProgress = window.electron.ipcRenderer.on(
       'scraper:progress',
       data => {
-        console.log('[ScrapeProgressModal] Received progress update:', data)
+        logger.info('[ScrapeProgressModal] Received progress update:', data)
         if (data.scrapeRunId === scrapeRunId) {
-          console.log(
+          logger.info(
             '[ScrapeProgressModal] Updating sites:',
             data.progress.sites,
           )
@@ -75,7 +71,7 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
     const unsubscribeComplete = window.electron.ipcRenderer.on(
       'scraper:complete',
       data => {
-        console.log('[ScrapeProgressModal] Received complete event:', data)
+        logger.info('[ScrapeProgressModal] Received complete event:', data)
         if (data.scrapeRunId === scrapeRunId) {
           setTotalNewJobs(data.totalNewJobs)
           setIsComplete(true)
@@ -84,15 +80,15 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
     )
 
     return () => {
-      console.log('[ScrapeProgressModal] Cleaning up listeners')
+      logger.info('[ScrapeProgressModal] Cleaning up listeners')
       unsubscribeProgress()
       unsubscribeComplete()
     }
   }, [scrapeRunId])
 
-  const startScraping = async () => {
+  const startScraping = useCallback(async () => {
     try {
-      console.log('[ScrapeProgressModal] Starting scrape...')
+      logger.info('[ScrapeProgressModal] Starting scrape...')
 
       // If retryRunId is provided, call retry instead of start
       const result = props.retryRunId
@@ -101,25 +97,31 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
           })
         : await ipcMessenger.invoke(CHANNEL.SCRAPER.START, undefined)
 
-      console.log('[ScrapeProgressModal] Start result:', result)
+      logger.info('[ScrapeProgressModal] Start result:', result)
 
       if (!result.success) {
         setError(result.error || 'Failed to start scraping')
         return
       }
 
-      console.log(
+      logger.info(
         '[ScrapeProgressModal] Setting scrapeRunId:',
         result.scrapeRunId,
       )
       setScrapeRunId(result.scrapeRunId!)
     } catch (error) {
-      console.error('Failed to start scraping:', error)
+      logger.error('Failed to start scraping:', error)
       setError(
         error instanceof Error ? error.message : 'Failed to start scraping',
       )
     }
-  }
+  }, [props.retryRunId])
+
+  useEffect(() => {
+    ;(async () => {
+      await startScraping()
+    })()
+  }, [startScraping])
 
   const handleClose = () => {
     if (isComplete) {
