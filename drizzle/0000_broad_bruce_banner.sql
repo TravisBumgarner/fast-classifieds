@@ -28,6 +28,7 @@ CREATE TABLE `hashes` (
 CREATE UNIQUE INDEX `hashes_hash_unique` ON `hashes` (`hash`);--> statement-breakpoint
 CREATE TABLE `job_postings` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`company` text,
 	`title` text NOT NULL,
 	`site_url` text NOT NULL,
 	`site_id` integer,
@@ -41,6 +42,7 @@ CREATE TABLE `prompts` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`title` text NOT NULL,
 	`content` text NOT NULL,
+	`status` text DEFAULT 'active' NOT NULL,
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL
 );
@@ -72,7 +74,7 @@ CREATE TABLE `sites` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`site_title` text NOT NULL,
 	`site_url` text NOT NULL,
-	`prompt` text NOT NULL,
+	`prompt_id` integer NOT NULL,
 	`selector` text NOT NULL,
 	`status` text DEFAULT 'active' NOT NULL,
 	`created_at` integer NOT NULL,

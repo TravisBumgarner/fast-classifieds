@@ -6,19 +6,40 @@ export interface ChangelogEntry {
     description: string
   }[]
 }
-
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.2.0',
+    date: '2025-11-13',
+    changes: [
+      {
+        category: 'New',
+        description: 'Contact form',
+      },
+      {
+        category: 'Improved',
+        description: 'Debugger tool now supports entire workflow',
+      },
+      {
+        category: 'Improved',
+        description: 'Exposed additional settings',
+      },
+      {
+        category: 'Fixed',
+        description: 'Prompt not showing when editing a site',
+      },
+    ],
+  },
   {
     version: '1.1.0',
     date: '2025-11-09',
     changes: [
       {
         category: 'New',
-        description: 'Added ability to open selected job postings in browser',
+        description: 'Open selected job postings in browser',
       },
       {
         category: 'New',
-        description: 'Added debugger tool for checking scraper issues',
+        description: 'Debugger tool for checking scraper issues',
       },
     ],
   },

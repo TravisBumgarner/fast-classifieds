@@ -1,5 +1,8 @@
 import { z } from 'zod'
 
+export type PartialWithRequired<T, K extends keyof T> = Omit<T, K> &
+  Required<Pick<T, K>>
+
 export const STATUS = {
   hash_exists: 'hash_exists',
   new_data: 'new_data',
@@ -7,11 +10,29 @@ export const STATUS = {
 }
 export type Status = keyof typeof STATUS
 
-export type Site = {
-  siteUrl: string
+export type SiteStatus = 'active' | 'inactive'
+
+export type NewSiteDTO = {
   siteTitle: string
+  siteUrl: string
+  promptId: number
   selector: string
-  prompt: string
+  status: SiteStatus
+}
+
+export type SiteDTO = NewSiteDTO & {
+  id: number
+  createdAt: Date
+  updatedAt: Date
+}
+
+export type UpdateSiteDTO = {
+  id: number
+  siteTitle: string
+  siteUrl: string
+  promptId: number
+  selector: string
+  status: SiteStatus
 }
 
 export const JobSchema = z.object({

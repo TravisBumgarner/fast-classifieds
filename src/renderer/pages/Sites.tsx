@@ -24,9 +24,10 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CHANNEL } from '../../shared/messages.types'
+import { SiteDTO } from '../../shared/types'
 import { PAGINATION, ROUTES } from '../consts'
 import ipcMessenger from '../ipcMessenger'
 import Icon from '../sharedComponents/Icon'
@@ -36,6 +37,7 @@ import { MODAL_ID } from '../sharedComponents/Modal/Modal.consts'
 import PageWrapper from '../sharedComponents/PageWrapper'
 import { activeModalSignal } from '../signals'
 import { SPACING } from '../styles/consts'
+import { logger } from '../utilities'
 
 type SiteStatus = 'active' | 'inactive'
 
@@ -46,18 +48,6 @@ type PostingStatus =
   | 'interview'
   | 'rejected'
   | 'offer'
-
-interface Site {
-  id: number
-  siteTitle: string
-  siteUrl: string
-  prompt: string
-  selector: string
-  status: SiteStatus
-  createdAt: Date
-  updatedAt: Date
-  totalJobs: number
-}
 
 interface JobPosting {
   id: number
@@ -74,7 +64,7 @@ type SortField = 'siteTitle' | 'status' | 'updatedAt'
 type SortDirection = 'asc' | 'desc'
 
 const Sites = () => {
-  const [sites, setSites] = useState<Site[]>([])
+  const [sites, setSites] = useState<(SiteDTO & { totalJobs: number })[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<SiteStatus[]>([
@@ -159,7 +149,7 @@ const Sites = () => {
       setSites(result.sites)
     } catch (err) {
       setError('Failed to load sites')
-      console.error(err)
+      logger.error(err)
     } finally {
       setLoading(false)
     }
@@ -183,7 +173,7 @@ const Sites = () => {
     }
   }
 
-  const handleEditSite = (site: Site) => {
+  const handleEditSite = (site: SiteDTO) => {
     activeModalSignal.value = {
       id: MODAL_ID.EDIT_SITE_MODAL,
       siteId: site.id,
@@ -207,7 +197,7 @@ const Sites = () => {
           }
         } catch (err) {
           setError('Failed to delete site')
-          console.error(err)
+          logger.error(err)
         }
       },
     }
@@ -229,7 +219,7 @@ const Sites = () => {
           )
           setSiteJobs(prev => ({ ...prev, [siteId]: result.postings }))
         } catch (err) {
-          console.error('Failed to load jobs for site:', err)
+          logger.error('Failed to load jobs for site:', err)
         } finally {
           setLoadingJobs(prev => ({ ...prev, [siteId]: false }))
         }
@@ -262,7 +252,7 @@ const Sites = () => {
       }
     } catch (err) {
       setError('Failed to update posting status')
-      console.error(err)
+      logger.error(err)
     }
   }
 
@@ -456,8 +446,8 @@ const Sites = () => {
                   const loading = loadingJobs[site.id] || false
 
                   return (
-                    <>
-                      <TableRow key={site.id} hover>
+                    <Fragment key={site.id}>
+                      <TableRow hover>
                         <TableCell padding="checkbox">
                           <Tooltip
                             title={
@@ -644,7 +634,7 @@ const Sites = () => {
                           </Collapse>
                         </TableCell>
                       </TableRow>
-                    </>
+                    </Fragment>
                   )
                 })
               )}

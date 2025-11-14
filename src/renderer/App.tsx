@@ -2,10 +2,10 @@ import { Box } from '@mui/material'
 import * as Sentry from '@sentry/electron/renderer'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useEffect } from 'react'
-import { Link, MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router-dom'
 import { CURRENT_VERSION } from '../shared/changelog'
 import { CHANNEL } from '../shared/messages.types'
-import ErrorBoundry from './components/ErrorBoundry'
+import ErrorBoundary from './components/ErrorBoundary'
 import Navigation from './components/Navigation'
 import Router from './components/Router'
 import ipcMessenger from './ipcMessenger'
@@ -66,14 +66,13 @@ function App() {
 const WrappedApp = () => {
   return (
     <MemoryRouter>
-      <Link to="/foo">Broken Link to test Error Boundary</Link>
-      <ErrorBoundry>
+      <ErrorBoundary>
         <AppThemeProvider>
           <QueryClientProvider client={queryClient}>
             <App />
           </QueryClientProvider>
         </AppThemeProvider>
-      </ErrorBoundry>
+      </ErrorBoundary>
     </MemoryRouter>
   )
 }

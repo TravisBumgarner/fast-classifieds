@@ -122,7 +122,7 @@ export const sites = sqliteTable('sites', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   siteTitle: text('site_title').notNull(),
   siteUrl: text('site_url').notNull().unique(),
-  prompt: text('prompt').notNull(),
+  promptId: integer('prompt_id').notNull(),
   selector: text('selector').notNull(),
   status: text('status', {
     enum: Object.values(SITE_STATUS) as [SiteStatus, ...SiteStatus[]],
@@ -136,9 +136,6 @@ export const sites = sqliteTable('sites', {
     .notNull()
     .$defaultFn(() => new Date()),
 })
-
-export type Site = typeof sites.$inferSelect
-export type NewSite = typeof sites.$inferInsert
 
 export const PROMPT_STATUS = {
   ACTIVE: 'active',

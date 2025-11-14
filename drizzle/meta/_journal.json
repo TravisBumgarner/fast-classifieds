@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1762636807491,
-      "tag": "0000_rare_firestar",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1762644519481,
-      "tag": "0001_medical_texas_twister",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1762644654036,
-      "tag": "0002_fluffy_rocket_raccoon",
+      "when": 1763090788910,
+      "tag": "0000_broad_bruce_banner",
       "breakpoints": true
     }
   ]

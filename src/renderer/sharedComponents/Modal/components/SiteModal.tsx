@@ -10,13 +10,14 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CHANNEL } from '../../../../shared/messages.types'
 import { ROUTES, TOOLTIPS } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
 import { activeModalSignal } from '../../../signals'
 import { SPACING } from '../../../styles/consts'
+import { logger } from '../../../utilities'
 import Icon from '../../Icon'
 import { MODAL_ID } from '../Modal.consts'
 import DefaultModal from './DefaultModal'
@@ -82,14 +83,6 @@ const SiteModal = (props: SiteModalProps) => {
     }
   }
 
-  useEffect(() => {
-    loadPrompts()
-    if (isEditMode && siteId) {
-      loadSite()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
   const loadPrompts = async () => {
     try {
       const result = await ipcMessenger.invoke(
@@ -100,11 +93,11 @@ const SiteModal = (props: SiteModalProps) => {
       const activePrompts = result.prompts.filter(p => p.status === 'active')
       setPrompts(activePrompts)
     } catch (err) {
-      console.error('Failed to load prompts:', err)
+      logger.error('Failed to load prompts:', err)
     }
   }
 
-  const loadSite = async () => {
+  const loadSite = useCallback(async () => {
     if (!siteId) return
 
     try {
@@ -119,20 +112,28 @@ const SiteModal = (props: SiteModalProps) => {
         setStatus(result.site.status || 'active')
 
         // Find matching prompt by content
-        const matchingPrompt = prompts.find(
-          p => p.content === result.site?.prompt,
-        )
+        const matchingPrompt = prompts.find(p => p.id === result.site?.promptId)
         if (matchingPrompt) {
           setPromptId(matchingPrompt.id)
         }
       }
     } catch (err) {
       setError('Failed to load site')
-      console.error(err)
+      logger.error(err)
     } finally {
       setLoading(false)
     }
-  }
+  }, [prompts, siteId])
+
+  useEffect(() => {
+    loadPrompts()
+  }, [])
+
+  useEffect(() => {
+    if (isEditMode && siteId) {
+      loadSite()
+    }
+  }, [isEditMode, siteId, loadSite])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -152,7 +153,7 @@ const SiteModal = (props: SiteModalProps) => {
           id: siteId,
           siteTitle,
           siteUrl,
-          prompt: selectedPrompt.content,
+          promptId: selectedPrompt.id,
           selector,
           status,
         })
@@ -166,7 +167,7 @@ const SiteModal = (props: SiteModalProps) => {
         const result = await ipcMessenger.invoke(CHANNEL.SITES.CREATE, {
           siteTitle,
           siteUrl,
-          prompt: selectedPrompt.content,
+          promptId: selectedPrompt.id,
           selector,
           status,
         })
@@ -180,7 +181,7 @@ const SiteModal = (props: SiteModalProps) => {
       activeModalSignal.value = null
     } catch (err) {
       setError('An error occurred')
-      console.error(err)
+      logger.error(err)
     } finally {
       setLoading(false)
     }

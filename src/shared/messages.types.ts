@@ -1,4 +1,10 @@
-import { Job, StoreSchema } from '../shared/types'
+import {
+  Job,
+  NewSiteDTO,
+  SiteDTO,
+  StoreSchema,
+  UpdateSiteDTO,
+} from '../shared/types'
 
 export const CHANNEL = {
   SITES: {
@@ -111,68 +117,27 @@ export type Invokes = {
   [CHANNEL.SITES.GET_ALL]: {
     args: undefined
     result: {
-      sites: Array<{
-        id: number
-        siteTitle: string
-        siteUrl: string
-        prompt: string
-        selector: string
-        status: 'active' | 'inactive'
-        createdAt: Date
-        updatedAt: Date
-      }>
+      sites: Array<SiteDTO>
     }
   }
   [CHANNEL.SITES.GET_ALL_WITH_JOB_COUNTS]: {
     args: undefined
     result: {
-      sites: Array<{
-        id: number
-        siteTitle: string
-        siteUrl: string
-        prompt: string
-        selector: string
-        status: 'active' | 'inactive'
-        createdAt: Date
-        updatedAt: Date
-        totalJobs: number
-      }>
+      sites: Array<SiteDTO & { totalJobs: number }>
     }
   }
   [CHANNEL.SITES.GET_BY_ID]: {
     args: { id: number }
     result: {
-      site: {
-        id: number
-        siteTitle: string
-        siteUrl: string
-        prompt: string
-        selector: string
-        status: 'active' | 'inactive'
-        createdAt: Date
-        updatedAt: Date
-      } | null
+      site: SiteDTO | null
     }
   }
   [CHANNEL.SITES.CREATE]: {
-    args: {
-      siteTitle: string
-      siteUrl: string
-      prompt: string
-      selector: string
-      status?: 'active' | 'inactive'
-    }
+    args: NewSiteDTO
     result: { success: boolean; id?: number; error?: string }
   }
   [CHANNEL.SITES.UPDATE]: {
-    args: {
-      id: number
-      siteTitle?: string
-      siteUrl?: string
-      prompt?: string
-      selector?: string
-      status?: 'active' | 'inactive'
-    }
+    args: UpdateSiteDTO
     result: { success: boolean; error?: string }
   }
   [CHANNEL.SITES.DELETE]: {
