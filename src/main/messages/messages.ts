@@ -2,6 +2,7 @@ import { BrowserWindow, ipcMain, shell } from 'electron'
 import path from 'node:path'
 import { CHANNEL } from '../../shared/messages.types'
 import queries from '../database/queries'
+import logger from '../logger'
 import * as scraper from '../scraper'
 import { processText } from '../scraper/ai'
 import { scrape } from '../scraper/scrape'
@@ -92,7 +93,7 @@ typedIpcMain.handle(CHANNEL.SITES.GET_ALL, async () => {
       sites,
     }
   } catch (error) {
-    console.error('Error getting sites:', error)
+    logger.error('Error getting sites:', error)
     return {
       type: 'get_all_sites',
       sites: [],
@@ -108,7 +109,7 @@ typedIpcMain.handle(CHANNEL.SITES.GET_ALL_WITH_JOB_COUNTS, async () => {
       sites,
     }
   } catch (error) {
-    console.error('Error getting sites with job counts:', error)
+    logger.error('Error getting sites with job counts:', error)
     return {
       type: 'get_all_sites_with_job_counts',
       sites: [],
@@ -124,7 +125,7 @@ typedIpcMain.handle(CHANNEL.SITES.GET_BY_ID, async (_event, params) => {
       site,
     }
   } catch (error) {
-    console.error('Error getting site:', error)
+    logger.error('Error getting site:', error)
     return {
       type: 'get_site_by_id',
       site: null,
@@ -141,7 +142,7 @@ typedIpcMain.handle(CHANNEL.SITES.CREATE, async (_event, params) => {
       id: result[0]?.id,
     }
   } catch (error) {
-    console.error('Error creating site:', error)
+    logger.error('Error creating site:', error)
     return {
       type: 'create_site',
       success: false,
@@ -159,7 +160,7 @@ typedIpcMain.handle(CHANNEL.SITES.UPDATE, async (_event, params) => {
       success: true,
     }
   } catch (error) {
-    console.error('Error updating site:', error)
+    logger.error('Error updating site:', error)
     return {
       type: 'update_site',
       success: false,
@@ -176,7 +177,7 @@ typedIpcMain.handle(CHANNEL.SITES.DELETE, async (_event, params) => {
       success: true,
     }
   } catch (error) {
-    console.error('Error deleting site:', error)
+    logger.error('Error deleting site:', error)
     return {
       type: 'delete_site',
       success: false,
@@ -194,7 +195,7 @@ typedIpcMain.handle(CHANNEL.PROMPTS.GET_ALL, async () => {
       prompts,
     }
   } catch (error) {
-    console.error('Error getting prompts:', error)
+    logger.error('Error getting prompts:', error)
     return {
       type: 'get_all_prompts',
       prompts: [],
@@ -210,7 +211,7 @@ typedIpcMain.handle(CHANNEL.PROMPTS.GET_BY_ID, async (_event, params) => {
       prompt,
     }
   } catch (error) {
-    console.error('Error getting prompt:', error)
+    logger.error('Error getting prompt:', error)
     return {
       type: 'get_prompt_by_id',
       prompt: null,
@@ -227,7 +228,7 @@ typedIpcMain.handle(CHANNEL.PROMPTS.CREATE, async (_event, params) => {
       id: result[0]?.id,
     }
   } catch (error) {
-    console.error('Error creating prompt:', error)
+    logger.error('Error creating prompt:', error)
     return {
       type: 'create_prompt',
       success: false,
@@ -245,7 +246,7 @@ typedIpcMain.handle(CHANNEL.PROMPTS.UPDATE, async (_event, params) => {
       success: true,
     }
   } catch (error) {
-    console.error('Error updating prompt:', error)
+    logger.error('Error updating prompt:', error)
     return {
       type: 'update_prompt',
       success: false,
@@ -262,7 +263,7 @@ typedIpcMain.handle(CHANNEL.PROMPTS.DELETE, async (_event, params) => {
       success: true,
     }
   } catch (error) {
-    console.error('Error deleting prompt:', error)
+    logger.error('Error deleting prompt:', error)
     return {
       type: 'delete_prompt',
       success: false,
@@ -279,7 +280,7 @@ typedIpcMain.handle(CHANNEL.SCRAPER.START, async () => {
       ...result,
     }
   } catch (error) {
-    console.error('Error starting scraper:', error)
+    logger.error('Error starting scraper:', error)
     return {
       type: 'start_scraping',
       success: false,
@@ -299,7 +300,7 @@ typedIpcMain.handle(CHANNEL.SCRAPER.RETRY, async (_event, params) => {
       ...result,
     }
   } catch (error) {
-    console.error('Error retrying scraper:', error)
+    logger.error('Error retrying scraper:', error)
     return {
       type: 'retry_scraping',
       success: false,
@@ -316,7 +317,7 @@ typedIpcMain.handle(CHANNEL.SCRAPER.GET_PROGRESS, async (_event, params) => {
       ...result,
     }
   } catch (error) {
-    console.error('Error getting scrape progress:', error)
+    logger.error('Error getting scrape progress:', error)
     return {
       type: 'get_scrape_progress',
       success: false,
@@ -337,7 +338,7 @@ typedIpcMain.handle(CHANNEL.DEBUG.SCRAPE, async (_event, params) => {
       html: result.siteContent,
     }
   } catch (error) {
-    console.error('Error in debug scrape:', error)
+    logger.error('Error in debug scrape:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -347,7 +348,7 @@ typedIpcMain.handle(CHANNEL.DEBUG.SCRAPE, async (_event, params) => {
 
 typedIpcMain.handle(CHANNEL.DEBUG.AI, async (_event, params) => {
   try {
-    console.log('Debug AI params:', params)
+    logger.info('Debug AI params:', params)
     const storeData = getStore()
     const result = await processText({
       apiKey: storeData.openaiApiKey,
@@ -357,7 +358,7 @@ typedIpcMain.handle(CHANNEL.DEBUG.AI, async (_event, params) => {
       siteUrl: params.siteUrl,
       jobToJSONPrompt: storeData.openAiSiteHTMLToJSONJobsPrompt,
     })
-    console.log('Debug AI result:', result.jobs)
+    logger.info('Debug AI result:', result.jobs)
 
     return {
       success: true,
@@ -365,7 +366,7 @@ typedIpcMain.handle(CHANNEL.DEBUG.AI, async (_event, params) => {
       rawResponse: result.rawResponse,
     }
   } catch (error) {
-    console.error('Error in debug process text:', error)
+    logger.error('Error in debug process text:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -382,7 +383,7 @@ typedIpcMain.handle(CHANNEL.SCRAPE_RUNS.GET_ALL, async () => {
       runs,
     }
   } catch (error) {
-    console.error('Error getting scrape runs:', error)
+    logger.error('Error getting scrape runs:', error)
     return {
       type: 'get_all_scrape_runs',
       runs: [],
@@ -398,7 +399,7 @@ typedIpcMain.handle(CHANNEL.SCRAPE_RUNS.GET_TASKS, async (_event, params) => {
       tasks,
     }
   } catch (error) {
-    console.error('Error getting scrape tasks:', error)
+    logger.error('Error getting scrape tasks:', error)
     return {
       type: 'get_scrape_tasks',
       tasks: [],
@@ -415,7 +416,7 @@ typedIpcMain.handle(CHANNEL.JOB_POSTINGS.GET_ALL, async () => {
       postings,
     }
   } catch (error) {
-    console.error('Error getting job postings:', error)
+    logger.error('Error getting job postings:', error)
     return {
       type: 'get_all_job_postings',
       postings: [],
@@ -433,7 +434,7 @@ typedIpcMain.handle(
         postings,
       }
     } catch (error) {
-      console.error('Error getting job postings by site:', error)
+      logger.error('Error getting job postings by site:', error)
       return {
         type: 'get_job_postings_by_site_id',
         postings: [],
@@ -452,7 +453,7 @@ typedIpcMain.handle(
         success: true,
       }
     } catch (error) {
-      console.error('Error updating job posting status:', error)
+      logger.error('Error updating job posting status:', error)
       return {
         type: 'update_job_posting_status',
         success: false,
@@ -467,7 +468,7 @@ ipcMain.handle('shell:openExternal', async (_event, url: string) => {
   try {
     // Validate URL
     if (!url || typeof url !== 'string' || url.trim() === '') {
-      console.error('Invalid URL provided to openExternal:', url)
+      logger.error('Invalid URL provided to openExternal:', url)
       return
     }
 
@@ -479,6 +480,6 @@ ipcMain.handle('shell:openExternal', async (_event, url: string) => {
 
     await shell.openExternal(validUrl)
   } catch (error) {
-    console.error('Error opening external URL:', error)
+    logger.error('Error opening external URL:', error)
   }
 })

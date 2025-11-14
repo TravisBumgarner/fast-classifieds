@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "36f8d037-665c-47a6-b9a9-ea707f818c3a",
+  "id": "f24ca880-d1df-4853-a894-ef829eec21ef",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "api_usage": {
@@ -189,6 +189,13 @@
           "notNull": true,
           "autoincrement": true
         },
+        "company": {
+          "name": "company",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "title": {
           "name": "title",
           "type": "text",
@@ -269,6 +276,14 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'active'"
         },
         "created_at": {
           "name": "created_at",
@@ -458,9 +473,9 @@
           "notNull": true,
           "autoincrement": false
         },
-        "prompt": {
-          "name": "prompt",
-          "type": "text",
+        "prompt_id": {
+          "name": "prompt_id",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false

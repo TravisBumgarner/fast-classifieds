@@ -1,1 +1,0 @@
-ALTER TABLE `prompts` ADD `status` text DEFAULT 'active' NOT NULL;

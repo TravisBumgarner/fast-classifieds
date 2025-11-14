@@ -1,6 +1,6 @@
 import { and, desc, eq } from 'drizzle-orm'
 import OpenAI from 'openai'
-import type { Status } from '../../shared/types'
+import type { NewSiteDTO, Status, UpdateSiteDTO } from '../../shared/types'
 import { db } from './client'
 import {
   apiUsage,
@@ -15,7 +15,6 @@ import {
   type NewPrompt,
   type NewScrapeRun,
   type NewScrapeTask,
-  type NewSite,
 } from './schema'
 
 async function insertApiUsage({
@@ -166,14 +165,14 @@ async function getSiteById(id: number) {
 /**
  * Insert a new site
  */
-async function insertSite(data: NewSite) {
+async function insertSite(data: NewSiteDTO) {
   return db.insert(sites).values(data).returning()
 }
 
 /**
  * Update a site
  */
-async function updateSite(id: number, data: Partial<NewSite>) {
+async function updateSite(id: number, data: Partial<UpdateSiteDTO>) {
   return db
     .update(sites)
     .set({ ...data, updatedAt: new Date() })

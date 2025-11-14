@@ -121,7 +121,7 @@ export const sites = sqliteTable('sites', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   siteTitle: text('site_title').notNull(),
   siteUrl: text('site_url').notNull().unique(),
-  prompt: text('prompt').notNull(),
+  promptId: text('prompt_id').notNull(),
   selector: text('selector').notNull(),
   status: text('status', {
     enum: Object.values(SITE_STATUS) as [SiteStatus, ...SiteStatus[]],
