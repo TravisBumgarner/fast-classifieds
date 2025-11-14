@@ -34,22 +34,35 @@ typedIpcMain.handle(CHANNEL.STORE.SET, async (_event, params) => {
 })
 
 typedIpcMain.handle(CHANNEL.APP.EXPORT_ALL_DATA, async () => {
-  // try {
-  //   // TODO: Implement export functionality
-  //   return {
-  //     type: 'export_all_data',
-  //     success: true,
-  //     data: {
-  //       sites: [],
-  //     },
-  //   }
-  // } catch (error) {
-  //   return {
-  //     type: 'export_all_data',
-  //     success: false,
-  //     error: error instanceof Error ? error.message : 'Unknown error',
-  //   }
-  // }
+  const sites = await queries.getAllSites()
+  const prompts = await queries.getAllPrompts()
+  const jobPostings = await queries.getAllJobPostings()
+  const scrapeRuns = await queries.getAllScrapeRuns()
+  const hashes = await queries.getAllHashes()
+  const apiUsage = await queries.getAllApiUsage()
+  const scrapeTasks = await queries.getAllScrapeTasks()
+
+  try {
+    return {
+      type: 'export_all_data',
+      success: true,
+      data: {
+        sites,
+        prompts,
+        jobPostings,
+        scrapeRuns,
+        hashes,
+        apiUsage,
+        scrapeTasks,
+      },
+    }
+  } catch (error) {
+    return {
+      type: 'export_all_data',
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    }
+  }
 })
 
 typedIpcMain.handle(CHANNEL.APP.RESTORE_ALL_DATA, async () => {

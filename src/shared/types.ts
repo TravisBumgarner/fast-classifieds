@@ -43,7 +43,7 @@ export const JobSchema = z.object({
 
 export const JobsResponseSchema = z.array(JobSchema)
 
-export type Job = z.infer<typeof JobSchema>
+export type JobDTO = z.infer<typeof JobSchema>
 export type JobsResponse = z.infer<typeof JobsResponseSchema>
 
 export interface StoreSchema {
@@ -57,11 +57,44 @@ export interface StoreSchema {
 }
 
 export type PromptStatus = 'active' | 'inactive'
-export interface Prompt {
+export interface NewPromptDTO {
+  title: string
+  content: string
+  status: PromptStatus
+}
+
+export interface UpdatePromptDTO {
   id: number
   title: string
   content: string
   status: PromptStatus
+}
+
+export interface PromptDTO extends NewPromptDTO {
+  id: number
   createdAt: Date
   updatedAt: Date
+}
+
+export interface ScrapeTaskDTO {
+  id: number
+  scrapeRunId: number
+  siteId: number
+  siteUrl: string
+  status: Status
+  newPostingsFound: number
+  errorMessage?: string | null
+  createdAt: Date
+  completedAt?: Date | null
+}
+
+export interface ScrapeRunDTO {
+  id: number
+  startedAt: Date
+  completedAt?: Date | null
+  totalSites: number
+  successfulSites: number
+  failedSites: number
+  status: Status
+  comments?: string | null
 }

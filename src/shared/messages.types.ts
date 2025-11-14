@@ -1,8 +1,13 @@
 import {
-  Job,
+  JobDTO,
+  NewPromptDTO,
   NewSiteDTO,
+  PromptDTO,
+  ScrapeRunDTO,
+  ScrapeTaskDTO,
   SiteDTO,
   StoreSchema,
+  UpdatePromptDTO,
   UpdateSiteDTO,
 } from '../shared/types'
 
@@ -99,7 +104,13 @@ export type Invokes = {
     args: undefined
     result: {
       success: boolean
-      data?: unknown // Todo fix
+      data?: {
+        sites: Array<SiteDTO>
+        prompts: Array<PromptDTO>
+        jobPostings: Array<JobDTO>
+        scrapeRuns: Array<ScrapeRunDTO>
+        scrapeTasks: Array<ScrapeTaskDTO>
+      }
       error?: string
     }
   }
@@ -147,44 +158,21 @@ export type Invokes = {
   [CHANNEL.PROMPTS.GET_ALL]: {
     args: undefined
     result: {
-      prompts: Array<{
-        id: number
-        title: string
-        content: string
-        status: 'active' | 'inactive'
-        createdAt: Date
-        updatedAt: Date
-      }>
+      prompts: Array<PromptDTO>
     }
   }
   [CHANNEL.PROMPTS.GET_BY_ID]: {
     args: { id: number }
     result: {
-      prompt: {
-        id: number
-        title: string
-        content: string
-        status: 'active' | 'inactive'
-        createdAt: Date
-        updatedAt: Date
-      } | null
+      prompt: PromptDTO | null
     }
   }
   [CHANNEL.PROMPTS.CREATE]: {
-    args: {
-      title: string
-      content: string
-      status?: 'active' | 'inactive'
-    }
+    args: NewPromptDTO
     result: { success: boolean; id?: number; error?: string }
   }
   [CHANNEL.PROMPTS.UPDATE]: {
-    args: {
-      id: number
-      title?: string
-      content?: string
-      status?: 'active' | 'inactive'
-    }
+    args: UpdatePromptDTO
     result: { success: boolean; error?: string }
   }
   [CHANNEL.PROMPTS.DELETE]: {
@@ -232,7 +220,7 @@ export type Invokes = {
     }
     result: {
       success: boolean
-      jobs?: Array<Job>
+      jobs?: Array<JobDTO>
       rawResponse?: unknown
       error?: string
     }
@@ -240,32 +228,13 @@ export type Invokes = {
   [CHANNEL.SCRAPE_RUNS.GET_ALL]: {
     args: undefined
     result: {
-      runs: Array<{
-        id: number
-        status: 'hash_exists' | 'new_data' | 'error'
-        totalSites: number
-        successfulSites: number
-        failedSites: number
-        comments?: string | null
-        createdAt: Date
-        completedAt?: Date | null
-      }>
+      runs: Array<ScrapeRunDTO>
     }
   }
   [CHANNEL.SCRAPE_RUNS.GET_TASKS]: {
     args: { scrapeRunId: number }
     result: {
-      tasks: Array<{
-        id: number
-        scrapeRunId: number
-        siteId: number
-        siteUrl: string
-        status: 'hash_exists' | 'new_data' | 'error'
-        newPostingsFound: number
-        errorMessage?: string | null
-        createdAt: Date
-        completedAt?: Date | null
-      }>
+      tasks: Array<ScrapeTaskDTO>
     }
   }
   [CHANNEL.JOB_POSTINGS.GET_ALL]: {
