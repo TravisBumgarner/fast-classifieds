@@ -194,6 +194,18 @@ async function getAllPrompts() {
   return db.select().from(prompts)
 }
 
+async function getAllHashes() {
+  return db.select().from(hashes)
+}
+
+async function getAllApiUsage() {
+  return db.select().from(apiUsage)
+}
+
+async function getAllScrapeTasks() {
+  return db.select().from(scrapeTasks)
+}
+
 /**
  * Get a prompt by ID
  */
@@ -343,6 +355,9 @@ export default {
   getAllSites,
   getAllSitesWithJobCounts,
   getSiteById,
+  getAllApiUsage,
+  getAllHashes,
+  getAllScrapeTasks,
   insertSite,
   updateSite,
   deleteSite,

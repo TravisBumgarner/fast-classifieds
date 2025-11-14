@@ -5,7 +5,8 @@
     "moduleResolution": "Bundler",
     "target": "ESNext",
     "types": ["vite/client"],
-    "noEmit": true
+    "noEmit": true,
+    "strict": true
   },
   "include": ["src/renderer/**/*"]
 }

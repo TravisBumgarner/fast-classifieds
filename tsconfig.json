@@ -6,6 +6,7 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "noImplicitAny": true,
+    "strict": true,
     "sourceMap": true,
     "jsx": "react-jsx",
     "baseUrl": ".",
@@ -14,5 +15,5 @@
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true
   },
-  "exclude": ["src/renderer"],
+  "exclude": ["src/renderer"]
 }

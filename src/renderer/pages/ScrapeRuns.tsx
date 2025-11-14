@@ -28,6 +28,7 @@ import { MODAL_ID } from '../sharedComponents/Modal/Modal.consts'
 import PageWrapper from '../sharedComponents/PageWrapper'
 import { activeModalSignal } from '../signals'
 import { SPACING } from '../styles/consts'
+import { logger } from '../utilities'
 
 type Status = 'hash_exists' | 'new_data' | 'error'
 
@@ -171,7 +172,7 @@ const ScrapeRuns = () => {
       setRuns(result.runs)
     } catch (err) {
       setError('Failed to load scrape runs')
-      console.error(err)
+      logger.error(err)
     } finally {
       setLoading(false)
     }
@@ -182,7 +183,7 @@ const ScrapeRuns = () => {
       const result = await ipcMessenger.invoke(CHANNEL.SITES.GET_ALL, undefined)
       setSites(result.sites)
     } catch (err) {
-      console.error('Failed to load sites:', err)
+      logger.error('Failed to load sites:', err)
     }
   }
 
@@ -195,7 +196,7 @@ const ScrapeRuns = () => {
       }
     } catch (err) {
       setError('Failed to retry scrape')
-      console.error(err)
+      logger.error(err)
     }
   }
 
@@ -214,7 +215,7 @@ const ScrapeRuns = () => {
       setExpandedRunId(runId)
     } catch (err) {
       setError('Failed to load scrape tasks')
-      console.error(err)
+      logger.error(err)
     }
   }
 

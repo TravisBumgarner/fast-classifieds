@@ -14,6 +14,7 @@ import { CHANNEL } from '../../../../shared/messages.types'
 import ipcMessenger from '../../../ipcMessenger'
 import { activeModalSignal } from '../../../signals'
 import { SPACING } from '../../../styles/consts'
+import { logger } from '../../../utilities'
 import { MODAL_ID } from '../Modal.consts'
 import DefaultModal from './DefaultModal'
 
@@ -56,11 +57,11 @@ const PromptModal = (props: PromptModalProps) => {
       if (result.prompt) {
         setTitle(result.prompt.title)
         setContent(result.prompt.content)
-        setStatus(result.prompt.status || 'active')
+        setStatus(result.prompt.status)
       }
     } catch (err) {
       setError('Failed to load prompt')
-      console.error(err)
+      logger.error(err)
     } finally {
       setLoading(false)
     }
@@ -111,7 +112,7 @@ const PromptModal = (props: PromptModalProps) => {
       activeModalSignal.value = null
     } catch (err) {
       setError('An error occurred')
-      console.error(err)
+      logger.error(err)
     } finally {
       setLoading(false)
     }

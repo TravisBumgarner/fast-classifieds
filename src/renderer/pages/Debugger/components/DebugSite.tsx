@@ -6,6 +6,7 @@ import ipcMessenger from '../../../ipcMessenger'
 import Icon from '../../../sharedComponents/Icon'
 import Message from '../../../sharedComponents/Message'
 import { SPACING } from '../../../styles/consts'
+import { logger } from '../../../utilities'
 
 const DebugSite = ({
   url,
@@ -34,7 +35,7 @@ const DebugSite = ({
       try {
         setSiteTitle(new URL(url).hostname)
       } catch {
-        console.log('Invalid URL provided')
+        logger.error('Invalid URL provided')
       }
     }
   }, [url, setSiteTitle])

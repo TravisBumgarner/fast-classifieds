@@ -23,6 +23,7 @@ import {
 } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { CHANNEL } from '../../shared/messages.types'
+import { PromptDTO, PromptStatus } from '../../shared/types'
 import { PAGINATION } from '../consts'
 import ipcMessenger from '../ipcMessenger'
 import Icon from '../sharedComponents/Icon'
@@ -31,17 +32,13 @@ import { MODAL_ID } from '../sharedComponents/Modal/Modal.consts'
 import PageWrapper from '../sharedComponents/PageWrapper'
 import { activeModalSignal } from '../signals'
 import { SPACING } from '../styles/consts'
-import { Prompt, PromptStatus } from '../../shared/types'
-
-
-
-
+import { logger } from '../utilities'
 
 type SortField = 'title' | 'status' | 'updatedAt'
 type SortDirection = 'asc' | 'desc'
 
 const Prompts = () => {
-  const [prompts, setPrompts] = useState<Prompt[]>([])
+  const [prompts, setPrompts] = useState<PromptDTO[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set())
@@ -121,7 +118,7 @@ const Prompts = () => {
       setPrompts(result.prompts)
     } catch (err) {
       setError('Failed to load prompts')
-      console.error(err)
+      logger.error(err)
     } finally {
       setLoading(false)
     }
@@ -138,7 +135,7 @@ const Prompts = () => {
     }
   }
 
-  const handleEditPrompt = (prompt: Prompt) => {
+  const handleEditPrompt = (prompt: PromptDTO) => {
     activeModalSignal.value = {
       id: MODAL_ID.EDIT_PROMPT_MODAL,
       promptId: prompt.id,
@@ -164,7 +161,7 @@ const Prompts = () => {
           }
         } catch (err) {
           setError('Failed to delete prompt')
-          console.error(err)
+          logger.error(err)
         }
       },
     }

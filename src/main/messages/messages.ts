@@ -1,7 +1,17 @@
 import { BrowserWindow, ipcMain, shell } from 'electron'
 import path from 'node:path'
 import { CHANNEL } from '../../shared/messages.types'
+import { db } from '../database/client'
 import queries from '../database/queries'
+import {
+  apiUsage,
+  hashes,
+  jobPostings,
+  prompts,
+  scrapeRuns,
+  scrapeTasks,
+  sites,
+} from '../database/schema'
 import logger from '../logger'
 import * as scraper from '../scraper'
 import { processText } from '../scraper/ai'
@@ -34,27 +44,65 @@ typedIpcMain.handle(CHANNEL.STORE.SET, async (_event, params) => {
 })
 
 typedIpcMain.handle(CHANNEL.APP.EXPORT_ALL_DATA, async () => {
-  // try {
-  //   // TODO: Implement export functionality
-  //   return {
-  //     type: 'export_all_data',
-  //     success: true,
-  //     data: {
-  //       sites: [],
-  //     },
-  //   }
-  // } catch (error) {
-  //   return {
-  //     type: 'export_all_data',
-  //     success: false,
-  //     error: error instanceof Error ? error.message : 'Unknown error',
-  //   }
-  // }
+  const sites = await queries.getAllSites()
+  const prompts = await queries.getAllPrompts()
+  const jobPostings = await queries.getAllJobPostings()
+  const scrapeRuns = await queries.getAllScrapeRuns()
+  const hashes = await queries.getAllHashes()
+  const apiUsage = await queries.getAllApiUsage()
+  const scrapeTasks = await queries.getAllScrapeTasks()
+
+  try {
+    return {
+      type: 'export_all_data',
+      success: true,
+      data: {
+        sites,
+        prompts,
+        jobPostings,
+        scrapeRuns,
+        hashes,
+        apiUsage,
+        scrapeTasks,
+      },
+    }
+  } catch (error) {
+    return {
+      type: 'export_all_data',
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    }
+  }
 })
 
-typedIpcMain.handle(CHANNEL.APP.RESTORE_ALL_DATA, async () => {
+typedIpcMain.handle(CHANNEL.APP.RESTORE_ALL_DATA, async (_event, params) => {
   try {
-    // TODO: Implement restore functionality
+    await db.delete(sites).run()
+    await db.delete(prompts).run()
+    await db.delete(jobPostings).run()
+    await db.delete(scrapeRuns).run()
+    await db.delete(hashes).run()
+    await db.delete(apiUsage).run()
+    await db.delete(scrapeTasks).run()
+
+    const {
+      sites: storeSites,
+      prompts: storePrompts,
+      jobPostings: storeJobPostings,
+      scrapeRuns: storeScrapeRuns,
+      hashes: storeHashes,
+      apiUsage: storeApiUsage,
+      scrapeTasks: storeScrapeTasks,
+    } = await params.data
+
+    await db.insert(sites).values(storeSites).run()
+    await db.insert(prompts).values(storePrompts).run()
+    await db.insert(jobPostings).values(storeJobPostings).run()
+    await db.insert(scrapeRuns).values(storeScrapeRuns).run()
+    await db.insert(hashes).values(storeHashes).run()
+    await db.insert(apiUsage).values(storeApiUsage).run()
+    await db.insert(scrapeTasks).values(storeScrapeTasks).run()
+
     return {
       type: 'restore_all_data',
       success: true,
