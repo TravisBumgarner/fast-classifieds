@@ -32,6 +32,7 @@ import { MODAL_ID } from '../sharedComponents/Modal/Modal.consts'
 import PageWrapper from '../sharedComponents/PageWrapper'
 import { activeModalSignal, onboardingCompletedSignal } from '../signals'
 import { SPACING } from '../styles/consts'
+import { logger } from '../utilities'
 
 type PostingStatus =
   | 'new'
@@ -146,7 +147,7 @@ const Postings = () => {
       setJobPostings(result.postings)
     } catch (err) {
       setError('Failed to load job postings')
-      console.error(err)
+      logger.error(err)
     } finally {
       setLoading(false)
     }
@@ -201,7 +202,7 @@ const Postings = () => {
       }
     } catch (err) {
       setError('Failed to update job posting status')
-      console.error(err)
+      logger.error(err)
     }
   }
 
@@ -239,7 +240,7 @@ const Postings = () => {
         // Signal that onboarding check is complete (whether shown or not)
         onboardingCompletedSignal.value = true
       } catch (err) {
-        console.error('Error checking first launch:', err)
+        logger.error('Error checking first launch:', err)
         setHasCheckedOnboarding(true)
         onboardingCompletedSignal.value = true
       }

@@ -65,6 +65,7 @@
     "react/no-unknown-property": "error",
     "react/require-render-return": "error",
     "no-extra-semi": "off",
+    "no-console": "error",
 
     // React Hooks rules
     "react-hooks/rules-of-hooks": "error",

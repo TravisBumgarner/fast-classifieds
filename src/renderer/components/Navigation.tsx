@@ -1,4 +1,4 @@
-import { Tooltip } from '@mui/material'
+import { Tooltip, Typography } from '@mui/material'
 import AppBar from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -8,6 +8,8 @@ import MenuItem from '@mui/material/MenuItem'
 import Toolbar from '@mui/material/Toolbar'
 import { useState } from 'react'
 import { Link as RouterLink, useLocation } from 'react-router-dom'
+
+import Logo from '../assets/icon.png'
 import { ROUTES } from '../consts'
 import Icon from '../sharedComponents/Icon'
 import { SPACING } from '../styles/consts'
@@ -48,12 +50,29 @@ const Navigation = () => {
             display: 'flex',
             justifyContent: 'space-between',
             width: '100%',
+            height: '40px',
+            alignItems: 'center',
           }}
         >
           <Box
             sx={{
+              height: '100%',
               display: 'flex',
-              gap: SPACING.MEDIUM.PX,
+            }}
+          >
+            <img
+              src={Logo}
+              alt="Fast Classifieds Logo"
+              style={{ height: '100%', aspectRatio: '1 / 1' }}
+            />
+            <Typography variant="body1" sx={{ fontWeight: 'bold', ml: 0.5 }}>
+              <sup>Alpha</sup>
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              display: 'flex',
+              gap: SPACING.TINY.PX,
               alignItems: 'center',
             }}
           >
@@ -70,8 +89,7 @@ const Navigation = () => {
                   variant={isActive ? 'contained' : 'text'}
                   color={isActive ? 'primary' : 'inherit'}
                   sx={{
-                    minWidth: 'auto',
-                    px: 2,
+                    width: '70px',
                   }}
                 >
                   {route.label}

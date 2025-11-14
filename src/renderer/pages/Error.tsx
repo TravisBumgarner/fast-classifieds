@@ -5,9 +5,11 @@ import PageWrapper from '../sharedComponents/PageWrapper'
 const NotFound = () => {
   return (
     <PageWrapper>
-      <Typography>404 - Page Not Found</Typography>
-      <Typography>The page you are looking for does not exist.</Typography>
-      <ContactForm formSuffix="not-found-page" />
+      <Typography>500 - Internal Server Error</Typography>
+      <Typography>
+        Something went wrong on our end. What were you trying to do?
+      </Typography>
+      <ContactForm formSuffix="error-page" />
     </PageWrapper>
   )
 }

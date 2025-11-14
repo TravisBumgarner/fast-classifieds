@@ -16,7 +16,7 @@ export const ROUTES = {
   },
   scrapeRuns: {
     href: () => '/scrape-runs',
-    label: 'Run History',
+    label: 'History',
     target: '_self',
   },
   settings: {
