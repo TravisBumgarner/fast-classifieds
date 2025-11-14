@@ -1,18 +1,23 @@
 import { Component } from 'react'
+import Error from '../pages/Error'
+import { logger } from '../utilities'
 
-class ErrorBoundary extends Component {
+class ErrorBoundary extends Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
   state = { hasError: false }
 
   static getDerivedStateFromError() {
     return { hasError: true }
   }
 
-  componentDidCatch(err, info) {
-    console.error(err, info)
+  componentDidCatch(err: unknown, info: unknown) {
+    logger.error(err, info)
   }
 
   render() {
-    if (this.state.hasError) return this.props.fallback
+    if (this.state.hasError) return <Error />
     return this.props.children
   }
 }
