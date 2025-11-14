@@ -10,5 +10,8 @@ Stop wasting hours manually browsing company career pages. Fast Classifieds uses
 
 1. `npm run bootstrap` - Install dependencies and setup database.
 1. Running App
-    - Everywhere: `npm run dev`
-    - Within VSCode: Use the `Run and Debug` tab, select `Main + renderer` from dropdown, then click run.
+   - Everywhere: `npm run dev`
+   - Within VSCode: Use the `Run and Debug` tab, select `Main + renderer` from dropdown, then click run.
+1. Note - Electron's main, the backend, does not have hot module reloading.
+   - Everywhere: Restart the `npm run dev` script
+   - Within VSCode: Hit the `Restart` button.
