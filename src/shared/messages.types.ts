@@ -162,15 +162,15 @@ export type Invokes = {
   }
   [CHANNEL.SITES.CREATE]: {
     args: NewSiteDTO
-    result: { success: boolean; id?: string; error?: string }
+    result: { success: true; id: string } | { success: false; error: string }
   }
   [CHANNEL.SITES.UPDATE]: {
     args: UpdateSiteDTO
-    result: { success: boolean; error?: string }
+    result: { success: true } | { success: false; error: string }
   }
   [CHANNEL.SITES.DELETE]: {
     args: { id: string }
-    result: { success: boolean; error?: string }
+    result: { success: true } | { success: false; error: string }
   }
   [CHANNEL.PROMPTS.GET_ALL]: {
     args: undefined
@@ -186,11 +186,11 @@ export type Invokes = {
   }
   [CHANNEL.PROMPTS.CREATE]: {
     args: NewPromptDTO
-    result: { success: boolean; id?: string; error?: string }
+    result: { success: true; id: string } | { success: false; error: string }
   }
   [CHANNEL.PROMPTS.UPDATE]: {
     args: UpdatePromptDTO
-    result: { success: boolean; error?: string }
+    result: { success: true } | { success: false; error: string }
   }
   [CHANNEL.PROMPTS.DELETE]: {
     args: { id: string }
@@ -276,6 +276,6 @@ export type Invokes = {
       id: string
       data: Partial<NewJobPostingDTO>
     }
-    result: { success: boolean; error?: string }
+    result: { success: true } | { success: false; error: string }
   }
 }
