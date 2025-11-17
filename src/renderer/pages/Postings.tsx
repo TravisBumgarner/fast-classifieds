@@ -362,7 +362,9 @@ const Postings = () => {
                     Found On
                   </TableSortLabel>
                 </TableCell>
-                <TableCell align="right">Actions</TableCell>
+                <TableCell width="90px" align="right">
+                  Actions
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
