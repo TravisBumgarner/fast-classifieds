@@ -6,6 +6,7 @@ import type {
   NewPromptDTO,
   NewSiteDTO,
   PromptDTO,
+  ScrapedContentDTO,
   ScrapeRunDTO,
   ScrapeTaskDTO,
   SiteDTO,
@@ -161,15 +162,15 @@ export type Invokes = {
   }
   [CHANNEL.SITES.CREATE]: {
     args: NewSiteDTO
-    result: { success: boolean; id?: string; error?: string }
+    result: { success: true; id: string } | { success: false; error: string }
   }
   [CHANNEL.SITES.UPDATE]: {
     args: UpdateSiteDTO
-    result: { success: boolean; error?: string }
+    result: { success: true } | { success: false; error: string }
   }
   [CHANNEL.SITES.DELETE]: {
     args: { id: string }
-    result: { success: boolean; error?: string }
+    result: { success: true } | { success: false; error: string }
   }
   [CHANNEL.PROMPTS.GET_ALL]: {
     args: undefined
@@ -185,23 +186,23 @@ export type Invokes = {
   }
   [CHANNEL.PROMPTS.CREATE]: {
     args: NewPromptDTO
-    result: { success: boolean; id?: string; error?: string }
+    result: { success: true; id: string } | { success: false; error: string }
   }
   [CHANNEL.PROMPTS.UPDATE]: {
     args: UpdatePromptDTO
-    result: { success: boolean; error?: string }
+    result: { success: true } | { success: false; error: string }
   }
   [CHANNEL.PROMPTS.DELETE]: {
     args: { id: string }
-    result: { success: boolean; error?: string }
+    result: { success: true } | { success: false; error: string }
   }
   [CHANNEL.SCRAPER.START]: {
     args: undefined
-    result: { success: boolean; scrapeRunId?: string; error?: string }
+    result: { success: true; scrapeRunId: string } | { success: false; error: string }
   }
   [CHANNEL.SCRAPER.RETRY]: {
     args: { scrapeRunId: string }
-    result: { success: boolean; scrapeRunId?: string; error?: string }
+    result: { success: true; scrapeRunId: string } | { success: false; error: string }
   }
   [CHANNEL.SCRAPER.GET_PROGRESS]: {
     args: { scrapeRunId: string }
@@ -225,22 +226,26 @@ export type Invokes = {
   }
   [CHANNEL.DEBUG.SCRAPE]: {
     args: { url: string; selector: string }
-    result: { success: boolean; html?: string; error?: string }
+    result: { success: true; scrapedContent: ScrapedContentDTO } | { success: false; error: string }
   }
   [CHANNEL.DEBUG.AI]: {
     args: {
       prompt: string
-      siteContent: string
+      scrapedContent: ScrapedContentDTO
       siteUrl: string
       siteId: string
       jobToJSONPrompt: string
     }
-    result: {
-      success: boolean
-      jobs?: Array<NewJobPostingDTO>
-      rawResponse?: unknown
-      error?: string
-    }
+    result:
+      | {
+          success: true
+          jobs: Array<JobPostingDTO>
+        }
+      | {
+          success: false
+          // rawResponse?: unknown
+          error: string
+        }
   }
   [CHANNEL.SCRAPE_RUNS.GET_ALL]: {
     args: undefined
@@ -271,6 +276,6 @@ export type Invokes = {
       id: string
       data: Partial<NewJobPostingDTO>
     }
-    result: { success: boolean; error?: string }
+    result: { success: true } | { success: false; error: string }
   }
 }

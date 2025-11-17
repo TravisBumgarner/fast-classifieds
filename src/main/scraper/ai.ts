@@ -1,5 +1,5 @@
 import OpenAI from 'openai'
-import type { NewJobPostingDTO } from 'src/shared/types'
+import type { NewJobPostingDTO, ScrapedContentDTO } from 'src/shared/types'
 import { z } from 'zod'
 import { renderPrompt } from '../../shared/utils'
 
@@ -15,7 +15,7 @@ const aiJobSchema = z.array(
 
 export async function processText({
   prompt,
-  siteContent,
+  scrapedContent,
   apiKey,
   model,
   siteUrl,
@@ -23,7 +23,7 @@ export async function processText({
   siteId,
 }: {
   prompt: string
-  siteContent: string
+  scrapedContent: ScrapedContentDTO
   apiKey: string
   model: string
   siteUrl: string
@@ -40,7 +40,7 @@ export async function processText({
     model,
     input: renderPrompt({
       prompt,
-      siteContent,
+      scrapedContent,
       siteUrl,
       jobToJSONPrompt,
     }),

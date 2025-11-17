@@ -1,5 +1,6 @@
 import { Box, Button, Stack, TextField, Tooltip, Typography } from '@mui/material'
 import { useState } from 'react'
+import type { ScrapedContentDTO } from 'src/shared/types'
 import { CHANNEL } from '../../../../shared/messages.types'
 import { TOOLTIPS } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
@@ -15,8 +16,8 @@ const DebugSite = ({
   setSelector,
   siteTitle,
   setSiteTitle,
-  scrapedHtml,
-  setScrapedHtml,
+  scrapedContent,
+  setScrapedContent,
 }: {
   url: string
   setUrl: (url: string) => void
@@ -24,8 +25,8 @@ const DebugSite = ({
   setSelector: (selector: string) => void
   siteTitle: string
   setSiteTitle: (siteTitle: string) => void
-  scrapedHtml: string
-  setScrapedHtml: (html: string) => void
+  scrapedContent: ScrapedContentDTO
+  setScrapedContent: (scrapedContent: ScrapedContentDTO) => void
 }) => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -42,7 +43,7 @@ const DebugSite = ({
 
   const handleTest = async () => {
     setError(null)
-    setScrapedHtml('')
+    setScrapedContent([])
 
     if (!url) {
       setError('Please enter a URL')
@@ -57,15 +58,7 @@ const DebugSite = ({
       })
 
       if (result.success) {
-        const formatted = result.html
-          ? result.html
-              .replace(/></g, '>\n<')
-              .split('\n')
-              .map((line) => line.trim())
-              .filter((line) => line.length > 0)
-              .join('\n')
-          : ''
-        setScrapedHtml(formatted)
+        setScrapedContent(result.scrapedContent)
       } else {
         setError(result.error || 'Failed to scrape')
       }
@@ -96,6 +89,7 @@ const DebugSite = ({
           onChange={(e) => setUrl(e.target.value)}
           placeholder="https://example.com"
           onBlur={handleUrlAndTitleSync}
+          type="url"
         />
 
         <TextField
@@ -155,7 +149,9 @@ const DebugSite = ({
           border: '1px solid #ccc',
         }}
       >
-        {scrapedHtml || 'No HTML scraped yet.'}
+        {scrapedContent.length > 0
+          ? scrapedContent.map((item) => (item.link ? `${item.text} - ${item.link}` : item.text)).join('\n\n')
+          : 'No HTML scraped yet.'}
       </Box>
 
       {error && <Message message={error} color="error" />}

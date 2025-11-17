@@ -1,7 +1,7 @@
 import { CgDebug } from 'react-icons/cg'
 import { FaExternalLinkAlt } from 'react-icons/fa'
 import { GiHamburgerMenu } from 'react-icons/gi'
-import { IoMdSettings } from 'react-icons/io'
+import { IoIosSkipForward, IoMdSettings } from 'react-icons/io'
 import { IoInformationCircleOutline } from 'react-icons/io5'
 import { LuPartyPopper } from 'react-icons/lu'
 
@@ -14,6 +14,7 @@ export const iconMap = {
   add: MdAdd,
   close: MdClose,
   info: IoInformationCircleOutline,
+  skip: IoIosSkipForward,
   error: MdError,
   success: LuPartyPopper,
   settings: IoMdSettings,

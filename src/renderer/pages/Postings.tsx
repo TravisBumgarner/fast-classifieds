@@ -405,26 +405,37 @@ const Postings = () => {
                     <TableCell>{posting.title}</TableCell>
                     <TableCell>{posting.location || '-'}</TableCell>
                     <TableCell>
-                      <FormControl size="small" sx={{ minWidth: 120 }}>
-                        <Select
-                          value={posting.status}
-                          onChange={(e) => handleUpdateStatus(posting.id, e.target.value as PostingStatus)}
-                          renderValue={(value) => (
-                            <Chip
-                              label={value.charAt(0).toUpperCase() + value.slice(1)}
-                              color={getStatusColor(value)}
-                              size="small"
-                            />
-                          )}
-                        >
-                          <MenuItem value="new">New</MenuItem>
-                          <MenuItem value="applied">Applied</MenuItem>
-                          <MenuItem value="interview">Interview</MenuItem>
-                          <MenuItem value="offer">Offer</MenuItem>
-                          <MenuItem value="skipped">Skipped</MenuItem>
-                          <MenuItem value="rejected">Rejected</MenuItem>
-                        </Select>
-                      </FormControl>
+                      <Stack direction="row" alignItems="center">
+                        <FormControl size="small" sx={{ minWidth: 120 }}>
+                          <Select
+                            value={posting.status}
+                            onChange={(e) => handleUpdateStatus(posting.id, e.target.value as PostingStatus)}
+                            renderValue={(value) => (
+                              <Chip
+                                label={value.charAt(0).toUpperCase() + value.slice(1)}
+                                color={getStatusColor(value)}
+                                size="small"
+                              />
+                            )}
+                          >
+                            <MenuItem value="new">New</MenuItem>
+                            <MenuItem value="applied">Applied</MenuItem>
+                            <MenuItem value="interview">Interview</MenuItem>
+                            <MenuItem value="offer">Offer</MenuItem>
+                            <MenuItem value="skipped">Skipped</MenuItem>
+                            <MenuItem value="rejected">Rejected</MenuItem>
+                          </Select>
+                        </FormControl>
+                        <Tooltip title="Skip Posting">
+                          <IconButton
+                            size="small"
+                            onClick={() => handleUpdateStatus(posting.id, 'skipped')}
+                            sx={{ ml: 1 }}
+                          >
+                            <Icon name="skip" />
+                          </IconButton>
+                        </Tooltip>
+                      </Stack>
                     </TableCell>
                     <TableCell>
                       <Tooltip title={posting.explanation || 'No explanation'}>
@@ -472,6 +483,7 @@ const Postings = () => {
           count={filteredPostings.length}
           rowsPerPage={rowsPerPage}
           page={page}
+          sx={{ flexShrink: 0 }}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />

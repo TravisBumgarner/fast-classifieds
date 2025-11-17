@@ -1,6 +1,8 @@
 import path from 'node:path'
 import { app, type BrowserWindow, ipcMain, shell } from 'electron'
+import { v4 as uuidv4 } from 'uuid'
 import { CHANNEL } from '../../shared/messages.types'
+import { POSTING_STATUS } from '../../shared/types'
 import { db } from '../database/client'
 import queries from '../database/queries'
 import { apiUsage, hashes, jobPostings, prompts, scrapeRuns, scrapeTasks, sites } from '../database/schema'
@@ -302,13 +304,13 @@ typedIpcMain.handle(CHANNEL.PROMPTS.DELETE, async (_event, params) => {
     await queries.deletePrompt(params.id)
     return {
       type: 'delete_prompt',
-      success: true,
+      success: true as const,
     }
   } catch (error) {
     logger.error('Error deleting prompt:', error)
     return {
       type: 'delete_prompt',
-      success: false,
+      success: false as const,
       error: error instanceof Error ? error.message : 'Unknown error',
     }
   }
@@ -342,7 +344,7 @@ typedIpcMain.handle(CHANNEL.SCRAPER.RETRY, async (_event, params) => {
     logger.error('Error retrying scraper:', error)
     return {
       type: 'retry_scraping',
-      success: false,
+      success: false as const,
       error: error instanceof Error ? error.message : 'Unknown error',
     }
   }
@@ -373,13 +375,13 @@ typedIpcMain.handle(CHANNEL.DEBUG.SCRAPE, async (_event, params) => {
     })
 
     return {
-      success: true,
-      html: result.siteContent,
+      success: true as const,
+      scrapedContent: result.scrapedContent,
     }
   } catch (error) {
     logger.error('Error in debug scrape:', error)
     return {
-      success: false,
+      success: false as const,
       error: error instanceof Error ? error.message : 'Unknown error',
     }
   }
@@ -393,7 +395,7 @@ typedIpcMain.handle(CHANNEL.DEBUG.AI, async (_event, params) => {
       apiKey: storeData.openaiApiKey,
       model: storeData.openaiModel,
       prompt: params.prompt,
-      siteContent: params.siteContent,
+      scrapedContent: params.scrapedContent,
       siteUrl: params.siteUrl,
       siteId: params.siteId,
       jobToJSONPrompt: storeData.openAiSiteHTMLToJSONJobsPrompt,
@@ -401,14 +403,20 @@ typedIpcMain.handle(CHANNEL.DEBUG.AI, async (_event, params) => {
     logger.info('Debug AI result:', result.jobs)
 
     return {
-      success: true,
-      jobs: result.jobs,
-      rawResponse: result.rawResponse,
+      success: true as const,
+      jobs: result.jobs.map((job) => ({
+        ...job,
+        id: uuidv4(),
+        status: POSTING_STATUS.NEW,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })),
+      // rawResponse: result.rawResponse,
     }
   } catch (error) {
     logger.error('Error in debug process text:', error)
     return {
-      success: false,
+      success: false as const,
       error: error instanceof Error ? error.message : 'Unknown error',
     }
   }

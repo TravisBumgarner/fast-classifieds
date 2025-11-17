@@ -1,22 +1,36 @@
-import { Box, Button, Divider, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  Divider,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CHANNEL } from '../../../../shared/messages.types'
-import type { PromptDTO, StoreSchema } from '../../../../shared/types'
+import type { JobPostingDTO, PromptDTO, ScrapedContentDTO, StoreSchema } from '../../../../shared/types'
 import { renderPrompt } from '../../../../shared/utils'
 import { ROUTES } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
+import Icon from '../../../sharedComponents/Icon'
 import Message from '../../../sharedComponents/Message'
+import { activeModalSignal } from '../../../signals'
 import { SPACING } from '../../../styles/consts'
 
 const DebugAI = ({
   url,
-  scrapedHtml,
+  scrapedContent,
   promptId,
   setPromptId,
 }: {
   url: string
-  scrapedHtml: string
+  scrapedContent: ScrapedContentDTO
   promptId: string | null
   setPromptId: React.Dispatch<React.SetStateAction<string | null>>
 }) => {
@@ -25,7 +39,7 @@ const DebugAI = ({
   const [loadingJobs, setLoadingJobs] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [prompts, setPrompts] = useState<PromptDTO[]>([])
-  const [jobs, setJobs] = useState<string>('')
+  const [jobs, setJobs] = useState<JobPostingDTO[]>([])
   const navigate = useNavigate()
   const [storeFromServer, setStoreFromServer] = useState<StoreSchema | null>(null)
 
@@ -49,6 +63,17 @@ const DebugAI = ({
     }
   }, [setPromptId])
 
+  const handleEditPrompt = () => {
+    if (!promptId) return
+    activeModalSignal.value = {
+      id: 'EDIT_PROMPT_MODAL',
+      promptId,
+      onSuccess: () => {
+        loadPrompts()
+      },
+    }
+  }
+
   const handleGenerateJobs = async () => {
     setLoadingJobs(true)
     setError(null)
@@ -56,12 +81,16 @@ const DebugAI = ({
     try {
       const response = await ipcMessenger.invoke(CHANNEL.DEBUG.AI, {
         prompt: prompts[prompts.findIndex((p) => p.id === promptId)]?.content,
-        siteContent: scrapedHtml,
+        scrapedContent,
         siteUrl: url,
         siteId: '',
         jobToJSONPrompt: storeFromServer?.openAiSiteHTMLToJSONJobsPrompt || '',
       })
-      setJobs(JSON.stringify(response.jobs, null, 2))
+      if (response.success) {
+        setJobs(response.jobs)
+      } else {
+        setError(response.error)
+      }
     } finally {
       setLoadingJobs(false)
     }
@@ -103,16 +132,23 @@ const DebugAI = ({
     >
       {error && <Message message={error} color="error" />}
 
-      <FormControl required size="small" sx={{ gap: SPACING.SMALL.PX }}>
-        <InputLabel>Prompt</InputLabel>
-        <Select fullWidth value={promptId} onChange={(e) => setPromptId(e.target.value)} label="Prompt">
-          {prompts.map((prompt) => (
-            <MenuItem key={prompt.id} value={prompt.id}>
-              {prompt.title}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <Stack direction="row" alignItems="center" spacing={SPACING.SMALL.PX}>
+        <FormControl fullWidth required size="small" sx={{ gap: SPACING.SMALL.PX }}>
+          <InputLabel>Prompt</InputLabel>
+          <Select fullWidth value={promptId} onChange={(e) => setPromptId(e.target.value)} label="Prompt">
+            {prompts.map((prompt) => (
+              <MenuItem key={prompt.id} value={prompt.id}>
+                {prompt.title}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <Tooltip title="Edit the selected prompt">
+          <IconButton onClick={handleEditPrompt}>
+            <Icon name="edit" />
+          </IconButton>
+        </Tooltip>
+      </Stack>
 
       <Typography>Full Prompt</Typography>
 
@@ -130,7 +166,7 @@ const DebugAI = ({
       >
         {renderPrompt({
           prompt: prompts[prompts.findIndex((p) => p.id === promptId)]?.content || '',
-          siteContent: scrapedHtml,
+          scrapedContent,
           siteUrl: url,
           jobToJSONPrompt: storeFromServer.openAiSiteHTMLToJSONJobsPrompt,
         })}
@@ -140,7 +176,7 @@ const DebugAI = ({
         onClick={handleGenerateJobs}
         fullWidth
         variant="contained"
-        disabled={!promptId || !scrapedHtml || !url || loadingJobs}
+        disabled={!promptId || !scrapedContent || !url || loadingJobs}
       >
         {loadingJobs ? 'Generating Jobs...' : 'Generate Jobs'}
       </Button>
@@ -160,7 +196,14 @@ const DebugAI = ({
           minHeight: 0,
         }}
       >
-        {jobs}
+        {jobs.map((job) => (
+          <Box key={job.id} sx={{ mb: SPACING.SMALL.PX }}>
+            <Typography component="pre">
+              {job.company} - {job.title}
+              <Typography component="pre">{job.siteUrl}</Typography>
+            </Typography>
+          </Box>
+        ))}
       </Box>
     </Box>
   )

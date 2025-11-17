@@ -1,9 +1,10 @@
-import crypto from 'node:crypto'
 import { JSDOM } from 'jsdom'
 import { launch } from 'puppeteer'
+import type { ScrapedContentDTO } from 'src/shared/types'
 import store from '../store'
+import { hashContent } from '../utilities'
 
-function extractTextAndLinks(html: string, baseUrl = '') {
+function extractTextAndLinks(html: string, baseUrl = ''): ScrapedContentDTO {
   const { window } = new JSDOM(html)
   const { document } = window
 
@@ -39,11 +40,7 @@ function extractTextAndLinks(html: string, baseUrl = '') {
     }
   }
 
-  return JSON.stringify(unique)
-}
-
-function hashContent(content: string): string {
-  return crypto.createHash('sha256').update(content).digest('hex')
+  return unique
 }
 
 export const scrape = async ({
@@ -52,7 +49,7 @@ export const scrape = async ({
 }: {
   siteUrl: string
   selector: string
-}): Promise<{ siteContent: string; hash: string }> => {
+}): Promise<{ scrapedContent: ScrapedContentDTO; hash: string }> => {
   const delay = store.get('scrapeDelay')
   const browser = await launch({
     headless: true,
@@ -74,11 +71,11 @@ export const scrape = async ({
     await new Promise((r) => setTimeout(r, delay))
 
     const rawContent = await page.$eval(selector, (el: Element) => el.outerHTML)
-    const siteContent = extractTextAndLinks(rawContent, siteUrl)
+    const scrapedContent = extractTextAndLinks(rawContent, siteUrl)
 
     return {
-      siteContent,
-      hash: hashContent(siteContent),
+      scrapedContent,
+      hash: hashContent(JSON.stringify(scrapedContent)),
     }
   } finally {
     await browser.close()

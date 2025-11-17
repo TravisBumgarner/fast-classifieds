@@ -78,8 +78,13 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
 
       logger.info('[ScrapeProgressModal] Start result:', result)
 
-      if (!result.success || !result.scrapeRunId) {
-        setError(result.error || 'Failed to start scraping')
+      if (!result.success) {
+        setError(result.error)
+        return
+      }
+
+      if (!result.scrapeRunId) {
+        setError('Failed to start scraping')
         return
       }
 

@@ -2,6 +2,7 @@ import type { BrowserWindow } from 'electron'
 import queries from '../database/queries'
 import log from '../logger'
 import store from '../store'
+import { hashContent } from '../utilities'
 import { processText } from './ai'
 import { scrape } from './scrape'
 
@@ -57,10 +58,15 @@ async function processSite({
     log.info(`Processing: ${siteUrl}`)
     onProgress?.('scraping')
 
-    const { siteContent, hash } = await scrape({ siteUrl, selector })
-    log.info(`Scraped content for: ${siteUrl}, hash: ${hash}, content: ${JSON.stringify(siteContent)}`)
+    const { scrapedContent, hash: siteContentHash } = await scrape({ siteUrl, selector })
+    log.info(`Scraped content for: ${siteUrl}, siteContentHash: ${siteContentHash}`)
 
-    const { exists } = await queries.insertHashIfNotExists({ hash, siteUrl })
+    const promptHash = hashContent(prompt)
+
+    const jobToJSONPrompt = store.get('openAiSiteHTMLToJSONJobsPrompt')
+    const jobToJSONPromptHash = hashContent(jobToJSONPrompt)
+
+    const exists = await queries.hashExists({ siteContentHash, siteId, promptHash, jobToJSONPromptHash })
     log.info(`Hash exists: ${exists}`)
 
     if (exists) {
@@ -81,18 +87,18 @@ async function processSite({
 
     const { jobs, rawResponse } = await processText({
       prompt,
-      siteContent,
+      scrapedContent,
       siteUrl,
       apiKey,
       model,
-      jobToJSONPrompt: store.get('openAiSiteHTMLToJSONJobsPrompt'),
+      jobToJSONPrompt,
       siteId,
     })
 
     await queries.insertApiUsage({
       response: rawResponse,
       prompt,
-      siteContent,
+      siteContent: JSON.stringify(scrapedContent),
       siteUrl,
     })
 
@@ -113,6 +119,15 @@ async function processSite({
       status: 'new_data',
       newPostingsFound: jobs.length,
       completedAt: new Date(),
+    })
+
+    // Only store the hash once AI has done its thing.
+    // If something errors, we want to be able to retry.
+    queries.insertHash({
+      siteContentHash,
+      promptHash,
+      siteId,
+      jobToJSONPromptHash,
     })
 
     return { newJobsFound: jobs.length, status: 'complete' as const }
@@ -142,21 +157,21 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
 
     if (!model) {
       return {
-        success: false,
+        success: false as const,
         error: 'OpenAI model not configured. Please set it in Settings.',
       }
     }
 
     if (!delay) {
       return {
-        success: false,
+        success: false as const,
         error: 'Scrape delay not configured. Please set it in Settings.',
       }
     }
 
     if (!apiKey) {
       return {
-        success: false,
+        success: false as const,
         error: 'OpenAI API key not configured. Please set it in Settings.',
       }
     }
@@ -166,7 +181,7 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
     const activeSites = allSites.filter((s) => s.status === 'active')
 
     if (activeSites.length === 0) {
-      return { success: false, error: 'No active sites to scrape' }
+      return { success: false as const, error: 'No active sites to scrape' }
     }
 
     // Create scrape run
@@ -253,8 +268,6 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
           },
         })
 
-        log.info('ruda', result)
-
         // Update progress with results
         const updatedProgress = activeRuns.get(scrapeRunId)
         if (updatedProgress) {
@@ -310,20 +323,20 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
     // Start processing sites without blocking
     processSitesAsync()
 
-    return { success: true, scrapeRunId }
+    return { success: true as const, scrapeRunId }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
     log.error('Failed to start scraping:', errorMessage)
-    return { success: false, error: errorMessage }
+    return { success: false as const, error: errorMessage }
   }
 }
 
 export function getProgress(scrapeRunId: string) {
   const progress = activeRuns.get(scrapeRunId)
   if (!progress) {
-    return { success: false, error: 'Scrape run not found' }
+    return { success: false as const, error: 'Scrape run not found' }
   }
-  return { success: true, progress }
+  return { success: true as const, progress }
 }
 
 export async function retryFailedScrapes(mainWindow: BrowserWindow | null, originalRunId: string) {
@@ -334,21 +347,21 @@ export async function retryFailedScrapes(mainWindow: BrowserWindow | null, origi
 
     if (!apiKey) {
       return {
-        success: false,
+        success: false as const,
         error: 'OpenAI API key not configured. Please set it in Settings.',
       }
     }
 
     if (!model) {
       return {
-        success: false,
+        success: false as const,
         error: 'OpenAI model not configured. Please set it in Settings.',
       }
     }
 
     if (!delay) {
       return {
-        success: false,
+        success: false as const,
         error: 'Scrape delay not configured. Please set it in Settings.',
       }
     }
@@ -357,7 +370,7 @@ export async function retryFailedScrapes(mainWindow: BrowserWindow | null, origi
     const failedTasks = await queries.getFailedTasksByRunId(originalRunId)
 
     if (failedTasks.length === 0) {
-      return { success: false, error: 'No failed sites to retry' }
+      return { success: false as const, error: 'No failed sites to retry' }
     }
 
     // Get site details for failed tasks
@@ -503,10 +516,10 @@ export async function retryFailedScrapes(mainWindow: BrowserWindow | null, origi
     // Start processing sites without blocking
     processSitesAsync()
 
-    return { success: true, scrapeRunId }
+    return { success: true as const, scrapeRunId }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
     log.error('Failed to retry scraping:', errorMessage)
-    return { success: false, error: errorMessage }
+    return { success: false as const, error: errorMessage }
   }
 }
