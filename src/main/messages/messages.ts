@@ -480,11 +480,11 @@ typedIpcMain.handle(CHANNEL.JOB_POSTINGS.GET_BY_SITE_ID, async (_event, params) 
   }
 })
 
-typedIpcMain.handle(CHANNEL.JOB_POSTINGS.UPDATE_STATUS, async (_event, params) => {
+typedIpcMain.handle(CHANNEL.JOB_POSTINGS.UPDATE, async (_event, params) => {
   try {
-    await queries.updateJobPostingStatus(params.id, params.status)
+    await queries.updateJobPosting(params.id, params.data)
     return {
-      type: 'update_job_posting_status',
+      type: 'update_job_posting',
       success: true,
     }
   } catch (error) {

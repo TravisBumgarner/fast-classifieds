@@ -196,9 +196,9 @@ const Sites = () => {
 
   const handleStatusChange = async (postingId: string, newStatus: PostingStatus, siteId: string) => {
     try {
-      const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.UPDATE_STATUS, {
+      const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.UPDATE, {
         id: postingId,
-        status: newStatus,
+        data: { status: newStatus },
       })
       if (result.success) {
         // Reload jobs for this site

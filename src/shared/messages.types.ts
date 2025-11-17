@@ -56,7 +56,7 @@ export const CHANNEL = {
   JOB_POSTINGS: {
     GET_ALL: 'job-postings:get-all',
     GET_BY_SITE_ID: 'job-postings:get-by-site-id',
-    UPDATE_STATUS: 'job-postings:update-status',
+    UPDATE: 'job-postings:update',
   },
 } as const
 
@@ -266,10 +266,10 @@ export type Invokes = {
       postings: Array<JobPostingDTO>
     }
   }
-  [CHANNEL.JOB_POSTINGS.UPDATE_STATUS]: {
+  [CHANNEL.JOB_POSTINGS.UPDATE]: {
     args: {
       id: string
-      status: 'new' | 'applied' | 'skipped' | 'interview' | 'rejected' | 'offer'
+      data: Partial<NewJobPostingDTO>
     }
     result: { success: boolean; error?: string }
   }

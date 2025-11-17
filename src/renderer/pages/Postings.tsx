@@ -7,6 +7,7 @@ import {
   FormControl,
   FormControlLabel,
   FormGroup,
+  IconButton,
   MenuItem,
   Paper,
   Select,
@@ -27,6 +28,7 @@ import type { JobPostingDTO } from 'src/shared/types'
 import { CHANNEL } from '../../shared/messages.types'
 import { PAGINATION } from '../consts'
 import ipcMessenger from '../ipcMessenger'
+import Icon from '../sharedComponents/Icon'
 import Link from '../sharedComponents/Link'
 import Message from '../sharedComponents/Message'
 import { MODAL_ID } from '../sharedComponents/Modal/Modal.consts'
@@ -162,7 +164,7 @@ const Postings = () => {
 
   const handleUpdateStatus = async (id: string, newStatus: PostingStatus) => {
     try {
-      const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.UPDATE_STATUS, { id, status: newStatus })
+      const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.UPDATE, { id, data: { status: newStatus } })
       if (result.success) {
         await loadJobPostings()
       } else {
@@ -436,6 +438,20 @@ const Postings = () => {
                     </TableCell>
                     <TableCell>{new Date(posting.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell align="right">
+                      <Tooltip title="Edit Posting">
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            activeModalSignal.value = {
+                              id: MODAL_ID.EDIT_POSTING_MODAL,
+                              postingId: posting.id,
+                              onSuccess: loadJobPostings,
+                            }
+                          }}
+                        >
+                          <Icon name="edit" />
+                        </IconButton>
+                      </Tooltip>
                       <Tooltip title="Open job posting in browser">
                         <span>
                           <Link url={posting.siteUrl} />
