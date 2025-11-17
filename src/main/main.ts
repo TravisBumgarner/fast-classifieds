@@ -9,6 +9,7 @@ import log from 'electron-log/main'
 import started from 'electron-squirrel-startup'
 import path from 'node:path'
 import { updateElectronApp } from 'update-electron-app'
+import { migrateProduction } from './database/client'
 import { setMainWindow } from './messages/messages'
 
 Sentry.init({
@@ -66,13 +67,13 @@ const createWindow = () => {
     )
   }
 
-  // Only open dev tools in development mode
   if (!app.isPackaged) {
     mainWindow.webContents.openDevTools()
   }
 }
 
 app.on('ready', () => {
+  migrateProduction()
   createWindow()
 })
 
