@@ -379,6 +379,7 @@ const Prompts = () => {
           count={filteredPrompts.length}
           rowsPerPage={rowsPerPage}
           page={page}
+          sx={{ flexShrink: 0 }}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />

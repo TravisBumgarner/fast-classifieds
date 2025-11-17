@@ -521,6 +521,7 @@ const Sites = () => {
           </Table>
         </Box>
         <TablePagination
+          sx={{ flexShrink: 0 }}
           rowsPerPageOptions={PAGINATION.ROWS_PER_PAGE_OPTIONS}
           component="div"
           count={filteredSites.length}
