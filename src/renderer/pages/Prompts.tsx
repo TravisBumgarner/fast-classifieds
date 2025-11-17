@@ -241,6 +241,7 @@ const Prompts = () => {
           <Table stickyHeader>
             <TableHead>
               <TableRow>
+                <TableCell padding="checkbox" />
                 <TableCell>
                   <TableSortLabel
                     active={sortField === 'title'}
@@ -311,6 +312,16 @@ const Prompts = () => {
 
                   return (
                     <TableRow key={prompt.id} hover>
+                      <TableCell padding="checkbox" sx={{ verticalAlign: 'top', paddingTop: '12px' }}>
+                        <Tooltip title={isExpanded ? 'Collapse job listings' : 'Expand job listings'}>
+                          <IconButton
+                            onClick={() => toggleRowExpansion(prompt.id)}
+                            sx={{ alignSelf: 'flex-start', marginTop: 0 }}
+                          >
+                            <Icon name={isExpanded ? 'down' : 'right'} />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
                       <TableCell>{prompt.title}</TableCell>
                       <TableCell>
                         {isExpanded || !showToggle ? (
@@ -329,11 +340,6 @@ const Prompts = () => {
                           >
                             {prompt.content}
                           </Typography>
-                        )}
-                        {showToggle && (
-                          <Button size="small" onClick={() => toggleRowExpansion(prompt.id)} sx={{ mt: 0.5 }}>
-                            {isExpanded ? 'Show less' : 'Show more'}
-                          </Button>
                         )}
                       </TableCell>
                       <TableCell>
