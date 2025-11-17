@@ -2,12 +2,8 @@ import * as Sentry from '@sentry/electron/renderer'
 
 const isBundled = import.meta.env.PROD
 
-// eslint-disable-next-line no-console
-console.log('is bundled:', isBundled)
-
 export const logger = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  info: (...args: any[]) => {
+  info: (...args: unknown[]) => {
     if (isBundled) {
       Sentry.captureMessage(args.map(String).join(' '))
     } else {
@@ -16,8 +12,7 @@ export const logger = {
     }
   },
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  error: (err: any, ...extra: any[]) => {
+  error: (err: unknown, ...extra: unknown[]) => {
     if (isBundled) {
       if (err instanceof Error) Sentry.captureException(err)
       else Sentry.captureMessage(String(err))

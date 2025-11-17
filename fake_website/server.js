@@ -1,6 +1,6 @@
-const http = require('http')
-const fs = require('fs')
-const path = require('path')
+const http = require('node:http')
+const fs = require('node:fs')
+const path = require('node:path')
 
 const PORT = 3000
 
@@ -23,8 +23,6 @@ const server = http.createServer((req, res) => {
 })
 
 server.listen(PORT, () => {
-  console.log(
-    `🚀 Fake job postings website running at http://localhost:${PORT}`,
-  )
+  console.log(`🚀 Fake job postings website running at http://localhost:${PORT}`)
   console.log(`Press Ctrl+C to stop the server`)
 })

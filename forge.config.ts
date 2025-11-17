@@ -3,9 +3,21 @@ import { MakerZIP } from '@electron-forge/maker-zip'
 import { AutoUnpackNativesPlugin } from '@electron-forge/plugin-auto-unpack-natives'
 import { VitePlugin } from '@electron-forge/plugin-vite'
 import type { ForgeConfig } from '@electron-forge/shared-types'
+import { z } from 'zod'
 
-// import { FusesPlugin } from "@electron-forge/plugin-fuses";
-// import { FuseV1Options, FuseVersion } from "@electron/fuses";
+const safeConfig = z.object({
+  APPLE_ID: z.email(),
+  APPLE_PASSWORD: z.string().min(1),
+  APPLE_TEAM_ID: z.string().min(1),
+  GITHUB_TOKEN: z.string().min(1),
+})
+
+const safeConfigParsed = safeConfig.parse({
+  APPLE_ID: process.env.APPLE_ID,
+  APPLE_PASSWORD: process.env.APPLE_PASSWORD,
+  APPLE_TEAM_ID: process.env.APPLE_TEAM_ID,
+  GITHUB_TOKEN: process.env.GITHUB_TOKEN,
+})
 
 const config: ForgeConfig = {
   packagerConfig: {
@@ -38,9 +50,7 @@ const config: ForgeConfig = {
     // new MakerDeb({}),
   ],
   plugins: [
-    ...(process.env.NODE_ENV === 'production'
-      ? [new AutoUnpackNativesPlugin({})]
-      : []),
+    ...(process.env.NODE_ENV === 'production' ? [new AutoUnpackNativesPlugin({})] : []),
     new VitePlugin({
       // `build` can specify multiple entry builds, which can be Main process, Preload scripts, Worker process, etc.
       // If you are familiar with Vite configuration, it will look really familiar.
@@ -78,21 +88,15 @@ const config: ForgeConfig = {
     // }),
   ],
   hooks: {
-    postPackage: async (
-      _forgeConfig,
-      options: { outputPaths: string[]; platform: string; arch: string },
-    ) => {
-      if (
-        options.platform === 'darwin' &&
-        process.env.NODE_ENV === 'production'
-      ) {
+    postPackage: async (_forgeConfig, options: { outputPaths: string[]; platform: string; arch: string }) => {
+      if (options.platform === 'darwin' && process.env.NODE_ENV === 'production') {
         const { notarize } = await import('@electron/notarize')
         const appPath = `${options.outputPaths[0]}/Fast Classifieds.app`
         await notarize({
           appPath,
-          appleId: process.env.APPLE_ID!,
-          appleIdPassword: process.env.APPLE_PASSWORD!,
-          teamId: process.env.APPLE_TEAM_ID!,
+          appleId: safeConfigParsed.APPLE_ID,
+          appleIdPassword: safeConfigParsed.APPLE_PASSWORD,
+          teamId: safeConfigParsed.APPLE_TEAM_ID,
         })
       }
     },

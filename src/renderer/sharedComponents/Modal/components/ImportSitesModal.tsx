@@ -10,16 +10,22 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { CHANNEL } from '../../../../shared/messages.types'
+import type { PromptDTO } from '../../../../shared/types'
 import ipcMessenger from '../../../ipcMessenger'
 import { activeModalSignal } from '../../../signals'
 import { SPACING } from '../../../styles/consts'
 import { logger } from '../../../utilities'
+import type { MODAL_ID } from '../Modal.consts'
 import DefaultModal from './DefaultModal'
-import { PromptDTO } from '../../../../shared/types'
 
-const ImportSitesModal = () => {
+export interface ImportSitesModalProps {
+  id: typeof MODAL_ID.IMPORT_SITES_MODAL
+  onSuccess?: () => void
+}
+
+const ImportSitesModal = (_props: ImportSitesModalProps) => {
   const [urls, setUrls] = useState('')
   const [promptId, setPromptId] = useState<number | ''>('')
   const [loading, setLoading] = useState(false)
@@ -27,16 +33,9 @@ const ImportSitesModal = () => {
   const [success, setSuccess] = useState<string | null>(null)
   const [prompts, setPrompts] = useState<PromptDTO[]>([])
 
-  useEffect(() => {
-    loadPrompts()
-  }, [])
-
-  const loadPrompts = async () => {
+  const loadPrompts = useCallback(async () => {
     try {
-      const result = await ipcMessenger.invoke(
-        CHANNEL.PROMPTS.GET_ALL,
-        undefined,
-      )
+      const result = await ipcMessenger.invoke(CHANNEL.PROMPTS.GET_ALL, undefined)
       setPrompts(result.prompts)
       // Auto-select first prompt if available
       if (result.prompts.length > 0) {
@@ -45,7 +44,11 @@ const ImportSitesModal = () => {
     } catch (err) {
       logger.error('Failed to load prompts:', err)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    loadPrompts()
+  }, [loadPrompts])
 
   const fetchPageTitle = async (url: string): Promise<string> => {
     try {
@@ -63,13 +66,17 @@ const ImportSitesModal = () => {
     }
   }
 
+  const handleCloseModal = () => {
+    activeModalSignal.value = null
+  }
+
   const handleImport = async () => {
     setError(null)
     setSuccess(null)
     setLoading(true)
 
     try {
-      const selectedPrompt = prompts.find(p => p.id === promptId)
+      const selectedPrompt = prompts.find((p) => p.id === promptId)
       if (!selectedPrompt) {
         setError('Please select a prompt')
         setLoading(false)
@@ -79,8 +86,8 @@ const ImportSitesModal = () => {
       // Parse URLs from textarea
       const urlList = urls
         .split('\n')
-        .map(line => line.trim())
-        .filter(line => line.length > 0)
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0)
 
       if (urlList.length === 0) {
         setError('Please enter at least one URL')
@@ -157,8 +164,8 @@ const ImportSitesModal = () => {
       <Box sx={{ minWidth: 500 }}>
         <Stack spacing={SPACING.MEDIUM.PX}>
           <Typography variant="body2" color="textSecondary">
-            Enter one URL per line. The site title will be fetched
-            automatically, and the selector will be set to &apos;body&apos;.
+            Enter one URL per line. The site title will be fetched automatically, and the selector will be set to
+            &apos;body&apos;.
           </Typography>
 
           {error && (
@@ -175,12 +182,8 @@ const ImportSitesModal = () => {
 
           <FormControl fullWidth required disabled={loading} size="small">
             <InputLabel>Prompt</InputLabel>
-            <Select
-              value={promptId}
-              onChange={e => setPromptId(e.target.value as number)}
-              label="Prompt"
-            >
-              {prompts.map(prompt => (
+            <Select value={promptId} onChange={(e) => setPromptId(e.target.value as number)} label="Prompt">
+              {prompts.map((prompt) => (
                 <MenuItem key={prompt.id} value={prompt.id}>
                   {prompt.title}
                 </MenuItem>
@@ -192,7 +195,7 @@ const ImportSitesModal = () => {
             size="small"
             label="URLs"
             value={urls}
-            onChange={e => setUrls(e.target.value)}
+            onChange={(e) => setUrls(e.target.value)}
             required
             fullWidth
             multiline
@@ -204,16 +207,8 @@ https://company.com/openings`}
             helperText="One URL per line"
           />
 
-          <Stack
-            direction="row"
-            spacing={SPACING.SMALL.PX}
-            justifyContent="flex-end"
-          >
-            <Button
-              variant="outlined"
-              onClick={() => (activeModalSignal.value = null)}
-              disabled={loading}
-            >
+          <Stack direction="row" spacing={SPACING.SMALL.PX} justifyContent="flex-end">
+            <Button variant="outlined" onClick={handleCloseModal} disabled={loading}>
               Cancel
             </Button>
             <Button

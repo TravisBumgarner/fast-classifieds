@@ -1,4 +1,4 @@
-import crypto from 'crypto'
+import crypto from 'node:crypto'
 import { JSDOM } from 'jsdom'
 import { launch } from 'puppeteer'
 import store from '../store'
@@ -8,18 +8,14 @@ function extractTextAndLinks(html: string, baseUrl = '') {
   const { document } = window
 
   // remove junk
-  document
-    .querySelectorAll('script, style, noscript')
-    .forEach(el => el.remove())
+  document.querySelectorAll('script, style, noscript').forEach((el) => {
+    el.remove()
+  })
 
   const items = []
 
   // walk entire tree
-  const walker = document.createTreeWalker(
-    document.body,
-    window.NodeFilter.SHOW_TEXT,
-    null,
-  )
+  const walker = document.createTreeWalker(document.body, window.NodeFilter.SHOW_TEXT, null)
   while (walker.nextNode()) {
     const text = walker.currentNode.nodeValue?.trim()
     if (!text) continue
@@ -75,7 +71,7 @@ export const scrape = async ({
     // Not sure the best solution here.
     // For some sites, content loads dynamically after selector appears.
     // Maybe this gets passed in as a param later?
-    await new Promise(r => setTimeout(r, delay))
+    await new Promise((r) => setTimeout(r, delay))
 
     const rawContent = await page.$eval(selector, (el: Element) => el.outerHTML)
     const siteContent = extractTextAndLinks(rawContent, siteUrl)

@@ -1,4 +1,6 @@
-import {
+import type {
+  ApiUsageDTO,
+  HashDTO,
   JobDTO,
   NewPromptDTO,
   NewSiteDTO,
@@ -9,8 +11,6 @@ import {
   StoreSchema,
   UpdatePromptDTO,
   UpdateSiteDTO,
-  HashDTO,
-  ApiUsageDTO,
 } from '../shared/types'
 
 export const CHANNEL = {
@@ -60,12 +60,12 @@ export const CHANNEL = {
 } as const
 
 export type FromRenderer = {
-  ['does-not-exist']: { id: number }
+  'does-not-exist': { id: number }
 }
 
 export type FromMain = {
-  ['does-not-exist']: { ok: boolean; id: number }
-  ['scraper:progress']: {
+  'does-not-exist': { ok: boolean; id: number }
+  'scraper:progress': {
     scrapeRunId: number
     progress: {
       status: 'pending' | 'in_progress' | 'completed' | 'failed'
@@ -81,7 +81,7 @@ export type FromMain = {
       }>
     }
   }
-  ['scraper:complete']: {
+  'scraper:complete': {
     scrapeRunId: number
     totalNewJobs: number
     successfulSites: number
@@ -255,13 +255,7 @@ export type Invokes = {
         siteUrl: string
         siteId?: number | null
         explanation?: string | null
-        status:
-          | 'new'
-          | 'applied'
-          | 'skipped'
-          | 'interview'
-          | 'rejected'
-          | 'offer'
+        status: 'new' | 'applied' | 'skipped' | 'interview' | 'rejected' | 'offer'
         createdAt: Date
         updatedAt: Date
       }>
@@ -276,13 +270,7 @@ export type Invokes = {
         siteUrl: string
         siteId?: number | null
         explanation?: string | null
-        status:
-          | 'new'
-          | 'applied'
-          | 'skipped'
-          | 'interview'
-          | 'rejected'
-          | 'offer'
+        status: 'new' | 'applied' | 'skipped' | 'interview' | 'rejected' | 'offer'
         createdAt: Date
         updatedAt: Date
       }>

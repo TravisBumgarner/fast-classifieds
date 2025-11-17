@@ -1,12 +1,4 @@
-import {
-  Alert,
-  Box,
-  Button,
-  Stack,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material'
+import { Alert, Box, Button, Stack, TextField, Tooltip, Typography } from '@mui/material'
 import { useState } from 'react'
 import { SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT } from '../../../../shared/consts'
 import { CHANNEL } from '../../../../shared/messages.types'
@@ -27,9 +19,7 @@ const TabOpenAI = ({
 }) => {
   const [apiKey, setApiKey] = useState<string>(initialOpenAiApiKey)
   const [model, setModel] = useState<string>(initialOpenAIModel)
-  const [jobsToJSONPrompt, setJobsToJSONPrompt] = useState<string>(
-    initialOpenAiSiteHTMLToJSONJobsPrompt,
-  )
+  const [jobsToJSONPrompt, setJobsToJSONPrompt] = useState<string>(initialOpenAiSiteHTMLToJSONJobsPrompt)
   const hasChanges =
     apiKey !== initialOpenAiApiKey ||
     model !== initialOpenAIModel ||
@@ -65,11 +55,7 @@ const TabOpenAI = ({
       <Typography variant="subtitle2" gutterBottom>
         OpenAI API Configuration
       </Typography>
-      <Typography
-        variant="body2"
-        color="textSecondary"
-        sx={{ mb: SPACING.SMALL.PX }}
-      >
+      <Typography variant="body2" color="textSecondary" sx={{ mb: SPACING.SMALL.PX }}>
         Configure your OpenAI API key and model for job scraping
       </Typography>
 
@@ -85,7 +71,7 @@ const TabOpenAI = ({
             label="API Key"
             type="password"
             value={apiKey}
-            onChange={e => setApiKey(e.target.value)}
+            onChange={(e) => setApiKey(e.target.value)}
             placeholder="sk-..."
             fullWidth
             size="small"
@@ -101,11 +87,9 @@ const TabOpenAI = ({
                     color: 'lightblue',
                     textDecoration: 'underline',
                   }}
-                  onClick={e => {
+                  onClick={(e) => {
                     e.preventDefault()
-                    window.electron.shell.openExternal(
-                      'https://platform.openai.com/settings/organization/api-keys',
-                    )
+                    window.electron.shell.openExternal('https://platform.openai.com/settings/organization/api-keys')
                   }}
                 >
                   Get your API key from OpenAI
@@ -124,7 +108,7 @@ const TabOpenAI = ({
           <TextField
             label="Model"
             value={model}
-            onChange={e => setModel(e.target.value)}
+            onChange={(e) => setModel(e.target.value)}
             placeholder="gpt-4o-mini"
             fullWidth
             size="small"
@@ -140,11 +124,9 @@ const TabOpenAI = ({
                     color: 'lightblue',
                     textDecoration: 'underline',
                   }}
-                  onClick={e => {
+                  onClick={(e) => {
                     e.preventDefault()
-                    window.electron.shell.openExternal(
-                      'https://platform.openai.com/docs/pricing',
-                    )
+                    window.electron.shell.openExternal('https://platform.openai.com/docs/pricing')
                   }}
                 >
                   View available models
@@ -160,15 +142,9 @@ const TabOpenAI = ({
         </Stack>
 
         <Alert severity="error" sx={{ mb: SPACING.SMALL.PX }}>
-          Do not customize Jobs to JSON Prompts unless you fully understand how
-          it works.
+          Do not customize Jobs to JSON Prompts unless you fully understand how it works.
         </Alert>
-        <Button
-          variant="outlined"
-          onClick={() =>
-            setJobsToJSONPrompt(SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT)
-          }
-        >
+        <Button variant="outlined" onClick={() => setJobsToJSONPrompt(SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT)}>
           Reset Jobs to JSON Prompt
         </Button>
 
@@ -176,7 +152,7 @@ const TabOpenAI = ({
           <TextField
             label="Jobs to JSON Prompts"
             value={jobsToJSONPrompt}
-            onChange={e => setJobsToJSONPrompt(e.target.value)}
+            onChange={(e) => setJobsToJSONPrompt(e.target.value)}
             placeholder="sk-..."
             fullWidth
             rows={8}
@@ -198,8 +174,7 @@ const TabOpenAI = ({
           <Tooltip
             title={
               <span>
-                This prompt is used to instruct the AI on how to extract job
-                postings from the scraped HTML content.
+                This prompt is used to instruct the AI on how to extract job postings from the scraped HTML content.
               </span>
             }
             arrow
@@ -210,12 +185,7 @@ const TabOpenAI = ({
           </Tooltip>
         </Stack>
 
-        <Button
-          variant="contained"
-          onClick={handleSaveApiSettings}
-          fullWidth
-          disabled={!hasChanges}
-        >
+        <Button variant="contained" onClick={handleSaveApiSettings} fullWidth disabled={!hasChanges}>
           Save API Settings
         </Button>
       </Stack>

@@ -21,9 +21,9 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { CHANNEL } from '../../shared/messages.types'
-import { PromptDTO, PromptStatus } from '../../shared/types'
+import type { PromptDTO, PromptStatus } from '../../shared/types'
 import { PAGINATION } from '../consts'
 import ipcMessenger from '../ipcMessenger'
 import Icon from '../sharedComponents/Icon'
@@ -42,16 +42,11 @@ const Prompts = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set())
-  const [statusFilter, setStatusFilter] = useState<PromptStatus[]>([
-    'active',
-    'inactive',
-  ])
+  const [statusFilter, setStatusFilter] = useState<PromptStatus[]>(['active', 'inactive'])
   const [sortField, setSortField] = useState<SortField>('title')
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
   const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(
-    PAGINATION.DEFAULT_ROWS_PER_PAGE,
-  )
+  const [rowsPerPage, setRowsPerPage] = useState(PAGINATION.DEFAULT_ROWS_PER_PAGE)
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -86,35 +81,27 @@ const Prompts = () => {
     return 0
   })
 
-  const filteredPrompts = sortedPrompts.filter(prompt => {
+  const filteredPrompts = sortedPrompts.filter((prompt) => {
     if (statusFilter.length === 0) return true
     return statusFilter.includes(prompt.status)
   })
 
-  const paginatedPrompts = filteredPrompts.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage,
-  )
+  const paginatedPrompts = filteredPrompts.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
 
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage)
   }
 
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10))
     setPage(0)
   }
 
-  const loadPrompts = async () => {
+  const loadPrompts = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
-      const result = await ipcMessenger.invoke(
-        CHANNEL.PROMPTS.GET_ALL,
-        undefined,
-      )
+      const result = await ipcMessenger.invoke(CHANNEL.PROMPTS.GET_ALL, undefined)
       setPrompts(result.prompts)
     } catch (err) {
       setError('Failed to load prompts')
@@ -122,11 +109,11 @@ const Prompts = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     loadPrompts()
-  }, [])
+  }, [loadPrompts])
 
   const handleAddPrompt = () => {
     activeModalSignal.value = {
@@ -178,7 +165,7 @@ const Prompts = () => {
   }
 
   if (loading) {
-    return <></>
+    return
   }
 
   return (
@@ -195,7 +182,7 @@ const Prompts = () => {
 
         <FormControl component="fieldset">
           <FormGroup row>
-            {(['active', 'inactive'] as PromptStatus[]).map(status => (
+            {(['active', 'inactive'] as PromptStatus[]).map((status) => (
               <FormControlLabel
                 key={status}
                 control={
@@ -203,7 +190,7 @@ const Prompts = () => {
                     checked={statusFilter.includes(status)}
                     onChange={() => {
                       const newFilter = statusFilter.includes(status)
-                        ? statusFilter.filter(s => s !== status)
+                        ? statusFilter.filter((s) => s !== status)
                         : [...statusFilter, status]
                       setStatusFilter(newFilter)
                       setPage(0)
@@ -224,19 +211,17 @@ const Prompts = () => {
             <strong>How to create effective prompts:</strong>
           </Typography>
           <Typography variant="body2" paragraph>
-            1. Upload your resume(s) to ChatGPT and ask: &quot;Take my resume
-            and extract all useful tokens and keywords for finding relevant
-            jobs, return this as a prompt I can give you in the future..&quot;
+            1. Upload your resume(s) to ChatGPT and ask: &quot;Take my resume and extract all useful tokens and keywords
+            for finding relevant jobs, return this as a prompt I can give you in the future..&quot;
           </Typography>
           <Typography variant="body2" paragraph>
-            2. Create a prompt like: &quot;I&apos;m looking for jobs that match
-            my background. Use the following tokens and keywords to find highly
-            relevant roles for me: Full Stack Software Engineer, Senior Software
-            Engineer, Tech Lead, React, English, Spanish, Remote&quot;
+            2. Create a prompt like: &quot;I&apos;m looking for jobs that match my background. Use the following tokens
+            and keywords to find highly relevant roles for me: Full Stack Software Engineer, Senior Software Engineer,
+            Tech Lead, React, English, Spanish, Remote&quot;
           </Typography>
           <Typography variant="body2">
-            3. You can create multiple prompts for different job types (e.g.,
-            one for senior roles, one for startup positions, etc.)
+            3. You can create multiple prompts for different job types (e.g., one for senior roles, one for startup
+            positions, etc.)
           </Typography>
         </Alert>
       )}
@@ -278,9 +263,7 @@ const Prompts = () => {
                 <TableCell>
                   <TableSortLabel
                     active={sortField === 'updatedAt'}
-                    direction={
-                      sortField === 'updatedAt' ? sortDirection : 'asc'
-                    }
+                    direction={sortField === 'updatedAt' ? sortDirection : 'asc'}
                     onClick={() => handleSort('updatedAt')}
                   >
                     Updated
@@ -293,11 +276,7 @@ const Prompts = () => {
               {filteredPrompts.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} align="center">
-                    <Stack
-                      spacing={SPACING.SMALL.PX}
-                      alignItems="center"
-                      sx={{ py: 4 }}
-                    >
+                    <Stack spacing={SPACING.SMALL.PX} alignItems="center" sx={{ py: 4 }}>
                       <Typography variant="body2" color="textSecondary">
                         {prompts.length === 0
                           ? 'No prompts found. Click "Add Prompt" to create your first one.'
@@ -316,20 +295,16 @@ const Prompts = () => {
                         </Button>
                       )}
                       {prompts.length === 0 && (
-                        <Typography
-                          variant="caption"
-                          color="textSecondary"
-                          sx={{ fontStyle: 'italic' }}
-                        >
-                          Example: &quot;Senior Full Stack Engineer&quot; with
-                          keywords like React, TypeScript, Node.js, Remote
+                        <Typography variant="caption" color="textSecondary" sx={{ fontStyle: 'italic' }}>
+                          Example: &quot;Senior Full Stack Engineer&quot; with keywords like React, TypeScript, Node.js,
+                          Remote
                         </Typography>
                       )}
                     </Stack>
                   </TableCell>
                 </TableRow>
               ) : (
-                paginatedPrompts.map(prompt => {
+                paginatedPrompts.map((prompt) => {
                   const isExpanded = expandedRows.has(prompt.id)
                   const contentLength = prompt.content.length
                   const showToggle = contentLength > 100 // Only show if content is longer than 100 characters
@@ -339,10 +314,7 @@ const Prompts = () => {
                       <TableCell>{prompt.title}</TableCell>
                       <TableCell>
                         {isExpanded || !showToggle ? (
-                          <Typography
-                            variant="body2"
-                            sx={{ whiteSpace: 'pre-wrap' }}
-                          >
+                          <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
                             {prompt.content}
                           </Typography>
                         ) : (
@@ -359,44 +331,29 @@ const Prompts = () => {
                           </Typography>
                         )}
                         {showToggle && (
-                          <Button
-                            size="small"
-                            onClick={() => toggleRowExpansion(prompt.id)}
-                            sx={{ mt: 0.5 }}
-                          >
+                          <Button size="small" onClick={() => toggleRowExpansion(prompt.id)} sx={{ mt: 0.5 }}>
                             {isExpanded ? 'Show less' : 'Show more'}
                           </Button>
                         )}
                       </TableCell>
                       <TableCell>
                         <Chip
-                          label={
-                            prompt.status === 'active' ? 'Active' : 'Inactive'
-                          }
-                          color={
-                            prompt.status === 'active' ? 'success' : 'default'
-                          }
+                          label={prompt.status === 'active' ? 'Active' : 'Inactive'}
+                          color={prompt.status === 'active' ? 'success' : 'default'}
                           size="small"
                         />
                       </TableCell>
-                      <TableCell>
-                        {new Date(prompt.updatedAt).toLocaleDateString()}
-                      </TableCell>
+                      <TableCell>{new Date(prompt.updatedAt).toLocaleDateString()}</TableCell>
                       <TableCell align="right">
                         <Tooltip title="Edit prompt">
-                          <IconButton
-                            size="small"
-                            onClick={() => handleEditPrompt(prompt)}
-                          >
+                          <IconButton size="small" onClick={() => handleEditPrompt(prompt)}>
                             <Icon name="edit" />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Delete prompt">
                           <IconButton
                             size="small"
-                            onClick={() =>
-                              handleDeletePrompt(prompt.id, prompt.title)
-                            }
+                            onClick={() => handleDeletePrompt(prompt.id, prompt.title)}
                             color="error"
                           >
                             <Icon name="delete" />

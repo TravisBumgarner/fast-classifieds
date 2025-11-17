@@ -14,14 +14,7 @@ import { ROUTES } from '../consts'
 import Icon from '../sharedComponents/Icon'
 import { SPACING } from '../styles/consts'
 
-const NAV_ROUTES: Array<keyof typeof ROUTES> = [
-  'postings',
-  'prompts',
-  'sites',
-  'scrapeRuns',
-  'settings',
-  'debugger',
-]
+const NAV_ROUTES: Array<keyof typeof ROUTES> = ['postings', 'prompts', 'sites', 'scrapeRuns', 'settings', 'debugger']
 
 const Navigation = () => {
   const location = useLocation()
@@ -60,11 +53,7 @@ const Navigation = () => {
               display: 'flex',
             }}
           >
-            <img
-              src={Logo}
-              alt="Fast Classifieds Logo"
-              style={{ height: '100%', aspectRatio: '1 / 1' }}
-            />
+            <img src={Logo} alt="Fast Classifieds Logo" style={{ height: '100%', aspectRatio: '1 / 1' }} />
             <Typography variant="body1" sx={{ fontWeight: 'bold', ml: 0.5 }}>
               <sup>Alpha</sup>
             </Typography>
@@ -76,7 +65,7 @@ const Navigation = () => {
               alignItems: 'center',
             }}
           >
-            {NAV_ROUTES.map(key => {
+            {NAV_ROUTES.map((key) => {
               const route = ROUTES[key]
               const isActive = location.pathname === route.href()
 
@@ -122,38 +111,14 @@ const Navigation = () => {
                 horizontal: 'right',
               }}
             >
-              <MenuItem
-                onClick={() =>
-                  handleExternalLink(
-                    'https://github.com/TravisBumgarner/fast-classifieds',
-                  )
-                }
-              >
+              <MenuItem onClick={() => handleExternalLink('https://github.com/TravisBumgarner/fast-classifieds')}>
                 GitHub
               </MenuItem>
-              <MenuItem
-                onClick={() =>
-                  handleExternalLink(
-                    'https://travisbumgarner.dev/marketing/classifieds',
-                  )
-                }
-              >
+              <MenuItem onClick={() => handleExternalLink('https://travisbumgarner.dev/marketing/classifieds')}>
                 Website & Support
               </MenuItem>
-              <MenuItem
-                onClick={() =>
-                  handleExternalLink('https://travisbumgarner.dev/')
-                }
-              >
-                More from Creator
-              </MenuItem>
-              <MenuItem
-                onClick={() =>
-                  handleExternalLink('https://discord.gg/xSZwF7PQ')
-                }
-              >
-                Join the Community
-              </MenuItem>
+              <MenuItem onClick={() => handleExternalLink('https://travisbumgarner.dev/')}>More from Creator</MenuItem>
+              <MenuItem onClick={() => handleExternalLink('https://discord.gg/xSZwF7PQ')}>Join the Community</MenuItem>
             </Menu>
           </Box>
         </Box>
