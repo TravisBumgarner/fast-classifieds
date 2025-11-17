@@ -6,6 +6,7 @@ import type {
   NewPromptDTO,
   NewSiteDTO,
   PromptDTO,
+  ScrapedContentDTO,
   ScrapeRunDTO,
   ScrapeTaskDTO,
   SiteDTO,
@@ -225,12 +226,12 @@ export type Invokes = {
   }
   [CHANNEL.DEBUG.SCRAPE]: {
     args: { url: string; selector: string }
-    result: { success: boolean; html?: string; error?: string }
+    result: { success: true; scrapedContent: ScrapedContentDTO } | { success: false; error: string }
   }
   [CHANNEL.DEBUG.AI]: {
     args: {
       prompt: string
-      siteContent: string
+      scrapedContent: ScrapedContentDTO
       siteUrl: string
       siteId: string
       jobToJSONPrompt: string

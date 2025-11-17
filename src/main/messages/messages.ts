@@ -374,7 +374,7 @@ typedIpcMain.handle(CHANNEL.DEBUG.SCRAPE, async (_event, params) => {
 
     return {
       success: true,
-      html: result.siteContent,
+      scrapedContent: result.scrapedContent,
     }
   } catch (error) {
     logger.error('Error in debug scrape:', error)
@@ -393,7 +393,7 @@ typedIpcMain.handle(CHANNEL.DEBUG.AI, async (_event, params) => {
       apiKey: storeData.openaiApiKey,
       model: storeData.openaiModel,
       prompt: params.prompt,
-      siteContent: params.siteContent,
+      scrapedContent: params.scrapedContent,
       siteUrl: params.siteUrl,
       siteId: params.siteId,
       jobToJSONPrompt: storeData.openAiSiteHTMLToJSONJobsPrompt,

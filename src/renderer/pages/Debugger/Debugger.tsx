@@ -1,6 +1,7 @@
 import { Alert, Box, Button, Divider, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import type { ScrapedContentDTO } from 'src/shared/types'
 import { CHANNEL } from '../../../shared/messages.types'
 import { ROUTES } from '../../consts'
 import ipcMessenger from '../../ipcMessenger'
@@ -14,7 +15,7 @@ const Debugger = () => {
   const [url, setUrl] = useState('')
   const [selector, setSelector] = useState('')
   const [siteTitle, setSiteTitle] = useState('')
-  const [scrapedHtml, setScrapedHtml] = useState('')
+  const [scrapedContent, setScrapedContent] = useState<ScrapedContentDTO>([])
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [params] = useSearchParams()
@@ -156,12 +157,12 @@ const Debugger = () => {
           setSelector={setSelector}
           siteTitle={siteTitle}
           setSiteTitle={setSiteTitle}
-          scrapedHtml={scrapedHtml}
-          setScrapedHtml={setScrapedHtml}
+          scrapedContent={scrapedContent}
+          setScrapedContent={setScrapedContent}
         />
         <Divider orientation="vertical" flexItem />
 
-        <DebugAI url={url} scrapedHtml={scrapedHtml} promptId={promptId} setPromptId={setPromptId} />
+        <DebugAI url={url} scrapedContent={scrapedContent} promptId={promptId} setPromptId={setPromptId} />
       </Box>
 
       <Button

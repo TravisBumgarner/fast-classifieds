@@ -14,7 +14,7 @@ import {
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CHANNEL } from '../../../../shared/messages.types'
-import type { PromptDTO, StoreSchema } from '../../../../shared/types'
+import type { PromptDTO, ScrapedContentDTO, StoreSchema } from '../../../../shared/types'
 import { renderPrompt } from '../../../../shared/utils'
 import { ROUTES } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
@@ -25,12 +25,12 @@ import { SPACING } from '../../../styles/consts'
 
 const DebugAI = ({
   url,
-  scrapedHtml,
+  scrapedContent,
   promptId,
   setPromptId,
 }: {
   url: string
-  scrapedHtml: string
+  scrapedContent: ScrapedContentDTO
   promptId: string | null
   setPromptId: React.Dispatch<React.SetStateAction<string | null>>
 }) => {
@@ -81,7 +81,7 @@ const DebugAI = ({
     try {
       const response = await ipcMessenger.invoke(CHANNEL.DEBUG.AI, {
         prompt: prompts[prompts.findIndex((p) => p.id === promptId)]?.content,
-        siteContent: scrapedHtml,
+        scrapedContent,
         siteUrl: url,
         siteId: '',
         jobToJSONPrompt: storeFromServer?.openAiSiteHTMLToJSONJobsPrompt || '',
@@ -162,7 +162,7 @@ const DebugAI = ({
       >
         {renderPrompt({
           prompt: prompts[prompts.findIndex((p) => p.id === promptId)]?.content || '',
-          siteContent: scrapedHtml,
+          scrapedContent,
           siteUrl: url,
           jobToJSONPrompt: storeFromServer.openAiSiteHTMLToJSONJobsPrompt,
         })}
@@ -172,7 +172,7 @@ const DebugAI = ({
         onClick={handleGenerateJobs}
         fullWidth
         variant="contained"
-        disabled={!promptId || !scrapedHtml || !url || loadingJobs}
+        disabled={!promptId || !scrapedContent || !url || loadingJobs}
       >
         {loadingJobs ? 'Generating Jobs...' : 'Generate Jobs'}
       </Button>

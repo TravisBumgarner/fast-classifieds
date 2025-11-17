@@ -1,11 +1,13 @@
+import type { ScrapedContentDTO } from './types'
+
 export const renderPrompt = ({
   prompt,
-  siteContent,
+  scrapedContent,
   siteUrl,
   jobToJSONPrompt,
 }: {
   prompt: string
-  siteContent: string
+  scrapedContent: ScrapedContentDTO
   siteUrl: string
   jobToJSONPrompt: string
 }) => {
@@ -14,7 +16,7 @@ USER CRITERIA:
 ${prompt}
 
 SCRAPED CONTENT:
-${siteContent}
+${JSON.stringify(scrapedContent, null, 2)}
 
 SITE_URL: ${siteUrl}
 

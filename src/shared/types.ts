@@ -143,4 +143,9 @@ export type NewScrapeRunDTO = {
   completedAt?: Date | null
 }
 
+export type ScrapedContentDTO = {
+  text: string
+  link: string | null
+}[]
+
 export type ScrapeRunDTO = NewScrapeRunDTO & TimestampsAndID

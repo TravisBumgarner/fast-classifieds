@@ -58,7 +58,7 @@ async function processSite({
     log.info(`Processing: ${siteUrl}`)
     onProgress?.('scraping')
 
-    const { siteContent, hash: siteContentHash } = await scrape({ siteUrl, selector })
+    const { scrapedContent, hash: siteContentHash } = await scrape({ siteUrl, selector })
     log.info(`Scraped content for: ${siteUrl}, siteContentHash: ${siteContentHash}`)
 
     const promptHash = hashContent(prompt)
@@ -87,7 +87,7 @@ async function processSite({
 
     const { jobs, rawResponse } = await processText({
       prompt,
-      siteContent,
+      scrapedContent,
       siteUrl,
       apiKey,
       model,
@@ -98,7 +98,7 @@ async function processSite({
     await queries.insertApiUsage({
       response: rawResponse,
       prompt,
-      siteContent,
+      siteContent: JSON.stringify(scrapedContent),
       siteUrl,
     })
 
