@@ -1,4 +1,16 @@
-import { Box, Button, Divider, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  Divider,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CHANNEL } from '../../../../shared/messages.types'
@@ -6,7 +18,9 @@ import type { PromptDTO, StoreSchema } from '../../../../shared/types'
 import { renderPrompt } from '../../../../shared/utils'
 import { ROUTES } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
+import Icon from '../../../sharedComponents/Icon'
 import Message from '../../../sharedComponents/Message'
+import { activeModalSignal } from '../../../signals'
 import { SPACING } from '../../../styles/consts'
 
 const DebugAI = ({
@@ -48,6 +62,17 @@ const DebugAI = ({
       setLoadingPrompts(false)
     }
   }, [setPromptId])
+
+  const handleEditPrompt = () => {
+    if (!promptId) return
+    activeModalSignal.value = {
+      id: 'EDIT_PROMPT_MODAL',
+      promptId,
+      onSuccess: () => {
+        loadPrompts()
+      },
+    }
+  }
 
   const handleGenerateJobs = async () => {
     setLoadingJobs(true)
@@ -103,16 +128,23 @@ const DebugAI = ({
     >
       {error && <Message message={error} color="error" />}
 
-      <FormControl required size="small" sx={{ gap: SPACING.SMALL.PX }}>
-        <InputLabel>Prompt</InputLabel>
-        <Select fullWidth value={promptId} onChange={(e) => setPromptId(e.target.value)} label="Prompt">
-          {prompts.map((prompt) => (
-            <MenuItem key={prompt.id} value={prompt.id}>
-              {prompt.title}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <Stack direction="row" alignItems="center" spacing={SPACING.SMALL.PX}>
+        <FormControl fullWidth required size="small" sx={{ gap: SPACING.SMALL.PX }}>
+          <InputLabel>Prompt</InputLabel>
+          <Select fullWidth value={promptId} onChange={(e) => setPromptId(e.target.value)} label="Prompt">
+            {prompts.map((prompt) => (
+              <MenuItem key={prompt.id} value={prompt.id}>
+                {prompt.title}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <Tooltip title="Edit the selected prompt">
+          <IconButton onClick={handleEditPrompt}>
+            <Icon name="edit" />
+          </IconButton>
+        </Tooltip>
+      </Stack>
 
       <Typography>Full Prompt</Typography>
 
