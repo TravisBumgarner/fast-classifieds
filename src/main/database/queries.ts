@@ -49,17 +49,11 @@ async function insertApiUsage({
     .returning()
 }
 
-/**
- * Check if a hash exists in the database
- */
 async function hashExists(hash: string): Promise<boolean> {
   const result = await db.select().from(hashes).where(eq(hashes.hash, hash)).limit(1)
   return result.length > 0
 }
 
-/**
- * Insert a new hash into the database
- */
 async function insertHash(data: NewHashDTO) {
   return db
     .insert(hashes)
@@ -67,9 +61,6 @@ async function insertHash(data: NewHashDTO) {
     .returning()
 }
 
-/**
- * Insert hash if it doesn't exist, or return existing record
- */
 async function insertHashIfNotExists({
   hash,
   siteUrl,
@@ -91,9 +82,6 @@ async function insertHashIfNotExists({
   }
 }
 
-/**
- * Insert a scrape run
- */
 async function insertScrapeRun(data: NewScrapeRunDTO) {
   return db
     .insert(scrapeRuns)
@@ -101,9 +89,6 @@ async function insertScrapeRun(data: NewScrapeRunDTO) {
     .returning()
 }
 
-/**
- * Insert a scrape task
- */
 async function insertScrapeTask(data: NewScrapeTaskDTO) {
   return db
     .insert(scrapeTasks)
@@ -111,9 +96,6 @@ async function insertScrapeTask(data: NewScrapeTaskDTO) {
     .returning()
 }
 
-/**
- * Insert a job posting
- */
 async function insertJobPosting(data: NewJobPostingDTO) {
   return db
     .insert(jobPostings)
@@ -121,25 +103,24 @@ async function insertJobPosting(data: NewJobPostingDTO) {
     .returning()
 }
 
-/**
- * Insert multiple job postings
- */
+async function updateJobPosting(id: string, data: Partial<NewJobPostingDTO>) {
+  return db
+    .update(jobPostings)
+    .set({ ...data, updatedAt: new Date() })
+    .where(eq(jobPostings.id, id))
+    .returning()
+}
+
 async function insertJobPostings(data: NewJobPostingDTO[]) {
   if (data.length === 0) return []
   const dataWithIds = data.map((item) => ({ ...item, id: uuidv4() }))
   return db.insert(jobPostings).values(dataWithIds).returning()
 }
 
-/**
- * Get all sites
- */
 async function getAllSites() {
   return db.select().from(sites)
 }
 
-/**
- * Get all sites with job counts
- */
 async function getAllSitesWithJobCounts() {
   const allSites = await db.select().from(sites)
 
@@ -157,17 +138,11 @@ async function getAllSitesWithJobCounts() {
   return sitesWithCounts
 }
 
-/**
- * Get a site by ID
- */
 async function getSiteById(id: string) {
   const result = await db.select().from(sites).where(eq(sites.id, id)).limit(1)
   return result[0] || null
 }
 
-/**
- * Insert a new site
- */
 async function insertSite(data: NewSiteDTO) {
   return db
     .insert(sites)
@@ -175,9 +150,6 @@ async function insertSite(data: NewSiteDTO) {
     .returning()
 }
 
-/**
- * Update a site
- */
 async function updateSite(id: string, data: Partial<UpdateSiteDTO>) {
   return db
     .update(sites)
@@ -186,16 +158,10 @@ async function updateSite(id: string, data: Partial<UpdateSiteDTO>) {
     .returning()
 }
 
-/**
- * Delete a site
- */
 async function deleteSite(id: string) {
   return db.delete(sites).where(eq(sites.id, id)).returning()
 }
 
-/**
- * Get all prompts
- */
 async function getAllPrompts() {
   return db.select().from(prompts)
 }
@@ -212,17 +178,11 @@ async function getAllScrapeTasks() {
   return db.select().from(scrapeTasks)
 }
 
-/**
- * Get a prompt by ID
- */
 async function getPromptById(id: string) {
   const result = await db.select().from(prompts).where(eq(prompts.id, id)).limit(1)
   return result[0] || null
 }
 
-/**
- * Insert a new prompt
- */
 async function insertPrompt(data: NewPromptDTO) {
   return db
     .insert(prompts)
@@ -230,9 +190,6 @@ async function insertPrompt(data: NewPromptDTO) {
     .returning()
 }
 
-/**
- * Update a prompt
- */
 async function updatePrompt(id: string, data: Partial<NewPromptDTO>) {
   return db
     .update(prompts)
@@ -241,23 +198,14 @@ async function updatePrompt(id: string, data: Partial<NewPromptDTO>) {
     .returning()
 }
 
-/**
- * Delete a prompt
- */
 async function deletePrompt(id: string) {
   return db.delete(prompts).where(eq(prompts.id, id)).returning()
 }
 
-/**
- * Get all scrape runs (ordered by most recent first)
- */
 async function getAllScrapeRuns() {
   return db.select().from(scrapeRuns).orderBy(desc(scrapeRuns.createdAt))
 }
 
-/**
- * Get scrape tasks for a specific run
- */
 async function getScrapeTasksByRunId(scrapeRunId: string) {
   return db
     .select()
@@ -266,9 +214,6 @@ async function getScrapeTasksByRunId(scrapeRunId: string) {
     .orderBy(desc(scrapeTasks.createdAt))
 }
 
-/**
- * Get failed scrape tasks for a specific run
- */
 async function getFailedTasksByRunId(scrapeRunId: string) {
   return db
     .select()
@@ -277,9 +222,6 @@ async function getFailedTasksByRunId(scrapeRunId: string) {
     .orderBy(desc(scrapeTasks.createdAt))
 }
 
-/**
- * Update scrape run completion status
- */
 async function updateScrapeRun(
   id: string,
   data: {
@@ -292,33 +234,14 @@ async function updateScrapeRun(
   return db.update(scrapeRuns).set(data).where(eq(scrapeRuns.id, id)).returning()
 }
 
-/**
- * Get all job postings (ordered by most recent first)
- */
 async function getAllJobPostings() {
   return db.select().from(jobPostings).orderBy(desc(jobPostings.createdAt))
 }
 
-/**
- * Get job postings for a specific site (ordered by most recent first)
- */
 async function getJobPostingsBySiteId(siteId: string) {
   return db.select().from(jobPostings).where(eq(jobPostings.siteId, siteId)).orderBy(desc(jobPostings.createdAt))
 }
 
-/**
- * Update job posting status
- */
-async function updateJobPostingStatus(
-  id: string,
-  status: 'new' | 'applied' | 'skipped' | 'interview' | 'rejected' | 'offer',
-) {
-  return db.update(jobPostings).set({ status, updatedAt: new Date() }).where(eq(jobPostings.id, id)).returning()
-}
-
-/**
- * Nuke database - delete all data from all tables
- */
 async function nukeDatabase() {
   // Delete in order to respect any dependencies
   await db.delete(scrapeTasks)
@@ -340,6 +263,7 @@ export default {
   updateScrapeRun,
   insertJobPosting,
   insertJobPostings,
+  updateJobPosting,
   getAllSites,
   getAllSitesWithJobCounts,
   getSiteById,
@@ -359,6 +283,5 @@ export default {
   getFailedTasksByRunId,
   getAllJobPostings,
   getJobPostingsBySiteId,
-  updateJobPostingStatus,
   nukeDatabase,
 }

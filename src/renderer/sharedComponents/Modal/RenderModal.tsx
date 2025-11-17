@@ -5,6 +5,7 @@ import ChangelogModal, { type ChangelogModalProps } from './components/Changelog
 import ConfirmationModal, { type ConfirmationModalProps } from './components/ConfirmationModal'
 import ImportSitesModal, { type ImportSitesModalProps } from './components/ImportSitesModal'
 import OnboardingModal, { type OnboardingModalProps } from './components/OnboardingModal'
+import PostingModal, { type EditPostingModalProps } from './components/PostingModal'
 import PromptModal, { type AddPromptModalProps, type EditPromptModalProps } from './components/PromptModal'
 import ScrapeProgressModal, { type ScrapeProgressModalProps } from './components/ScrapeProgressModal'
 import SiteModal, { type AddSiteModalProps, type EditSiteModalProps } from './components/SiteModal'
@@ -20,6 +21,7 @@ export type ActiveModal =
   | OnboardingModalProps
   | ScrapeProgressModalProps
   | ChangelogModalProps
+  | EditPostingModalProps
 
 export type ModalId = (typeof MODAL_ID)[keyof typeof MODAL_ID]
 
@@ -47,6 +49,8 @@ const RenderModal: FC = () => {
       return <ScrapeProgressModal {...(activeModalSignal.value as ScrapeProgressModalProps)} />
     case MODAL_ID.CHANGELOG_MODAL:
       return <ChangelogModal {...(activeModalSignal.value as ChangelogModalProps)} />
+    case MODAL_ID.EDIT_POSTING_MODAL:
+      return <PostingModal {...(activeModalSignal.value as EditPostingModalProps)} />
     default:
       return null
   }
