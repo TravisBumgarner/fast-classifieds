@@ -1,11 +1,4 @@
-import {
-  Box,
-  Button,
-  Stack,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material'
+import { Box, Button, Stack, TextField, Tooltip, Typography } from '@mui/material'
 import { useState } from 'react'
 import { CHANNEL } from '../../../../shared/messages.types'
 import { TOOLTIPS } from '../../../consts'
@@ -68,8 +61,8 @@ const DebugSite = ({
           ? result.html
               .replace(/></g, '>\n<')
               .split('\n')
-              .map(line => line.trim())
-              .filter(line => line.length > 0)
+              .map((line) => line.trim())
+              .filter((line) => line.length > 0)
               .join('\n')
           : ''
         setScrapedHtml(formatted)
@@ -100,7 +93,7 @@ const DebugSite = ({
           fullWidth
           label="URL"
           value={url}
-          onChange={e => setUrl(e.target.value)}
+          onChange={(e) => setUrl(e.target.value)}
           placeholder="https://example.com"
           onBlur={handleUrlAndTitleSync}
         />
@@ -110,7 +103,7 @@ const DebugSite = ({
           fullWidth
           label="Site Title"
           value={siteTitle}
-          onChange={e => setSiteTitle(e.target.value)}
+          onChange={(e) => setSiteTitle(e.target.value)}
         />
       </Stack>
       <Stack direction="row" spacing={SPACING.SMALL.PX}>
@@ -119,7 +112,7 @@ const DebugSite = ({
           fullWidth
           label="CSS Selector"
           value={selector}
-          onChange={e => setSelector(e.target.value)}
+          onChange={(e) => setSelector(e.target.value)}
         />
         <Typography variant="body2">
           New to selectors?{' '}
@@ -130,11 +123,9 @@ const DebugSite = ({
             style={{
               textDecoration: 'underline',
             }}
-            onClick={e => {
+            onClick={(e) => {
               e.preventDefault()
-              window.electron.shell.openExternal(
-                'https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be',
-              )
+              window.electron.shell.openExternal('https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be')
             }}
           >
             Watch the tutorial
@@ -148,12 +139,7 @@ const DebugSite = ({
         </Tooltip>
       </Stack>
 
-      <Button
-        variant="contained"
-        onClick={handleTest}
-        disabled={loading || !url}
-        fullWidth
-      >
+      <Button variant="contained" onClick={handleTest} disabled={loading || !url} fullWidth>
         {loading ? 'Scraping...' : 'Scrape'}
       </Button>
 

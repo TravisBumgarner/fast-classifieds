@@ -60,6 +60,10 @@ const PromptModal = (props: PromptModalProps) => {
     }
   }, [])
 
+  const handleClose = () => {
+    activeModalSignal.value = null
+  }
+
   useEffect(() => {
     if (isEdit && 'promptId' in props) {
       loadPrompt(props.promptId)
@@ -121,17 +125,13 @@ const PromptModal = (props: PromptModalProps) => {
     <DefaultModal title={isEdit ? 'Edit Prompt' : 'Add Prompt'}>
       <Box>
         <Stack spacing={SPACING.MEDIUM.PX}>
-          {error && (
-            <Box sx={{ color: 'error.main', fontSize: '0.875rem' }}>
-              {error}
-            </Box>
-          )}
+          {error && <Box sx={{ color: 'error.main', fontSize: '0.875rem' }}>{error}</Box>}
 
           <TextField
             size="small"
             label="Title"
             value={title}
-            onChange={e => setTitle(e.target.value)}
+            onChange={(e) => setTitle(e.target.value)}
             required
             fullWidth
             disabled={loading}
@@ -143,7 +143,7 @@ const PromptModal = (props: PromptModalProps) => {
             size="small"
             label="Content"
             value={content}
-            onChange={e => setContent(e.target.value)}
+            onChange={(e) => setContent(e.target.value)}
             required
             fullWidth
             multiline
@@ -159,41 +159,17 @@ Use these to match roles by relevance, not just by keyword overlap.`}
 
           <FormControl component="fieldset" disabled={loading}>
             <FormLabel component="legend">Status</FormLabel>
-            <RadioGroup
-              row
-              value={status}
-              onChange={e => setStatus(e.target.value as PromptStatus)}
-            >
-              <FormControlLabel
-                value="active"
-                control={<Radio />}
-                label="Active"
-              />
-              <FormControlLabel
-                value="inactive"
-                control={<Radio />}
-                label="Inactive"
-              />
+            <RadioGroup row value={status} onChange={(e) => setStatus(e.target.value as PromptStatus)}>
+              <FormControlLabel value="active" control={<Radio />} label="Active" />
+              <FormControlLabel value="inactive" control={<Radio />} label="Inactive" />
             </RadioGroup>
           </FormControl>
 
-          <Stack
-            direction="row"
-            spacing={SPACING.SMALL.PX}
-            justifyContent="flex-end"
-          >
-            <Button
-              variant="outlined"
-              onClick={() => (activeModalSignal.value = null)}
-              disabled={loading}
-            >
+          <Stack direction="row" spacing={SPACING.SMALL.PX} justifyContent="flex-end">
+            <Button variant="outlined" onClick={handleClose} disabled={loading}>
               Cancel
             </Button>
-            <Button
-              onClick={handleSave}
-              variant="contained"
-              disabled={loading || !title.trim() || !content.trim()}
-            >
+            <Button onClick={handleSave} variant="contained" disabled={loading || !title.trim() || !content.trim()}>
               {loading ? 'Saving...' : isEdit ? 'Update' : 'Create'}
             </Button>
           </Stack>

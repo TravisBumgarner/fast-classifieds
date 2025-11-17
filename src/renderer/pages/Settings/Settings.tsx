@@ -1,7 +1,7 @@
 import { Box, Tab, Tabs, Typography } from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'
 import { CHANNEL } from '../../../shared/messages.types'
-import { StoreSchema } from '../../../shared/types'
+import type { StoreSchema } from '../../../shared/types'
 import ipcMessenger from '../../ipcMessenger'
 import PageWrapper from '../../sharedComponents/PageWrapper'
 import { SPACING } from '../../styles/consts'
@@ -12,9 +12,7 @@ import TabOpenAI from './components/TabOpenAI'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Settings = () => {
-  const [storeFromServer, setStoreFromServer] = useState<StoreSchema | null>(
-    null,
-  )
+  const [storeFromServer, setStoreFromServer] = useState<StoreSchema | null>(null)
 
   const [activeTab, setActiveTab] = useState(0)
 
@@ -32,9 +30,7 @@ const Settings = () => {
   if (!storeFromServer) {
     return (
       <PageWrapper>
-        <Box
-          sx={{ p: SPACING.MEDIUM.PX, display: 'flex', alignItems: 'center' }}
-        >
+        <Box sx={{ p: SPACING.MEDIUM.PX, display: 'flex', alignItems: 'center' }}>
           <Typography variant="body2" sx={{ ml: SPACING.SMALL.PX }}>
             Loading settings...
           </Typography>
@@ -62,17 +58,12 @@ const Settings = () => {
             initialOpenAiApiKey={storeFromServer.openaiApiKey}
             loadStoreSettings={loadStoreSettings}
             initialOpenAIModel={storeFromServer.openaiModel}
-            initialOpenAiSiteHTMLToJSONJobsPrompt={
-              storeFromServer.openAiSiteHTMLToJSONJobsPrompt
-            }
+            initialOpenAiSiteHTMLToJSONJobsPrompt={storeFromServer.openAiSiteHTMLToJSONJobsPrompt}
           />
         )}
 
         {activeTab === 1 && (
-          <TabJobFinder
-            loadStoreSettings={loadStoreSettings}
-            initialScrapeDelay={storeFromServer.scrapeDelay}
-          />
+          <TabJobFinder loadStoreSettings={loadStoreSettings} initialScrapeDelay={storeFromServer.scrapeDelay} />
         )}
         {activeTab === 2 && <TabData />}
         {activeTab === 3 && <TabHelpAndOnboarding />}

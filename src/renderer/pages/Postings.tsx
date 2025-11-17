@@ -22,7 +22,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { CHANNEL } from '../../shared/messages.types'
 import { PAGINATION } from '../consts'
 import ipcMessenger from '../ipcMessenger'
@@ -34,13 +34,7 @@ import { activeModalSignal, onboardingCompletedSignal } from '../signals'
 import { SPACING } from '../styles/consts'
 import { logger } from '../utilities'
 
-type PostingStatus =
-  | 'new'
-  | 'applied'
-  | 'skipped'
-  | 'interview'
-  | 'rejected'
-  | 'offer'
+type PostingStatus = 'new' | 'applied' | 'skipped' | 'interview' | 'rejected' | 'offer'
 
 interface JobPosting {
   id: number
@@ -62,21 +56,12 @@ const Postings = () => {
   const [jobPostings, setJobPostings] = useState<JobPosting[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [statusFilter, setStatusFilter] = useState<PostingStatus[]>([
-    'new',
-    'applied',
-    'interview',
-    'offer',
-  ])
+  const [statusFilter, setStatusFilter] = useState<PostingStatus[]>(['new', 'applied', 'interview', 'offer'])
   const [sortField, setSortField] = useState<SortField>('createdAt')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
-  const [selectedPostings, setSelectedPostings] = useState<Set<number>>(
-    new Set(),
-  )
+  const [selectedPostings, setSelectedPostings] = useState<Set<number>>(new Set())
   const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(
-    PAGINATION.DEFAULT_ROWS_PER_PAGE,
-  )
+  const [rowsPerPage, setRowsPerPage] = useState(PAGINATION.DEFAULT_ROWS_PER_PAGE)
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -115,35 +100,27 @@ const Postings = () => {
     return 0
   })
 
-  const filteredPostings = sortedPostings.filter(posting => {
+  const filteredPostings = sortedPostings.filter((posting) => {
     if (statusFilter.length === 0) return true
     return statusFilter.includes(posting.status)
   })
 
-  const paginatedPostings = filteredPostings.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage,
-  )
+  const paginatedPostings = filteredPostings.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
 
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage)
   }
 
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10))
     setPage(0)
   }
 
-  const loadJobPostings = async () => {
+  const loadJobPostings = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
-      const result = await ipcMessenger.invoke(
-        CHANNEL.JOB_POSTINGS.GET_ALL,
-        undefined,
-      )
+      const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.GET_ALL, undefined)
       setJobPostings(result.postings)
     } catch (err) {
       setError('Failed to load job postings')
@@ -151,7 +128,7 @@ const Postings = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   const handleFindJobs = () => {
     activeModalSignal.value = {
@@ -161,10 +138,8 @@ const Postings = () => {
   }
 
   const handleOpenSelectedInBrowser = () => {
-    const postingsToOpen = filteredPostings.filter(posting =>
-      selectedPostings.has(posting.id),
-    )
-    postingsToOpen.forEach(posting => {
+    const postingsToOpen = filteredPostings.filter((posting) => selectedPostings.has(posting.id))
+    postingsToOpen.forEach((posting) => {
       // @ts-expect-error - shell:openExternal is not in typed IPC but is defined in messages.ts
       window.electron.ipcRenderer.invoke('shell:openExternal', posting.siteUrl)
     })
@@ -185,16 +160,13 @@ const Postings = () => {
     if (selectedPostings.size === filteredPostings.length) {
       setSelectedPostings(new Set())
     } else {
-      setSelectedPostings(new Set(filteredPostings.map(p => p.id)))
+      setSelectedPostings(new Set(filteredPostings.map((p) => p.id)))
     }
   }
 
   const handleUpdateStatus = async (id: number, newStatus: PostingStatus) => {
     try {
-      const result = await ipcMessenger.invoke(
-        CHANNEL.JOB_POSTINGS.UPDATE_STATUS,
-        { id, status: newStatus },
-      )
+      const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.UPDATE_STATUS, { id, status: newStatus })
       if (result.success) {
         await loadJobPostings()
       } else {
@@ -211,10 +183,7 @@ const Postings = () => {
       if (hasCheckedOnboarding) return
 
       // Check if user has already completed onboarding
-      const { onboardingCompleted } = await ipcMessenger.invoke(
-        CHANNEL.STORE.GET,
-        undefined,
-      )
+      const { onboardingCompleted } = await ipcMessenger.invoke(CHANNEL.STORE.GET, undefined)
       if (onboardingCompleted) {
         setHasCheckedOnboarding(true)
         onboardingCompletedSignal.value = true
@@ -229,10 +198,7 @@ const Postings = () => {
         ])
 
         // If no prompts and no sites, show onboarding
-        if (
-          promptsResult.prompts.length === 0 &&
-          sitesResult.sites.length === 0
-        ) {
+        if (promptsResult.prompts.length === 0 && sitesResult.sites.length === 0) {
           activeModalSignal.value = { id: MODAL_ID.ONBOARDING_MODAL }
         }
 
@@ -248,11 +214,9 @@ const Postings = () => {
 
     checkFirstLaunch()
     loadJobPostings()
-  }, [hasCheckedOnboarding])
+  }, [hasCheckedOnboarding, loadJobPostings])
 
-  const getStatusColor = (
-    status: PostingStatus,
-  ): 'primary' | 'success' | 'error' | 'info' => {
+  const getStatusColor = (status: PostingStatus): 'primary' | 'success' | 'error' | 'info' => {
     switch (status) {
       case 'new':
         return 'primary'
@@ -272,7 +236,7 @@ const Postings = () => {
   }
 
   if (loading) {
-    return <></>
+    return
   }
 
   return (
@@ -288,11 +252,7 @@ const Postings = () => {
             Find Jobs
           </Button>
           {selectedPostings.size > 0 && (
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={handleOpenSelectedInBrowser}
-            >
+            <Button size="small" variant="outlined" onClick={handleOpenSelectedInBrowser}>
               Open Selected ({selectedPostings.size})
             </Button>
           )}
@@ -300,16 +260,7 @@ const Postings = () => {
 
         <FormControl component="fieldset">
           <FormGroup row>
-            {(
-              [
-                'new',
-                'applied',
-                'interview',
-                'offer',
-                'skipped',
-                'rejected',
-              ] as PostingStatus[]
-            ).map(status => (
+            {(['new', 'applied', 'interview', 'offer', 'skipped', 'rejected'] as PostingStatus[]).map((status) => (
               <FormControlLabel
                 key={status}
                 control={
@@ -317,7 +268,7 @@ const Postings = () => {
                     checked={statusFilter.includes(status)}
                     onChange={() => {
                       const newFilter = statusFilter.includes(status)
-                        ? statusFilter.filter(s => s !== status)
+                        ? statusFilter.filter((s) => s !== status)
                         : [...statusFilter, status]
                       setStatusFilter(newFilter)
                       setPage(0)
@@ -338,9 +289,8 @@ const Postings = () => {
             <strong>No job postings yet</strong>
           </Typography>
           <Typography variant="body2">
-            Job postings will appear here after you run your first scrape. Make
-            sure you&apos;ve added sites and prompts, then run a scrape to find
-            matching jobs.
+            Job postings will appear here after you run your first scrape. Make sure you&apos;ve added sites and
+            prompts, then run a scrape to find matching jobs.
           </Typography>
         </Alert>
       )}
@@ -362,14 +312,8 @@ const Postings = () => {
               <TableRow>
                 <TableCell padding="checkbox">
                   <Checkbox
-                    indeterminate={
-                      selectedPostings.size > 0 &&
-                      selectedPostings.size < filteredPostings.length
-                    }
-                    checked={
-                      filteredPostings.length > 0 &&
-                      selectedPostings.size === filteredPostings.length
-                    }
+                    indeterminate={selectedPostings.size > 0 && selectedPostings.size < filteredPostings.length}
+                    checked={filteredPostings.length > 0 && selectedPostings.size === filteredPostings.length}
                     onChange={handleSelectAll}
                   />
                 </TableCell>
@@ -404,9 +348,7 @@ const Postings = () => {
                 <TableCell>
                   <TableSortLabel
                     active={sortField === 'createdAt'}
-                    direction={
-                      sortField === 'createdAt' ? sortDirection : 'asc'
-                    }
+                    direction={sortField === 'createdAt' ? sortDirection : 'asc'}
                     onClick={() => handleSort('createdAt')}
                   >
                     Found On
@@ -419,11 +361,7 @@ const Postings = () => {
               {filteredPostings.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} align="center">
-                    <Stack
-                      spacing={SPACING.SMALL.PX}
-                      alignItems="center"
-                      sx={{ py: 4 }}
-                    >
+                    <Stack spacing={SPACING.SMALL.PX} alignItems="center" sx={{ py: 4 }}>
                       <Typography variant="body2" color="textSecondary">
                         {jobPostings.length === 0
                           ? 'No job postings found. Run your first scrape to find jobs.'
@@ -445,7 +383,7 @@ const Postings = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                paginatedPostings.map(posting => (
+                paginatedPostings.map((posting) => (
                   <TableRow key={posting.id} hover>
                     <TableCell padding="checkbox">
                       <Checkbox
@@ -459,17 +397,10 @@ const Postings = () => {
                       <FormControl size="small" sx={{ minWidth: 120 }}>
                         <Select
                           value={posting.status}
-                          onChange={e =>
-                            handleUpdateStatus(
-                              posting.id,
-                              e.target.value as PostingStatus,
-                            )
-                          }
-                          renderValue={value => (
+                          onChange={(e) => handleUpdateStatus(posting.id, e.target.value as PostingStatus)}
+                          renderValue={(value) => (
                             <Chip
-                              label={
-                                value.charAt(0).toUpperCase() + value.slice(1)
-                              }
+                              label={value.charAt(0).toUpperCase() + value.slice(1)}
                               color={getStatusColor(value)}
                               size="small"
                             />
@@ -492,13 +423,11 @@ const Postings = () => {
                             maxWidth: 275,
                           }}
                         >
-                          {posting.explanation?.slice(0, 75) + '...' || '-'}
+                          {`${posting.explanation?.slice(0, 75)}...` || '-'}
                         </Typography>
                       </Tooltip>
                     </TableCell>
-                    <TableCell>
-                      {new Date(posting.createdAt).toLocaleDateString()}
-                    </TableCell>
+                    <TableCell>{new Date(posting.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell align="right">
                       <Tooltip title="Open job posting in browser">
                         <span>

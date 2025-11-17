@@ -1,5 +1,5 @@
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
-import { Status, STATUS } from '../../shared/types'
+import { STATUS, type Status } from '../../shared/types'
 
 export const apiUsage = sqliteTable('api_usage', {
   id: integer('id').primaryKey({ autoIncrement: true }),

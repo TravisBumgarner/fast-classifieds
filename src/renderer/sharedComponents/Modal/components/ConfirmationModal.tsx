@@ -3,7 +3,7 @@ import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import { useCallback } from 'react'
 import { activeModalSignal } from '../../../signals'
-import { MODAL_ID } from '../Modal.consts'
+import type { MODAL_ID } from '../Modal.consts'
 import DefaultModal from './DefaultModal'
 
 export interface ConfirmationModalProps {

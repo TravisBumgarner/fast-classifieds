@@ -1,8 +1,8 @@
 export default {
-  schema: "./src/main/database/schema.ts",
-  out: "./drizzle",
-  dialect: "sqlite",
+  schema: './src/main/database/schema.ts',
+  out: './drizzle',
+  dialect: 'sqlite',
   dbCredentials: {
-    url: "./data.sqlite",
+    url: './data.sqlite',
   },
-} as const;
+} as const

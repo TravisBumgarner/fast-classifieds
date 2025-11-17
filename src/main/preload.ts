@@ -1,5 +1,5 @@
-import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron'
-import { FromMain, FromRenderer, Invokes } from '../shared/messages.types'
+import { contextBridge, type IpcRendererEvent, ipcRenderer } from 'electron'
+import type { FromMain, FromRenderer, Invokes } from '../shared/messages.types'
 
 const electronHandler = {
   ipcRenderer: {
@@ -9,25 +9,16 @@ const electronHandler = {
     },
 
     // Main → Renderer (listen)
-    on<T extends keyof FromMain>(
-      channel: T,
-      listener: (params: FromMain[T]) => void,
-    ) {
-      const subscription = (_event: IpcRendererEvent, params: FromMain[T]) =>
-        listener(params)
+    on<T extends keyof FromMain>(channel: T, listener: (params: FromMain[T]) => void) {
+      const subscription = (_event: IpcRendererEvent, params: FromMain[T]) => listener(params)
 
       ipcRenderer.on(channel, subscription)
       return () => ipcRenderer.removeListener(channel, subscription)
     },
 
     // Main → Renderer (one-time listen)
-    once<T extends keyof FromMain>(
-      channel: T,
-      listener: (params: FromMain[T]) => void,
-    ) {
-      ipcRenderer.once(channel, (_event, params: FromMain[T]) =>
-        listener(params),
-      )
+    once<T extends keyof FromMain>(channel: T, listener: (params: FromMain[T]) => void) {
+      ipcRenderer.once(channel, (_event, params: FromMain[T]) => listener(params))
     },
 
     // Renderer → Main (invoke / handle roundtrip)
@@ -39,8 +30,7 @@ const electronHandler = {
     },
   },
   shell: {
-    openExternal: (url: string) =>
-      ipcRenderer.invoke('shell:openExternal', url),
+    openExternal: (url: string) => ipcRenderer.invoke('shell:openExternal', url),
   },
 }
 

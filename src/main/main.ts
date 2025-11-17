@@ -1,16 +1,14 @@
+import path from 'node:path'
 import * as Sentry from '@sentry/electron/main'
-import {
-  app,
-  BrowserWindow,
-  BrowserWindowConstructorOptions,
-  screen,
-} from 'electron'
+import { app, BrowserWindow, type BrowserWindowConstructorOptions, screen } from 'electron'
 import log from 'electron-log/main'
 import started from 'electron-squirrel-startup'
-import path from 'node:path'
 import { updateElectronApp } from 'update-electron-app'
 import { migrateProduction } from './database/client'
 import { setMainWindow } from './messages/messages'
+
+declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string
+declare const MAIN_WINDOW_VITE_NAME: string
 
 Sentry.init({
   dsn: 'https://aa9b99c0da19f5f16cde7295bcae0fa4@o196886.ingest.us.sentry.io/4510360742133760',
@@ -62,9 +60,7 @@ const createWindow = () => {
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL)
   } else {
-    mainWindow.loadFile(
-      path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`),
-    )
+    mainWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`))
   }
 
   if (!app.isPackaged) {

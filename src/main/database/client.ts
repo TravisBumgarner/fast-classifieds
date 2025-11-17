@@ -1,15 +1,13 @@
+import fs from 'node:fs'
+import path from 'node:path'
 import BetterSqlite3 from 'better-sqlite3'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator'
 import { app } from 'electron'
-import fs from 'node:fs'
-import path from 'node:path'
 import log from '../logger'
 
 // Use userData directory for the database in production, current directory in dev
-const dbPath = app.isPackaged
-  ? path.join(app.getPath('userData'), 'data.sqlite')
-  : './data.sqlite'
+const dbPath = app.isPackaged ? path.join(app.getPath('userData'), 'data.sqlite') : './data.sqlite'
 
 // Ensure the directory exists
 const dbDir = path.dirname(dbPath)

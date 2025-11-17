@@ -1,12 +1,4 @@
-import {
-  Alert,
-  Box,
-  Button,
-  Stack,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material'
+import { Alert, Box, Button, Stack, TextField, Tooltip, Typography } from '@mui/material'
 import { useState } from 'react'
 import { CHANNEL } from '../../../../shared/messages.types'
 import ipcMessenger from '../../../ipcMessenger'
@@ -51,11 +43,7 @@ const TabJobFinder = ({
       <Typography variant="subtitle2" gutterBottom>
         Scraper Configuration
       </Typography>
-      <Typography
-        variant="body2"
-        color="textSecondary"
-        sx={{ mb: SPACING.SMALL.PX }}
-      >
+      <Typography variant="body2" color="textSecondary" sx={{ mb: SPACING.SMALL.PX }}>
         Configure how the scraper behaves when loading pages
       </Typography>
 
@@ -71,7 +59,7 @@ const TabJobFinder = ({
             label="Page Load Delay (ms)"
             type="number"
             value={scrapeDelay}
-            onChange={e => setScrapeDelay(Number(e.target.value))}
+            onChange={(e) => setScrapeDelay(Number(e.target.value))}
             placeholder="3000"
             fullWidth
             size="small"
@@ -80,10 +68,9 @@ const TabJobFinder = ({
           <Tooltip
             title={
               <span>
-                Time to wait after the page selector appears before scraping
-                content. Some sites load content dynamically after the initial
-                page load. Increase this value if you&apos;re missing content,
-                decrease it to speed up scraping.
+                Time to wait after the page selector appears before scraping content. Some sites load content
+                dynamically after the initial page load. Increase this value if you&apos;re missing content, decrease it
+                to speed up scraping.
               </span>
             }
             arrow
@@ -94,12 +81,7 @@ const TabJobFinder = ({
           </Tooltip>
         </Stack>
 
-        <Button
-          variant="contained"
-          onClick={handleSubmit}
-          fullWidth
-          disabled={!hasChanges}
-        >
+        <Button variant="contained" onClick={handleSubmit} fullWidth disabled={!hasChanges}>
           Save Scraper Settings
         </Button>
       </Stack>

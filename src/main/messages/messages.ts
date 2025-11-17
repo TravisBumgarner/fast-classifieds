@@ -1,17 +1,9 @@
-import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import path from 'node:path'
+import { app, type BrowserWindow, ipcMain, shell } from 'electron'
 import { CHANNEL } from '../../shared/messages.types'
 import { db } from '../database/client'
 import queries from '../database/queries'
-import {
-  apiUsage,
-  hashes,
-  jobPostings,
-  prompts,
-  scrapeRuns,
-  scrapeTasks,
-  sites,
-} from '../database/schema'
+import { apiUsage, hashes, jobPostings, prompts, scrapeRuns, scrapeTasks, sites } from '../database/schema'
 import logger from '../logger'
 import * as scraper from '../scraper'
 import { processText } from '../scraper/ai'
@@ -341,10 +333,7 @@ typedIpcMain.handle(CHANNEL.SCRAPER.START, async () => {
 
 typedIpcMain.handle(CHANNEL.SCRAPER.RETRY, async (_event, params) => {
   try {
-    const result = await scraper.retryFailedScrapes(
-      mainWindow,
-      params.scrapeRunId,
-    )
+    const result = await scraper.retryFailedScrapes(mainWindow, params.scrapeRunId)
     return {
       type: 'retry_scraping',
       ...result,
@@ -474,44 +463,38 @@ typedIpcMain.handle(CHANNEL.JOB_POSTINGS.GET_ALL, async () => {
   }
 })
 
-typedIpcMain.handle(
-  CHANNEL.JOB_POSTINGS.GET_BY_SITE_ID,
-  async (_event, params) => {
-    try {
-      const postings = await queries.getJobPostingsBySiteId(params.siteId)
-      return {
-        type: 'get_job_postings_by_site_id',
-        postings,
-      }
-    } catch (error) {
-      logger.error('Error getting job postings by site:', error)
-      return {
-        type: 'get_job_postings_by_site_id',
-        postings: [],
-      }
+typedIpcMain.handle(CHANNEL.JOB_POSTINGS.GET_BY_SITE_ID, async (_event, params) => {
+  try {
+    const postings = await queries.getJobPostingsBySiteId(params.siteId)
+    return {
+      type: 'get_job_postings_by_site_id',
+      postings,
     }
-  },
-)
+  } catch (error) {
+    logger.error('Error getting job postings by site:', error)
+    return {
+      type: 'get_job_postings_by_site_id',
+      postings: [],
+    }
+  }
+})
 
-typedIpcMain.handle(
-  CHANNEL.JOB_POSTINGS.UPDATE_STATUS,
-  async (_event, params) => {
-    try {
-      await queries.updateJobPostingStatus(params.id, params.status)
-      return {
-        type: 'update_job_posting_status',
-        success: true,
-      }
-    } catch (error) {
-      logger.error('Error updating job posting status:', error)
-      return {
-        type: 'update_job_posting_status',
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      }
+typedIpcMain.handle(CHANNEL.JOB_POSTINGS.UPDATE_STATUS, async (_event, params) => {
+  try {
+    await queries.updateJobPostingStatus(params.id, params.status)
+    return {
+      type: 'update_job_posting_status',
+      success: true,
     }
-  },
-)
+  } catch (error) {
+    logger.error('Error updating job posting status:', error)
+    return {
+      type: 'update_job_posting_status',
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    }
+  }
+})
 
 // Shell handlers
 ipcMain.handle('shell:openExternal', async (_event, url: string) => {
@@ -525,7 +508,7 @@ ipcMain.handle('shell:openExternal', async (_event, url: string) => {
     // Ensure URL has a protocol
     let validUrl = url.trim()
     if (!validUrl.startsWith('http://') && !validUrl.startsWith('https://')) {
-      validUrl = 'https://' + validUrl
+      validUrl = `https://${validUrl}`
     }
 
     await shell.openExternal(validUrl)

@@ -1,0 +1,28 @@
+{
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "useBiomeIgnoreFolder": "error"
+      }
+    }
+  },
+  "files": {
+    "includes": ["**", "!.vite", "!node_modules", "!.husky", "!out"]
+  },
+  "formatter": {
+    "enabled": true,
+    "formatWithErrors": false,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 100,
+    "attributePosition": "auto"
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "lineWidth": 120,
+      "semicolons": "asNeeded"
+    }
+  }
+}

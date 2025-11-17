@@ -1,7 +1,6 @@
 import { z } from 'zod'
 
-export type PartialWithRequired<T, K extends keyof T> = Omit<T, K> &
-  Required<Pick<T, K>>
+export type PartialWithRequired<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>
 
 export const STATUS = {
   hash_exists: 'hash_exists',

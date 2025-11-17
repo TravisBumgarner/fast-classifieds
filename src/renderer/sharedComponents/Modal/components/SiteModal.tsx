@@ -72,18 +72,19 @@ const SiteModal = (props: SiteModalProps) => {
     setSiteUrl(url)
   }
 
-  const loadPrompts = async () => {
+  const loadPrompts = useCallback(async () => {
     try {
-      const result = await ipcMessenger.invoke(
-        CHANNEL.PROMPTS.GET_ALL,
-        undefined,
-      )
+      const result = await ipcMessenger.invoke(CHANNEL.PROMPTS.GET_ALL, undefined)
       // Filter to only show active prompts
-      const activePrompts = result.prompts.filter(p => p.status === 'active')
+      const activePrompts = result.prompts.filter((p) => p.status === 'active')
       setPrompts(activePrompts)
     } catch (err) {
       logger.error('Failed to load prompts:', err)
     }
+  }, [])
+
+  const handleClose = () => {
+    activeModalSignal.value = null
   }
 
   const loadSite = useCallback(async () => {
@@ -101,7 +102,7 @@ const SiteModal = (props: SiteModalProps) => {
         setStatus(result.site.status || 'active')
 
         // Find matching prompt by content
-        const matchingPrompt = prompts.find(p => p.id === result.site?.promptId)
+        const matchingPrompt = prompts.find((p) => p.id === result.site?.promptId)
         if (matchingPrompt) {
           setPromptId(matchingPrompt.id)
         }
@@ -116,7 +117,7 @@ const SiteModal = (props: SiteModalProps) => {
 
   useEffect(() => {
     loadPrompts()
-  }, [])
+  }, [loadPrompts])
 
   useEffect(() => {
     if (isEditMode && siteId) {
@@ -130,7 +131,7 @@ const SiteModal = (props: SiteModalProps) => {
     setLoading(true)
 
     try {
-      const selectedPrompt = prompts.find(p => p.id === promptId)
+      const selectedPrompt = prompts.find((p) => p.id === promptId)
       if (!selectedPrompt) {
         setError('Please select a prompt')
         setLoading(false)
@@ -183,19 +184,11 @@ const SiteModal = (props: SiteModalProps) => {
             No Active Prompts Available
           </Typography>
           <Typography variant="body1" textAlign="center" color="text.secondary">
-            You need to have at least one active prompt before you can add a
-            site. Please create a new prompt or activate an existing one.
+            You need to have at least one active prompt before you can add a site. Please create a new prompt or
+            activate an existing one.
           </Typography>
-          <Stack
-            direction="row"
-            spacing={SPACING.SMALL.PX}
-            justifyContent="center"
-            width="100%"
-          >
-            <Button
-              variant="outlined"
-              onClick={() => (activeModalSignal.value = null)}
-            >
+          <Stack direction="row" spacing={SPACING.SMALL.PX} justifyContent="center" width="100%">
+            <Button variant="outlined" onClick={handleClose}>
               Cancel
             </Button>
             <Button
@@ -242,7 +235,7 @@ const SiteModal = (props: SiteModalProps) => {
             size="small"
             label="Site URL"
             value={siteUrl}
-            onChange={e => handleUrlChange(e.target.value)}
+            onChange={(e) => handleUrlChange(e.target.value)}
             onBlur={handleUrlAndTitleSync}
             required
             fullWidth
@@ -255,7 +248,7 @@ const SiteModal = (props: SiteModalProps) => {
             size="small"
             label="Site Title"
             value={siteTitle}
-            onChange={e => setSiteTitle(e.target.value)}
+            onChange={(e) => setSiteTitle(e.target.value)}
             required
             fullWidth
             disabled={loading}
@@ -268,7 +261,7 @@ const SiteModal = (props: SiteModalProps) => {
               size="small"
               label="CSS Selector"
               value={selector}
-              onChange={e => setSelector(e.target.value)}
+              onChange={(e) => setSelector(e.target.value)}
               required
               fullWidth
               disabled={loading}
@@ -283,11 +276,9 @@ const SiteModal = (props: SiteModalProps) => {
                 style={{
                   textDecoration: 'underline',
                 }}
-                onClick={e => {
+                onClick={(e) => {
                   e.preventDefault()
-                  window.electron.shell.openExternal(
-                    'https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be',
-                  )
+                  window.electron.shell.openExternal('https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be')
                 }}
               >
                 Watch the tutorial
@@ -302,12 +293,8 @@ const SiteModal = (props: SiteModalProps) => {
 
           <FormControl fullWidth required disabled={loading} size="small">
             <InputLabel>Prompt</InputLabel>
-            <Select
-              value={promptId}
-              onChange={e => setPromptId(e.target.value as number)}
-              label="Prompt"
-            >
-              {prompts.map(prompt => (
+            <Select value={promptId} onChange={(e) => setPromptId(e.target.value as number)} label="Prompt">
+              {prompts.map((prompt) => (
                 <MenuItem key={prompt.id} value={prompt.id}>
                   {prompt.title}
                 </MenuItem>
@@ -317,34 +304,20 @@ const SiteModal = (props: SiteModalProps) => {
 
           <FormControl fullWidth required disabled={loading} size="small">
             <InputLabel>Status</InputLabel>
-            <Select
-              value={status}
-              onChange={e => setStatus(e.target.value as SiteStatus)}
-              label="Status"
-            >
+            <Select value={status} onChange={(e) => setStatus(e.target.value as SiteStatus)} label="Status">
               <MenuItem value="active">Active</MenuItem>
               <MenuItem value="inactive">Inactive</MenuItem>
             </Select>
           </FormControl>
 
-          <Stack
-            direction="row"
-            spacing={SPACING.SMALL.PX}
-            justifyContent="flex-end"
-          >
-            <Button
-              variant="outlined"
-              onClick={() => (activeModalSignal.value = null)}
-              disabled={loading}
-            >
+          <Stack direction="row" spacing={SPACING.SMALL.PX} justifyContent="flex-end">
+            <Button variant="outlined" onClick={handleClose} disabled={loading}>
               Cancel
             </Button>
             <Button
               type="submit"
               variant="contained"
-              disabled={
-                loading || !siteTitle || !siteUrl || !selector || !promptId
-              }
+              disabled={loading || !siteTitle || !siteUrl || !selector || !promptId}
             >
               {loading ? 'Saving...' : isEditMode ? 'Update' : 'Create'}
             </Button>

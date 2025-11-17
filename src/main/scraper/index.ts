@@ -1,4 +1,4 @@
-import { BrowserWindow } from 'electron'
+import type { BrowserWindow } from 'electron'
 import queries from '../database/queries'
 import log from '../logger'
 import store from '../store'
@@ -51,18 +51,14 @@ async function processSite({
   apiKey: string
   model: string
   delay?: number
-  onProgress?: (
-    status: 'scraping' | 'processing' | 'complete' | 'error',
-  ) => void
+  onProgress?: (status: 'scraping' | 'processing' | 'complete' | 'error') => void
 }) {
   try {
     log.info(`Processing: ${siteUrl}`)
     onProgress?.('scraping')
 
     const { siteContent, hash } = await scrape({ siteUrl, selector })
-    log.info(
-      `Scraped content for: ${siteUrl}, hash: ${hash}, content: ${JSON.stringify(siteContent)}`,
-    )
+    log.info(`Scraped content for: ${siteUrl}, hash: ${hash}, content: ${JSON.stringify(siteContent)}`)
 
     const { exists } = await queries.insertHashIfNotExists({ hash, siteUrl })
     log.info(`Hash exists: ${exists}`)
@@ -100,7 +96,7 @@ async function processSite({
     })
 
     // Insert job postings
-    const jobPostings = jobs.map(job => ({
+    const jobPostings = jobs.map((job) => ({
       company: job.company,
       title: job.title,
       siteUrl: job.siteUrl,
@@ -169,7 +165,7 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
 
     // Get all active sites
     const allSites = await queries.getAllSites()
-    const activeSites = allSites.filter(s => s.status === 'active')
+    const activeSites = allSites.filter((s) => s.status === 'active')
 
     if (activeSites.length === 0) {
       return { success: false, error: 'No active sites to scrape' }
@@ -190,7 +186,7 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
       status: 'in_progress' as const,
       totalSites: activeSites.length,
       completedSites: 0,
-      sites: activeSites.map(site => ({
+      sites: activeSites.map((site) => ({
         siteId: site.id,
         siteTitle: site.siteTitle,
         siteUrl: site.siteUrl,
@@ -228,12 +224,7 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
 
         // Send progress update to renderer
         if (mainWindow && !mainWindow.isDestroyed()) {
-          log.info(
-            '[Scraper] Sending progress update for site',
-            i,
-            'runId:',
-            scrapeRunId,
-          )
+          log.info('[Scraper] Sending progress update for site', i, 'runId:', scrapeRunId)
           mainWindow.webContents.send('scraper:progress', {
             scrapeRunId,
             progress: activeRuns.get(scrapeRunId),
@@ -249,7 +240,7 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
           apiKey,
           model,
           delay,
-          onProgress: status => {
+          onProgress: (status) => {
             const currentProgress = activeRuns.get(scrapeRunId)
             if (currentProgress) {
               currentProgress.sites[i].status = status
@@ -337,10 +328,7 @@ export function getProgress(scrapeRunId: number) {
   return { success: true, progress }
 }
 
-export async function retryFailedScrapes(
-  mainWindow: BrowserWindow | null,
-  originalRunId: number,
-) {
+export async function retryFailedScrapes(mainWindow: BrowserWindow | null, originalRunId: number) {
   try {
     const apiKey = store.get('openaiApiKey')
     const model = store.get('openaiModel')
@@ -375,9 +363,9 @@ export async function retryFailedScrapes(
     }
 
     // Get site details for failed tasks
-    const siteIds = failedTasks.map(t => t.siteId)
+    const siteIds = failedTasks.map((t) => t.siteId)
     const allSites = await queries.getAllSites()
-    const sitesToRetry = allSites.filter(s => siteIds.includes(s.id))
+    const sitesToRetry = allSites.filter((s) => siteIds.includes(s.id))
 
     // Create a new scrape run for retries
     const [scrapeRun] = await queries.insertScrapeRun({
@@ -395,7 +383,7 @@ export async function retryFailedScrapes(
       status: 'in_progress' as const,
       totalSites: sitesToRetry.length,
       completedSites: 0,
-      sites: sitesToRetry.map(site => ({
+      sites: sitesToRetry.map((site) => ({
         siteId: site.id,
         siteTitle: site.siteTitle,
         siteUrl: site.siteUrl,
@@ -407,10 +395,7 @@ export async function retryFailedScrapes(
 
     // Send initial progress to renderer
     if (mainWindow && !mainWindow.isDestroyed()) {
-      log.info(
-        '[Scraper] Sending initial progress for retry runId:',
-        scrapeRunId,
-      )
+      log.info('[Scraper] Sending initial progress for retry runId:', scrapeRunId)
       mainWindow.webContents.send('scraper:progress', {
         scrapeRunId,
         progress,
@@ -450,7 +435,7 @@ export async function retryFailedScrapes(
           apiKey,
           model,
           delay,
-          onProgress: status => {
+          onProgress: (status) => {
             const currentProgress = activeRuns.get(scrapeRunId)
             if (currentProgress) {
               currentProgress.sites[i].status = status

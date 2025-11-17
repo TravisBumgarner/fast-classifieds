@@ -1,17 +1,8 @@
-import {
-  Box,
-  Button,
-  Divider,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Typography,
-} from '@mui/material'
+import { Box, Button, Divider, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CHANNEL } from '../../../../shared/messages.types'
-import { PromptDTO, StoreSchema } from '../../../../shared/types'
+import type { PromptDTO, StoreSchema } from '../../../../shared/types'
 import { renderPrompt } from '../../../../shared/utils'
 import { ROUTES } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
@@ -36,9 +27,7 @@ const DebugAI = ({
   const [prompts, setPrompts] = useState<PromptDTO[]>([])
   const [jobs, setJobs] = useState<string>('')
   const navigate = useNavigate()
-  const [storeFromServer, setStoreFromServer] = useState<StoreSchema | null>(
-    null,
-  )
+  const [storeFromServer, setStoreFromServer] = useState<StoreSchema | null>(null)
 
   const loadStoreSettings = useCallback(async () => {
     const store = await ipcMessenger.invoke(CHANNEL.STORE.GET, undefined)
@@ -66,7 +55,7 @@ const DebugAI = ({
 
     try {
       const response = await ipcMessenger.invoke(CHANNEL.DEBUG.AI, {
-        prompt: prompts[prompts.findIndex(p => p.id === promptId)]?.content,
+        prompt: prompts[prompts.findIndex((p) => p.id === promptId)]?.content,
         siteContent: scrapedHtml,
         siteUrl: url,
         jobToJSONPrompt: storeFromServer?.openAiSiteHTMLToJSONJobsPrompt || '',
@@ -85,7 +74,7 @@ const DebugAI = ({
     loadStoreSettings()
   }, [loadStoreSettings])
 
-  if (loadingPrompts || loadingSettings || !storeFromServer) return <></>
+  if (loadingPrompts || loadingSettings || !storeFromServer) return
 
   if (!prompts.length) {
     return (
@@ -115,13 +104,8 @@ const DebugAI = ({
 
       <FormControl required size="small" sx={{ gap: SPACING.SMALL.PX }}>
         <InputLabel>Prompt</InputLabel>
-        <Select
-          fullWidth
-          value={promptId}
-          onChange={e => setPromptId(e.target.value as number)}
-          label="Prompt"
-        >
-          {prompts.map(prompt => (
+        <Select fullWidth value={promptId} onChange={(e) => setPromptId(e.target.value as number)} label="Prompt">
+          {prompts.map((prompt) => (
             <MenuItem key={prompt.id} value={prompt.id}>
               {prompt.title}
             </MenuItem>
@@ -144,8 +128,7 @@ const DebugAI = ({
         }}
       >
         {renderPrompt({
-          prompt:
-            prompts[prompts.findIndex(p => p.id === promptId)]?.content || '',
+          prompt: prompts[prompts.findIndex((p) => p.id === promptId)]?.content || '',
           siteContent: scrapedHtml,
           siteUrl: url,
           jobToJSONPrompt: storeFromServer.openAiSiteHTMLToJSONJobsPrompt,

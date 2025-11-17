@@ -48,36 +48,24 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
   useEffect(() => {
     if (scrapeRunId === null) return
 
-    logger.info(
-      '[ScrapeProgressModal] Setting up listeners for runId:',
-      scrapeRunId,
-    )
+    logger.info('[ScrapeProgressModal] Setting up listeners for runId:', scrapeRunId)
 
     // Listen for progress updates
-    const unsubscribeProgress = window.electron.ipcRenderer.on(
-      'scraper:progress',
-      data => {
-        logger.info('[ScrapeProgressModal] Received progress update:', data)
-        if (data.scrapeRunId === scrapeRunId) {
-          logger.info(
-            '[ScrapeProgressModal] Updating sites:',
-            data.progress.sites,
-          )
-          setSites(data.progress.sites)
-        }
-      },
-    )
+    const unsubscribeProgress = window.electron.ipcRenderer.on('scraper:progress', (data) => {
+      logger.info('[ScrapeProgressModal] Received progress update:', data)
+      if (data.scrapeRunId === scrapeRunId) {
+        logger.info('[ScrapeProgressModal] Updating sites:', data.progress.sites)
+        setSites(data.progress.sites)
+      }
+    })
 
-    const unsubscribeComplete = window.electron.ipcRenderer.on(
-      'scraper:complete',
-      data => {
-        logger.info('[ScrapeProgressModal] Received complete event:', data)
-        if (data.scrapeRunId === scrapeRunId) {
-          setTotalNewJobs(data.totalNewJobs)
-          setIsComplete(true)
-        }
-      },
-    )
+    const unsubscribeComplete = window.electron.ipcRenderer.on('scraper:complete', (data) => {
+      logger.info('[ScrapeProgressModal] Received complete event:', data)
+      if (data.scrapeRunId === scrapeRunId) {
+        setTotalNewJobs(data.totalNewJobs)
+        setIsComplete(true)
+      }
+    })
 
     return () => {
       logger.info('[ScrapeProgressModal] Cleaning up listeners')
@@ -99,21 +87,16 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
 
       logger.info('[ScrapeProgressModal] Start result:', result)
 
-      if (!result.success) {
+      if (!result.success || !result.scrapeRunId) {
         setError(result.error || 'Failed to start scraping')
         return
       }
 
-      logger.info(
-        '[ScrapeProgressModal] Setting scrapeRunId:',
-        result.scrapeRunId,
-      )
-      setScrapeRunId(result.scrapeRunId!)
+      logger.info('[ScrapeProgressModal] Setting scrapeRunId:', result.scrapeRunId)
+      setScrapeRunId(result.scrapeRunId)
     } catch (error) {
       logger.error('Failed to start scraping:', error)
-      setError(
-        error instanceof Error ? error.message : 'Failed to start scraping',
-      )
+      setError(error instanceof Error ? error.message : 'Failed to start scraping')
     }
   }, [props.retryRunId])
 
@@ -140,9 +123,7 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
     }
   }
 
-  const getStatusColor = (
-    status: SiteProgress['status'],
-  ): 'default' | 'primary' | 'success' | 'error' | 'warning' => {
+  const getStatusColor = (status: SiteProgress['status']): 'default' | 'primary' | 'success' | 'error' | 'warning' => {
     switch (status) {
       case 'pending':
         return 'default'
@@ -175,10 +156,8 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
     }
   }
 
-  const completedCount = sites.filter(
-    s => s.status === 'complete' || s.status === 'error',
-  ).length
-  const errorCount = sites.filter(s => s.status === 'error').length
+  const completedCount = sites.filter((s) => s.status === 'complete' || s.status === 'error').length
+  const errorCount = sites.filter((s) => s.status === 'error').length
   const progress = sites.length > 0 ? (completedCount / sites.length) * 100 : 0
 
   const handleGoToSites = () => {
@@ -201,11 +180,7 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
                 Go to Sites
               </Button>
             )}
-            <Button
-              variant={isNoActiveSites ? 'outlined' : 'contained'}
-              onClick={() => (activeModalSignal.value = null)}
-              fullWidth
-            >
+            <Button variant={isNoActiveSites ? 'outlined' : 'contained'} onClick={handleClose} fullWidth>
               Close
             </Button>
           </Stack>
@@ -223,11 +198,7 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
               Scanning {sites.length} active site{sites.length !== 1 ? 's' : ''}
               ...
             </Typography>
-            <LinearProgress
-              variant="determinate"
-              value={progress}
-              sx={{ mb: SPACING.SMALL.PX }}
-            />
+            <LinearProgress variant="determinate" value={progress} sx={{ mb: SPACING.SMALL.PX }} />
             <Typography variant="caption" color="textSecondary">
               {completedCount} of {sites.length} sites processed
             </Typography>
@@ -241,8 +212,7 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
             </Typography>
             <Typography variant="body2" color="textSecondary">
               Found <strong>{totalNewJobs}</strong> new job posting
-              {totalNewJobs !== 1 ? 's' : ''} across {sites.length - errorCount}{' '}
-              site
+              {totalNewJobs !== 1 ? 's' : ''} across {sites.length - errorCount} site
               {sites.length - errorCount !== 1 ? 's' : ''}
               {errorCount > 0 && (
                 <>
@@ -257,31 +227,19 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
         <Divider sx={{ mb: SPACING.SMALL.PX }} />
 
         <List dense>
-          {sites.map((site, idx) => (
+          {sites.map((site) => (
             <ListItem
-              key={idx}
+              key={site.siteId}
               secondaryAction={
-                <Stack
-                  direction="row"
-                  spacing={SPACING.SMALL.PX}
-                  alignItems="center"
-                >
-                  {site.status === 'complete' &&
-                    site.newJobsFound !== undefined && (
-                      <Typography variant="body2" color="textSecondary">
-                        {site.newJobsFound} new job
-                        {site.newJobsFound !== 1 ? 's' : ''}
-                      </Typography>
-                    )}
-                  {(site.status === 'scraping' ||
-                    site.status === 'processing') && (
-                    <CircularProgress size={16} />
+                <Stack direction="row" spacing={SPACING.SMALL.PX} alignItems="center">
+                  {site.status === 'complete' && site.newJobsFound !== undefined && (
+                    <Typography variant="body2" color="textSecondary">
+                      {site.newJobsFound} new job
+                      {site.newJobsFound !== 1 ? 's' : ''}
+                    </Typography>
                   )}
-                  <Chip
-                    label={getStatusLabel(site.status)}
-                    color={getStatusColor(site.status)}
-                    size="small"
-                  />
+                  {(site.status === 'scraping' || site.status === 'processing') && <CircularProgress size={16} />}
+                  <Chip label={getStatusLabel(site.status)} color={getStatusColor(site.status)} size="small" />
                 </Stack>
               }
             >
@@ -305,12 +263,7 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
           <Box sx={{ mt: SPACING.MEDIUM.PX }}>
             <Stack spacing={SPACING.SMALL.PX}>
               {errorCount > 0 && (
-                <Button
-                  variant="outlined"
-                  color="warning"
-                  onClick={handleRetry}
-                  fullWidth
-                >
+                <Button variant="outlined" color="warning" onClick={handleRetry} fullWidth>
                   Retry Failed Sites ({errorCount})
                 </Button>
               )}

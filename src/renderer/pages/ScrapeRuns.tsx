@@ -18,7 +18,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useCallback, useEffect, useState } from 'react'
 import { CHANNEL } from '../../shared/messages.types'
 import { PAGINATION } from '../consts'
 import ipcMessenger from '../ipcMessenger'
@@ -55,12 +55,7 @@ interface ScrapeRun {
   completedAt?: Date | null
 }
 
-type RunSortField =
-  | 'createdAt'
-  | 'status'
-  | 'totalSites'
-  | 'successfulSites'
-  | 'failedSites'
+type RunSortField = 'createdAt' | 'status' | 'totalSites' | 'successfulSites' | 'failedSites'
 type TaskSortField = 'siteUrl' | 'status' | 'newPostingsFound' | 'completedAt'
 type SortDirection = 'asc' | 'desc'
 
@@ -78,15 +73,11 @@ const ScrapeRuns = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [runSortField, setRunSortField] = useState<RunSortField>('createdAt')
-  const [runSortDirection, setRunSortDirection] =
-    useState<SortDirection>('desc')
+  const [runSortDirection, setRunSortDirection] = useState<SortDirection>('desc')
   const [taskSortField, setTaskSortField] = useState<TaskSortField>('siteUrl')
-  const [taskSortDirection, setTaskSortDirection] =
-    useState<SortDirection>('asc')
+  const [taskSortDirection, setTaskSortDirection] = useState<SortDirection>('asc')
   const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(
-    PAGINATION.DEFAULT_ROWS_PER_PAGE,
-  )
+  const [rowsPerPage, setRowsPerPage] = useState(PAGINATION.DEFAULT_ROWS_PER_PAGE)
 
   const handleRunSort = (field: RunSortField) => {
     if (runSortField === field) {
@@ -107,7 +98,7 @@ const ScrapeRuns = () => {
   }
 
   const getSiteTitle = (siteId: number): string => {
-    const site = sites.find(s => s.id === siteId)
+    const site = sites.find((s) => s.id === siteId)
     return site?.siteTitle || 'Unknown'
   }
 
@@ -143,32 +134,24 @@ const ScrapeRuns = () => {
     return 0
   })
 
-  const paginatedRuns = sortedRuns.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage,
-  )
+  const paginatedRuns = sortedRuns.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
 
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage)
     setExpandedRunId(null) // Collapse expanded rows when changing pages
   }
 
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10))
     setPage(0)
     setExpandedRunId(null)
   }
 
-  const loadScrapeRuns = async () => {
+  const loadScrapeRuns = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
-      const result = await ipcMessenger.invoke(
-        CHANNEL.SCRAPE_RUNS.GET_ALL,
-        undefined,
-      )
+      const result = await ipcMessenger.invoke(CHANNEL.SCRAPE_RUNS.GET_ALL, undefined)
       setRuns(result.runs)
     } catch (err) {
       setError('Failed to load scrape runs')
@@ -176,16 +159,16 @@ const ScrapeRuns = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  const loadSites = async () => {
+  const loadSites = useCallback(async () => {
     try {
       const result = await ipcMessenger.invoke(CHANNEL.SITES.GET_ALL, undefined)
       setSites(result.sites)
     } catch (err) {
       logger.error('Failed to load sites:', err)
     }
-  }
+  }, [])
 
   const handleRetry = async (runId: number) => {
     try {
@@ -211,7 +194,7 @@ const ScrapeRuns = () => {
       const result = await ipcMessenger.invoke(CHANNEL.SCRAPE_RUNS.GET_TASKS, {
         scrapeRunId: runId,
       })
-      setTasks(prev => ({ ...prev, [runId]: result.tasks }))
+      setTasks((prev) => ({ ...prev, [runId]: result.tasks }))
       setExpandedRunId(runId)
     } catch (err) {
       setError('Failed to load scrape tasks')
@@ -222,7 +205,7 @@ const ScrapeRuns = () => {
   useEffect(() => {
     loadScrapeRuns()
     loadSites()
-  }, [])
+  }, [loadScrapeRuns, loadSites])
 
   const formatStatus = (status: Status): string => {
     switch (status) {
@@ -237,9 +220,7 @@ const ScrapeRuns = () => {
     }
   }
 
-  const getStatusColor = (
-    status: Status,
-  ): 'success' | 'warning' | 'error' | 'default' => {
+  const getStatusColor = (status: Status): 'success' | 'warning' | 'error' | 'default' => {
     switch (status) {
       case 'new_data':
         return 'success'
@@ -252,17 +233,12 @@ const ScrapeRuns = () => {
     }
   }
   if (loading) {
-    return <></>
+    return
   }
 
   return (
     <PageWrapper>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        sx={{ mb: SPACING.MEDIUM.PX }}
-      >
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: SPACING.MEDIUM.PX }}>
         <Typography variant="h4">Scrape Run History</Typography>
       </Stack>
 
@@ -272,9 +248,8 @@ const ScrapeRuns = () => {
             <strong>No scrape runs yet</strong>
           </Typography>
           <Typography variant="body2">
-            Scrape runs will appear here once you start scanning your sites for
-            job postings. Each run shows which sites were scanned, how many new
-            jobs were found, and any errors encountered.
+            Scrape runs will appear here once you start scanning your sites for job postings. Each run shows which sites
+            were scanned, how many new jobs were found, and any errors encountered.
           </Typography>
         </Alert>
       )}
@@ -298,9 +273,7 @@ const ScrapeRuns = () => {
                 <TableCell>
                   <TableSortLabel
                     active={runSortField === 'createdAt'}
-                    direction={
-                      runSortField === 'createdAt' ? runSortDirection : 'asc'
-                    }
+                    direction={runSortField === 'createdAt' ? runSortDirection : 'asc'}
                     onClick={() => handleRunSort('createdAt')}
                   >
                     Run Date
@@ -309,9 +282,7 @@ const ScrapeRuns = () => {
                 <TableCell>
                   <TableSortLabel
                     active={runSortField === 'status'}
-                    direction={
-                      runSortField === 'status' ? runSortDirection : 'asc'
-                    }
+                    direction={runSortField === 'status' ? runSortDirection : 'asc'}
                     onClick={() => handleRunSort('status')}
                   >
                     Status
@@ -320,9 +291,7 @@ const ScrapeRuns = () => {
                 <TableCell>
                   <TableSortLabel
                     active={runSortField === 'totalSites'}
-                    direction={
-                      runSortField === 'totalSites' ? runSortDirection : 'asc'
-                    }
+                    direction={runSortField === 'totalSites' ? runSortDirection : 'asc'}
                     onClick={() => handleRunSort('totalSites')}
                   >
                     Sites Scanned
@@ -331,11 +300,7 @@ const ScrapeRuns = () => {
                 <TableCell>
                   <TableSortLabel
                     active={runSortField === 'successfulSites'}
-                    direction={
-                      runSortField === 'successfulSites'
-                        ? runSortDirection
-                        : 'asc'
-                    }
+                    direction={runSortField === 'successfulSites' ? runSortDirection : 'asc'}
                     onClick={() => handleRunSort('successfulSites')}
                   >
                     Successful
@@ -344,9 +309,7 @@ const ScrapeRuns = () => {
                 <TableCell>
                   <TableSortLabel
                     active={runSortField === 'failedSites'}
-                    direction={
-                      runSortField === 'failedSites' ? runSortDirection : 'asc'
-                    }
+                    direction={runSortField === 'failedSites' ? runSortDirection : 'asc'}
                     onClick={() => handleRunSort('failedSites')}
                   >
                     Failed
@@ -361,20 +324,15 @@ const ScrapeRuns = () => {
               {sortedRuns.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} align="center">
-                    <Stack
-                      spacing={SPACING.SMALL.PX}
-                      alignItems="center"
-                      sx={{ py: 4 }}
-                    >
+                    <Stack spacing={SPACING.SMALL.PX} alignItems="center" sx={{ py: 4 }}>
                       <Typography variant="body2" color="textSecondary">
-                        No scrape runs found. Run your first scrape to see
-                        results here.
+                        No scrape runs found. Run your first scrape to see results here.
                       </Typography>
                     </Stack>
                   </TableCell>
                 </TableRow>
               ) : (
-                paginatedRuns.map(run => {
+                paginatedRuns.map((run) => {
                   const isExpanded = expandedRunId === run.id
                   const runTasks = tasks[run.id] || []
 
@@ -396,12 +354,8 @@ const ScrapeRuns = () => {
                         bVal = b.newPostingsFound
                         break
                       case 'completedAt':
-                        aVal = a.completedAt
-                          ? new Date(a.completedAt).getTime()
-                          : 0
-                        bVal = b.completedAt
-                          ? new Date(b.completedAt).getTime()
-                          : 0
+                        aVal = a.completedAt ? new Date(a.completedAt).getTime() : 0
+                        bVal = b.completedAt ? new Date(b.completedAt).getTime() : 0
                         break
                     }
 
@@ -411,48 +365,27 @@ const ScrapeRuns = () => {
                   })
                   const duration =
                     run.completedAt && run.createdAt
-                      ? Math.round(
-                          (new Date(run.completedAt).getTime() -
-                            new Date(run.createdAt).getTime()) /
-                            1000,
-                        )
+                      ? Math.round((new Date(run.completedAt).getTime() - new Date(run.createdAt).getTime()) / 1000)
                       : null
 
                   return (
                     <Fragment key={run.id}>
                       <TableRow hover>
                         <TableCell>
-                          <Tooltip
-                            title={
-                              isExpanded ? 'Collapse details' : 'Expand details'
-                            }
-                          >
-                            <IconButton
-                              size="small"
-                              onClick={() => loadTasksForRun(run.id)}
-                            >
+                          <Tooltip title={isExpanded ? 'Collapse details' : 'Expand details'}>
+                            <IconButton size="small" onClick={() => loadTasksForRun(run.id)}>
                               <Icon name={isExpanded ? 'down' : 'right'} />
                             </IconButton>
                           </Tooltip>
                         </TableCell>
+                        <TableCell>{new Date(run.createdAt).toLocaleString()}</TableCell>
                         <TableCell>
-                          {new Date(run.createdAt).toLocaleString()}
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={formatStatus(run.status)}
-                            color={getStatusColor(run.status)}
-                            size="small"
-                          />
+                          <Chip label={formatStatus(run.status)} color={getStatusColor(run.status)} size="small" />
                         </TableCell>
                         <TableCell>{run.totalSites}</TableCell>
                         <TableCell>{run.successfulSites}</TableCell>
                         <TableCell>{run.failedSites}</TableCell>
-                        <TableCell>
-                          {duration !== null
-                            ? `${duration}s`
-                            : 'In progress...'}
-                        </TableCell>
+                        <TableCell>{duration !== null ? `${duration}s` : 'In progress...'}</TableCell>
                         <TableCell>{run.comments || '-'}</TableCell>
                         <TableCell>
                           {run.failedSites > 0 && (
@@ -472,21 +405,10 @@ const ScrapeRuns = () => {
 
                       {/* Expandable section for tasks */}
                       <TableRow>
-                        <TableCell
-                          style={{ paddingBottom: 0, paddingTop: 0 }}
-                          colSpan={9}
-                        >
-                          <Collapse
-                            in={isExpanded}
-                            timeout="auto"
-                            unmountOnExit
-                          >
+                        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={9}>
+                          <Collapse in={isExpanded} timeout="auto" unmountOnExit>
                             <Box sx={{ margin: 2 }}>
-                              <Typography
-                                variant="h6"
-                                gutterBottom
-                                component="div"
-                              >
+                              <Typography variant="h6" gutterBottom component="div">
                                 Site Scan Details
                               </Typography>
                               <Table size="small">
@@ -495,14 +417,8 @@ const ScrapeRuns = () => {
                                     <TableCell>
                                       <TableSortLabel
                                         active={taskSortField === 'siteUrl'}
-                                        direction={
-                                          taskSortField === 'siteUrl'
-                                            ? taskSortDirection
-                                            : 'asc'
-                                        }
-                                        onClick={() =>
-                                          handleTaskSort('siteUrl')
-                                        }
+                                        direction={taskSortField === 'siteUrl' ? taskSortDirection : 'asc'}
+                                        onClick={() => handleTaskSort('siteUrl')}
                                       >
                                         Company
                                       </TableSortLabel>
@@ -510,11 +426,7 @@ const ScrapeRuns = () => {
                                     <TableCell>
                                       <TableSortLabel
                                         active={taskSortField === 'status'}
-                                        direction={
-                                          taskSortField === 'status'
-                                            ? taskSortDirection
-                                            : 'asc'
-                                        }
+                                        direction={taskSortField === 'status' ? taskSortDirection : 'asc'}
                                         onClick={() => handleTaskSort('status')}
                                       >
                                         Status
@@ -522,17 +434,9 @@ const ScrapeRuns = () => {
                                     </TableCell>
                                     <TableCell>
                                       <TableSortLabel
-                                        active={
-                                          taskSortField === 'newPostingsFound'
-                                        }
-                                        direction={
-                                          taskSortField === 'newPostingsFound'
-                                            ? taskSortDirection
-                                            : 'asc'
-                                        }
-                                        onClick={() =>
-                                          handleTaskSort('newPostingsFound')
-                                        }
+                                        active={taskSortField === 'newPostingsFound'}
+                                        direction={taskSortField === 'newPostingsFound' ? taskSortDirection : 'asc'}
+                                        onClick={() => handleTaskSort('newPostingsFound')}
                                       >
                                         New Postings
                                       </TableSortLabel>
@@ -541,14 +445,8 @@ const ScrapeRuns = () => {
                                     <TableCell>
                                       <TableSortLabel
                                         active={taskSortField === 'completedAt'}
-                                        direction={
-                                          taskSortField === 'completedAt'
-                                            ? taskSortDirection
-                                            : 'asc'
-                                        }
-                                        onClick={() =>
-                                          handleTaskSort('completedAt')
-                                        }
+                                        direction={taskSortField === 'completedAt' ? taskSortDirection : 'asc'}
+                                        onClick={() => handleTaskSort('completedAt')}
                                       >
                                         Completed At
                                       </TableSortLabel>
@@ -559,20 +457,15 @@ const ScrapeRuns = () => {
                                   {sortedTasks.length === 0 ? (
                                     <TableRow>
                                       <TableCell colSpan={5} align="center">
-                                        <Typography
-                                          variant="body2"
-                                          color="textSecondary"
-                                        >
+                                        <Typography variant="body2" color="textSecondary">
                                           No task details available
                                         </Typography>
                                       </TableCell>
                                     </TableRow>
                                   ) : (
-                                    sortedTasks.map(task => (
+                                    sortedTasks.map((task) => (
                                       <TableRow key={task.id}>
-                                        <TableCell>
-                                          {getSiteTitle(task.siteId)}
-                                        </TableCell>
+                                        <TableCell>{getSiteTitle(task.siteId)}</TableCell>
                                         <TableCell>
                                           <Chip
                                             label={formatStatus(task.status)}
@@ -580,18 +473,10 @@ const ScrapeRuns = () => {
                                             size="small"
                                           />
                                         </TableCell>
+                                        <TableCell>{task.newPostingsFound}</TableCell>
+                                        <TableCell>{task.errorMessage || '-'}</TableCell>
                                         <TableCell>
-                                          {task.newPostingsFound}
-                                        </TableCell>
-                                        <TableCell>
-                                          {task.errorMessage || '-'}
-                                        </TableCell>
-                                        <TableCell>
-                                          {task.completedAt
-                                            ? new Date(
-                                                task.completedAt,
-                                              ).toLocaleString()
-                                            : '-'}
+                                          {task.completedAt ? new Date(task.completedAt).toLocaleString() : '-'}
                                         </TableCell>
                                       </TableRow>
                                     ))

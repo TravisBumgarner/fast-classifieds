@@ -29,9 +29,7 @@ export async function processText({
   jobToJSONPrompt: string
 }): Promise<{ jobs: Job[]; rawResponse: OpenAI.Responses.Response }> {
   if (!apiKey) {
-    throw new Error(
-      'OpenAI API key is not configured. Please set it in Settings.',
-    )
+    throw new Error('OpenAI API key is not configured. Please set it in Settings.')
   }
 
   const client = new OpenAI({ apiKey })
@@ -46,9 +44,7 @@ export async function processText({
     }),
   })
 
-  const parsed = JobsResponseSchema.safeParse(
-    JSON.parse(response.output_text || '[]'),
-  )
+  const parsed = JobsResponseSchema.safeParse(JSON.parse(response.output_text || '[]'))
 
   if (!parsed.success) {
     throw new Error(`Failed to parse AI response: ${parsed.error.message}`)

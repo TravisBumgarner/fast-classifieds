@@ -12,8 +12,8 @@ import ipcMessenger from './ipcMessenger'
 import RenderModal from './sharedComponents/Modal'
 import { MODAL_ID } from './sharedComponents/Modal/Modal.consts'
 import { activeModalSignal, onboardingCompletedSignal } from './signals'
-import AppThemeProvider from './styles/Theme'
 import { SPACING } from './styles/consts'
+import AppThemeProvider from './styles/Theme'
 
 Sentry.init({
   dsn: 'https://aa9b99c0da19f5f16cde7295bcae0fa4@o196886.ingest.us.sentry.io/4510360742133760',
@@ -26,23 +26,21 @@ function App() {
     // Wait for onboarding check to complete before showing changelog
     if (!onboardingCompletedSignal.value) return
 
-    ipcMessenger
-      .invoke(CHANNEL.STORE.GET, undefined)
-      .then(({ changelogLastSeenVersion }) => {
-        if (changelogLastSeenVersion !== CURRENT_VERSION) {
-          // Show changelog modal after a short delay to let the app render
-          setTimeout(() => {
-            activeModalSignal.value = {
-              id: MODAL_ID.CHANGELOG_MODAL,
-              showLatestOnly: true,
-            }
-            // Update the last seen version
-            ipcMessenger.invoke(CHANNEL.STORE.SET, {
-              changelogLastSeenVersion: CURRENT_VERSION,
-            })
-          }, 500)
-        }
-      })
+    ipcMessenger.invoke(CHANNEL.STORE.GET, undefined).then(({ changelogLastSeenVersion }) => {
+      if (changelogLastSeenVersion !== CURRENT_VERSION) {
+        // Show changelog modal after a short delay to let the app render
+        setTimeout(() => {
+          activeModalSignal.value = {
+            id: MODAL_ID.CHANGELOG_MODAL,
+            showLatestOnly: true,
+          }
+          // Update the last seen version
+          ipcMessenger.invoke(CHANNEL.STORE.SET, {
+            changelogLastSeenVersion: CURRENT_VERSION,
+          })
+        }, 500)
+      }
+    })
   }, [])
 
   return (

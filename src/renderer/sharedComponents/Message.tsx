@@ -1,8 +1,7 @@
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
-
 import { useTheme } from '@mui/material/styles'
+import Typography from '@mui/material/Typography'
 import { useMemo } from 'react'
 import { SPACING } from '../styles/consts'
 import Icon from './Icon'
@@ -45,15 +44,9 @@ const Message = ({
         gap: SPACING.MEDIUM.PX,
       }}
     >
-      <Box
-        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-      >
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Box>{icon}</Box>
-        <Typography
-          sx={{ marginLeft: SPACING.SMALL.PX }}
-          variant="h5"
-          color={'info.main'}
-        >
+        <Typography sx={{ marginLeft: SPACING.SMALL.PX }} variant="h5" color={'info.main'}>
           {message}
         </Typography>
       </Box>

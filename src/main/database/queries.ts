@@ -1,20 +1,20 @@
 import { and, desc, eq } from 'drizzle-orm'
-import OpenAI from 'openai'
+import type OpenAI from 'openai'
 import type { NewSiteDTO, Status, UpdateSiteDTO } from '../../shared/types'
 import { db } from './client'
 import {
   apiUsage,
   hashes,
   jobPostings,
-  prompts,
-  scrapeRuns,
-  scrapeTasks,
-  sites,
   type NewHash,
   type NewJobPosting,
   type NewPrompt,
   type NewScrapeRun,
   type NewScrapeTask,
+  prompts,
+  scrapeRuns,
+  scrapeTasks,
+  sites,
 } from './schema'
 
 async function insertApiUsage({
@@ -41,8 +41,7 @@ async function insertApiUsage({
       totalTokens: response.usage?.total_tokens || 0,
 
       cachedTokens: response.usage?.input_tokens_details.cached_tokens || 0,
-      reasoningTokens:
-        response.usage?.output_tokens_details.reasoning_tokens || 0,
+      reasoningTokens: response.usage?.output_tokens_details.reasoning_tokens || 0,
 
       prompt,
       siteContent,
@@ -56,11 +55,7 @@ async function insertApiUsage({
  * Check if a hash exists in the database
  */
 async function hashExists(hash: string): Promise<boolean> {
-  const result = await db
-    .select()
-    .from(hashes)
-    .where(eq(hashes.hash, hash))
-    .limit(1)
+  const result = await db.select().from(hashes).where(eq(hashes.hash, hash)).limit(1)
   return result.length > 0
 }
 
@@ -138,11 +133,8 @@ async function getAllSitesWithJobCounts() {
   const allSites = await db.select().from(sites)
 
   const sitesWithCounts = await Promise.all(
-    allSites.map(async site => {
-      const jobs = await db
-        .select()
-        .from(jobPostings)
-        .where(eq(jobPostings.siteId, site.id))
+    allSites.map(async (site) => {
+      const jobs = await db.select().from(jobPostings).where(eq(jobPostings.siteId, site.id))
 
       return {
         ...site,
@@ -210,11 +202,7 @@ async function getAllScrapeTasks() {
  * Get a prompt by ID
  */
 async function getPromptById(id: number) {
-  const result = await db
-    .select()
-    .from(prompts)
-    .where(eq(prompts.id, id))
-    .limit(1)
+  const result = await db.select().from(prompts).where(eq(prompts.id, id)).limit(1)
   return result[0] || null
 }
 
@@ -268,12 +256,7 @@ async function getFailedTasksByRunId(scrapeRunId: number) {
   return db
     .select()
     .from(scrapeTasks)
-    .where(
-      and(
-        eq(scrapeTasks.scrapeRunId, scrapeRunId),
-        eq(scrapeTasks.status, 'error'),
-      ),
-    )
+    .where(and(eq(scrapeTasks.scrapeRunId, scrapeRunId), eq(scrapeTasks.status, 'error')))
     .orderBy(desc(scrapeTasks.createdAt))
 }
 
@@ -289,11 +272,7 @@ async function updateScrapeRun(
     status?: Status
   },
 ) {
-  return db
-    .update(scrapeRuns)
-    .set(data)
-    .where(eq(scrapeRuns.id, id))
-    .returning()
+  return db.update(scrapeRuns).set(data).where(eq(scrapeRuns.id, id)).returning()
 }
 
 /**
@@ -307,11 +286,7 @@ async function getAllJobPostings() {
  * Get job postings for a specific site (ordered by most recent first)
  */
 async function getJobPostingsBySiteId(siteId: number) {
-  return db
-    .select()
-    .from(jobPostings)
-    .where(eq(jobPostings.siteId, siteId))
-    .orderBy(desc(jobPostings.createdAt))
+  return db.select().from(jobPostings).where(eq(jobPostings.siteId, siteId)).orderBy(desc(jobPostings.createdAt))
 }
 
 /**
@@ -321,11 +296,7 @@ async function updateJobPostingStatus(
   id: number,
   status: 'new' | 'applied' | 'skipped' | 'interview' | 'rejected' | 'offer',
 ) {
-  return db
-    .update(jobPostings)
-    .set({ status, updatedAt: new Date() })
-    .where(eq(jobPostings.id, id))
-    .returning()
+  return db.update(jobPostings).set({ status, updatedAt: new Date() }).where(eq(jobPostings.id, id)).returning()
 }
 
 /**

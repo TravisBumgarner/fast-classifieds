@@ -39,10 +39,7 @@ const TabData = () => {
     setIsExporting(true)
     setDataMessage(null)
     try {
-      const result = await ipcMessenger.invoke(
-        CHANNEL.APP.EXPORT_ALL_DATA,
-        undefined,
-      )
+      const result = await ipcMessenger.invoke(CHANNEL.APP.EXPORT_ALL_DATA, undefined)
 
       if (result.success && result.data) {
         // Create and download JSON file
@@ -54,10 +51,7 @@ const TabData = () => {
         link.setAttribute('href', url)
 
         const timestamp = new Date().toISOString().split('T')[0]
-        link.setAttribute(
-          'download',
-          `fast-classifieds-backup-${timestamp}.json`,
-        )
+        link.setAttribute('download', `fast-classifieds-backup-${timestamp}.json`)
         link.style.visibility = 'hidden'
 
         document.body.appendChild(link)
@@ -75,7 +69,7 @@ const TabData = () => {
     } catch (error) {
       setDataMessage({
         type: 'error',
-        text: 'Error exporting data: ' + (error as Error).message,
+        text: `Error exporting data: ${(error as Error).message}`,
       })
     } finally {
       setIsExporting(false)
@@ -101,12 +95,9 @@ const TabData = () => {
     try {
       const text = await selectedFile.text()
       // Reviver to convert ISO date strings to Date objects
-      const dateReviver = (key: string, value: unknown) => {
+      const dateReviver = (_key: string, value: unknown) => {
         // ISO 8601 date string check
-        if (
-          typeof value === 'string' &&
-          /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d+)?Z$/.test(value)
-        ) {
+        if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d+)?Z$/.test(value)) {
           return new Date(value)
         }
         return value
@@ -144,7 +135,7 @@ const TabData = () => {
     } catch (error) {
       setDataMessage({
         type: 'error',
-        text: 'Error restoring data: ' + (error as Error).message,
+        text: `Error restoring data: ${(error as Error).message}`,
       })
     } finally {
       setIsRestoring(false)
@@ -177,10 +168,7 @@ const TabData = () => {
     setNukeConfirmationText('')
 
     try {
-      const result = await ipcMessenger.invoke(
-        CHANNEL.APP.NUKE_DATABASE,
-        undefined,
-      )
+      const result = await ipcMessenger.invoke(CHANNEL.APP.NUKE_DATABASE, undefined)
 
       if (result.success) {
         setDataMessage({
@@ -196,7 +184,7 @@ const TabData = () => {
     } catch (error) {
       setDataMessage({
         type: 'error',
-        text: 'Error nuking database: ' + (error as Error).message,
+        text: `Error nuking database: ${(error as Error).message}`,
       })
     } finally {
       setIsNuking(false)
@@ -213,7 +201,7 @@ const TabData = () => {
     input.type = 'file'
     input.accept = '.json'
 
-    input.onchange = async e => {
+    input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (!file) return
 
@@ -228,10 +216,7 @@ const TabData = () => {
   useEffect(() => {
     const getBackupDirectory = async () => {
       try {
-        const result = await ipcMessenger.invoke(
-          CHANNEL.APP.GET_BACKUP_DIRECTORY,
-          undefined,
-        )
+        const result = await ipcMessenger.invoke(CHANNEL.APP.GET_BACKUP_DIRECTORY, undefined)
         setBackupDirectory(result.backupDirectory)
       } catch (error) {
         logger.error('Error getting backup directory:', error)
@@ -247,11 +232,7 @@ const TabData = () => {
         <Typography variant="subtitle2" gutterBottom>
           Database Backups
         </Typography>
-        <Typography
-          variant="body2"
-          color="textSecondary"
-          sx={{ mb: SPACING.MEDIUM.PX }}
-        >
+        <Typography variant="body2" color="textSecondary" sx={{ mb: SPACING.MEDIUM.PX }}>
           Backup Location: {backupDirectory || 'Loading...'}
         </Typography>
 
@@ -260,11 +241,7 @@ const TabData = () => {
         <Typography variant="subtitle2" gutterBottom>
           Export & Restore
         </Typography>
-        <Typography
-          variant="body2"
-          color="textSecondary"
-          sx={{ mb: SPACING.SMALL.PX }}
-        >
+        <Typography variant="body2" color="textSecondary" sx={{ mb: SPACING.SMALL.PX }}>
           Export or restore your data
         </Typography>
 
@@ -300,11 +277,7 @@ const TabData = () => {
         <Typography variant="subtitle2" gutterBottom color="error">
           Danger Zone
         </Typography>
-        <Typography
-          variant="body2"
-          color="textSecondary"
-          sx={{ mb: SPACING.SMALL.PX }}
-        >
+        <Typography variant="body2" color="textSecondary" sx={{ mb: SPACING.SMALL.PX }}>
           Permanently delete all data from the database
         </Typography>
 
@@ -328,8 +301,7 @@ const TabData = () => {
         <DialogTitle id="confirm-dialog-title">Restore from Backup</DialogTitle>
         <DialogContent>
           <DialogContentText id="confirm-dialog-description">
-            This will replace all current data with the backup. Type CONFIRM to
-            continue.
+            This will replace all current data with the backup. Type CONFIRM to continue.
           </DialogContentText>
           <TextField
             margin="dense"
@@ -337,7 +309,7 @@ const TabData = () => {
             variant="outlined"
             placeholder="Type CONFIRM here"
             value={confirmationText}
-            onChange={e => setConfirmationText(e.target.value)}
+            onChange={(e) => setConfirmationText(e.target.value)}
             sx={{ mt: 2 }}
             size="small"
           />
@@ -375,7 +347,7 @@ const TabData = () => {
             variant="outlined"
             placeholder="Type NUKE here"
             value={nukeConfirmationText}
-            onChange={e => setNukeConfirmationText(e.target.value)}
+            onChange={(e) => setNukeConfirmationText(e.target.value)}
             sx={{ mt: 2 }}
             color="error"
             size="small"
@@ -383,12 +355,7 @@ const TabData = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancelNuke}>Cancel</Button>
-          <Button
-            onClick={handleConfirmNuke}
-            color="error"
-            variant="contained"
-            disabled={!nukeConfirmationText.trim()}
-          >
+          <Button onClick={handleConfirmNuke} color="error" variant="contained" disabled={!nukeConfirmationText.trim()}>
             Nuke Database
           </Button>
         </DialogActions>

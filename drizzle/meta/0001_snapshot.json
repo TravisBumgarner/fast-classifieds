@@ -168,9 +168,7 @@
       "indexes": {
         "hashes_hash_unique": {
           "name": "hashes_hash_unique",
-          "columns": [
-            "hash"
-          ],
+          "columns": ["hash"],
           "isUnique": true
         }
       },
@@ -513,9 +511,7 @@
       "indexes": {
         "sites_site_url_unique": {
           "name": "sites_site_url_unique",
-          "columns": [
-            "site_url"
-          ],
+          "columns": ["site_url"],
           "isUnique": true
         }
       },

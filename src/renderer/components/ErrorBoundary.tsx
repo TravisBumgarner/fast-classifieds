@@ -1,11 +1,8 @@
 import { Component } from 'react'
-import Error from '../pages/Error'
+import ErrorPage from '../pages/Error'
 import { logger } from '../utilities'
 
-class ErrorBoundary extends Component<
-  { children: React.ReactNode },
-  { hasError: boolean }
-> {
+class ErrorBoundary extends Component<{ children: React.ReactNode }, { hasError: boolean }> {
   state = { hasError: false }
 
   static getDerivedStateFromError() {
@@ -17,7 +14,7 @@ class ErrorBoundary extends Component<
   }
 
   render() {
-    if (this.state.hasError) return <Error />
+    if (this.state.hasError) return <ErrorPage />
     return this.props.children
   }
 }

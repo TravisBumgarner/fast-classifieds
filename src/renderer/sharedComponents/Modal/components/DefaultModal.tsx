@@ -3,10 +3,11 @@ import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import MUIModal from '@mui/material/Modal'
 import type { SxProps } from '@mui/material/styles'
-import { useCallback, type FC } from 'react'
+import { type FC, useCallback } from 'react'
 import Icon from '../../../sharedComponents/Icon'
 import { activeModalSignal } from '../../../signals'
 import { SPACING, Z_INDICES } from '../../../styles/consts'
+
 interface ActiveModal {
   children: React.ReactNode | React.ReactNode[]
   closeCallback?: () => void

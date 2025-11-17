@@ -24,10 +24,10 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CHANNEL } from '../../shared/messages.types'
-import { SiteDTO } from '../../shared/types'
+import type { SiteDTO } from '../../shared/types'
 import { PAGINATION, ROUTES } from '../consts'
 import ipcMessenger from '../ipcMessenger'
 import Icon from '../sharedComponents/Icon'
@@ -41,13 +41,7 @@ import { logger } from '../utilities'
 
 type SiteStatus = 'active' | 'inactive'
 
-type PostingStatus =
-  | 'new'
-  | 'applied'
-  | 'skipped'
-  | 'interview'
-  | 'rejected'
-  | 'offer'
+type PostingStatus = 'new' | 'applied' | 'skipped' | 'interview' | 'rejected' | 'offer'
 
 interface JobPosting {
   id: number
@@ -67,10 +61,7 @@ const Sites = () => {
   const [sites, setSites] = useState<(SiteDTO & { totalJobs: number })[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [statusFilter, setStatusFilter] = useState<SiteStatus[]>([
-    'active',
-    'inactive',
-  ])
+  const [statusFilter, setStatusFilter] = useState<SiteStatus[]>(['active', 'inactive'])
   const [sortField, setSortField] = useState<SortField>('siteTitle')
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
   const [expandedSiteId, setExpandedSiteId] = useState<number | null>(null)
@@ -78,9 +69,7 @@ const Sites = () => {
   const [loadingJobs, setLoadingJobs] = useState<Record<number, boolean>>({})
   const [page, setPage] = useState(0)
   const navigate = useNavigate()
-  const [rowsPerPage, setRowsPerPage] = useState(
-    PAGINATION.DEFAULT_ROWS_PER_PAGE,
-  )
+  const [rowsPerPage, setRowsPerPage] = useState(PAGINATION.DEFAULT_ROWS_PER_PAGE)
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -115,37 +104,29 @@ const Sites = () => {
     return 0
   })
 
-  const filteredSites = sortedSites.filter(site => {
+  const filteredSites = sortedSites.filter((site) => {
     if (statusFilter.length === 0) return true
     return statusFilter.includes(site.status)
   })
 
-  const paginatedSites = filteredSites.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage,
-  )
+  const paginatedSites = filteredSites.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
 
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage)
     setExpandedSiteId(null) // Collapse expanded rows when changing pages
   }
 
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10))
     setPage(0)
     setExpandedSiteId(null)
   }
 
-  const loadSites = async () => {
+  const loadSites = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
-      const result = await ipcMessenger.invoke(
-        CHANNEL.SITES.GET_ALL_WITH_JOB_COUNTS,
-        undefined,
-      )
+      const result = await ipcMessenger.invoke(CHANNEL.SITES.GET_ALL_WITH_JOB_COUNTS, undefined)
       setSites(result.sites)
     } catch (err) {
       setError('Failed to load sites')
@@ -153,11 +134,11 @@ const Sites = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     loadSites()
-  }, [])
+  }, [loadSites])
 
   const handleAddSite = () => {
     activeModalSignal.value = {
@@ -211,42 +192,29 @@ const Sites = () => {
 
       // Load jobs if not already loaded
       if (!siteJobs[siteId]) {
-        setLoadingJobs(prev => ({ ...prev, [siteId]: true }))
+        setLoadingJobs((prev) => ({ ...prev, [siteId]: true }))
         try {
-          const result = await ipcMessenger.invoke(
-            CHANNEL.JOB_POSTINGS.GET_BY_SITE_ID,
-            { siteId },
-          )
-          setSiteJobs(prev => ({ ...prev, [siteId]: result.postings }))
+          const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.GET_BY_SITE_ID, { siteId })
+          setSiteJobs((prev) => ({ ...prev, [siteId]: result.postings }))
         } catch (err) {
           logger.error('Failed to load jobs for site:', err)
         } finally {
-          setLoadingJobs(prev => ({ ...prev, [siteId]: false }))
+          setLoadingJobs((prev) => ({ ...prev, [siteId]: false }))
         }
       }
     }
   }
 
-  const handleStatusChange = async (
-    postingId: number,
-    newStatus: PostingStatus,
-    siteId: number,
-  ) => {
+  const handleStatusChange = async (postingId: number, newStatus: PostingStatus, siteId: number) => {
     try {
-      const result = await ipcMessenger.invoke(
-        CHANNEL.JOB_POSTINGS.UPDATE_STATUS,
-        {
-          id: postingId,
-          status: newStatus,
-        },
-      )
+      const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.UPDATE_STATUS, {
+        id: postingId,
+        status: newStatus,
+      })
       if (result.success) {
         // Reload jobs for this site
-        const jobsResult = await ipcMessenger.invoke(
-          CHANNEL.JOB_POSTINGS.GET_BY_SITE_ID,
-          { siteId },
-        )
-        setSiteJobs(prev => ({ ...prev, [siteId]: jobsResult.postings }))
+        const jobsResult = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.GET_BY_SITE_ID, { siteId })
+        setSiteJobs((prev) => ({ ...prev, [siteId]: jobsResult.postings }))
       } else {
         setError('Failed to update posting status')
       }
@@ -259,14 +227,7 @@ const Sites = () => {
   const statusOptions: {
     value: PostingStatus
     label: string
-    color:
-      | 'default'
-      | 'primary'
-      | 'secondary'
-      | 'error'
-      | 'info'
-      | 'success'
-      | 'warning'
+    color: 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'
   }[] = [
     { value: 'new', label: 'New', color: 'info' },
     { value: 'applied', label: 'Applied', color: 'success' },
@@ -277,26 +238,17 @@ const Sites = () => {
   ]
 
   if (loading) {
-    return <></>
+    return
   }
 
   return (
     <PageWrapper>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        sx={{ mb: SPACING.MEDIUM.PX }}
-      >
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: SPACING.MEDIUM.PX }}>
         <Stack direction="row" spacing={SPACING.SMALL.PX} alignItems="center">
           <Button size="small" variant="contained" onClick={handleAddSite}>
             Add Site
           </Button>
-          <Button
-            size="small"
-            variant="outlined"
-            onClick={() => navigate(ROUTES.debugger.href())}
-          >
+          <Button size="small" variant="outlined" onClick={() => navigate(ROUTES.debugger.href())}>
             Setup New Site
           </Button>
           <Button size="small" variant="outlined" onClick={handleImportSites}>
@@ -306,7 +258,7 @@ const Sites = () => {
 
         <FormControl component="fieldset">
           <FormGroup row>
-            {(['active', 'inactive'] as SiteStatus[]).map(status => (
+            {(['active', 'inactive'] as SiteStatus[]).map((status) => (
               <FormControlLabel
                 key={status}
                 control={
@@ -314,7 +266,7 @@ const Sites = () => {
                     checked={statusFilter.includes(status)}
                     onChange={() => {
                       const newFilter = statusFilter.includes(status)
-                        ? statusFilter.filter(s => s !== status)
+                        ? statusFilter.filter((s) => s !== status)
                         : [...statusFilter, status]
                       setStatusFilter(newFilter)
                       setPage(0)
@@ -335,16 +287,13 @@ const Sites = () => {
             <strong>Getting started with sites:</strong>
           </Typography>
           <Typography variant="body2" paragraph>
-            Add career pages from companies you&apos;re interested in. For each
-            site, you&apos;ll need:
+            Add career pages from companies you&apos;re interested in. For each site, you&apos;ll need:
           </Typography>
           <Typography variant="body2" component="div">
-            • <strong>Site Title:</strong> Company name (e.g., &quot;Acme
-            Corp&quot;)
+            • <strong>Site Title:</strong> Company name (e.g., &quot;Acme Corp&quot;)
             <br />• <strong>URL:</strong> Link to their careers page
-            <br />• <strong>CSS Selector:</strong> Target the job listings
-            container (e.g., &quot;.job-list&quot; or &quot;#jobs&quot;). Use
-            &quot;body&quot; if unsure. New to selectors?{' '}
+            <br />• <strong>CSS Selector:</strong> Target the job listings container (e.g., &quot;.job-list&quot; or
+            &quot;#jobs&quot;). Use &quot;body&quot; if unsure. New to selectors?{' '}
             <a
               href="https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be"
               target="_blank"
@@ -352,17 +301,14 @@ const Sites = () => {
               style={{
                 textDecoration: 'underline',
               }}
-              onClick={e => {
+              onClick={(e) => {
                 e.preventDefault()
-                window.electron.shell.openExternal(
-                  'https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be',
-                )
+                window.electron.shell.openExternal('https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be')
               }}
             >
               Watch the tutorial
             </a>
-            <br />• <strong>Prompt:</strong> Select which prompt to use for
-            matching jobs
+            <br />• <strong>Prompt:</strong> Select which prompt to use for matching jobs
           </Typography>
         </Alert>
       )}
@@ -386,9 +332,7 @@ const Sites = () => {
                 <TableCell>
                   <TableSortLabel
                     active={sortField === 'siteTitle'}
-                    direction={
-                      sortField === 'siteTitle' ? sortDirection : 'asc'
-                    }
+                    direction={sortField === 'siteTitle' ? sortDirection : 'asc'}
                     onClick={() => handleSort('siteTitle')}
                   >
                     Company
@@ -408,9 +352,7 @@ const Sites = () => {
                 <TableCell>
                   <TableSortLabel
                     active={sortField === 'updatedAt'}
-                    direction={
-                      sortField === 'updatedAt' ? sortDirection : 'asc'
-                    }
+                    direction={sortField === 'updatedAt' ? sortDirection : 'asc'}
                     onClick={() => handleSort('updatedAt')}
                   >
                     Updated
@@ -430,11 +372,7 @@ const Sites = () => {
               {filteredSites.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} align="center">
-                    <Stack
-                      spacing={SPACING.SMALL.PX}
-                      alignItems="center"
-                      sx={{ py: 4 }}
-                    >
+                    <Stack spacing={SPACING.SMALL.PX} alignItems="center" sx={{ py: 4 }}>
                       <Typography variant="body2" color="textSecondary">
                         {sites.length === 0
                           ? 'No sites found. Click "Add Site" or "Import Sites" to get started.'
@@ -456,7 +394,7 @@ const Sites = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                paginatedSites.map(site => {
+                paginatedSites.map((site) => {
                   const isExpanded = expandedSiteId === site.id
                   const jobs = siteJobs[site.id] || []
                   const loading = loadingJobs[site.id] || false
@@ -465,16 +403,8 @@ const Sites = () => {
                     <Fragment key={site.id}>
                       <TableRow hover>
                         <TableCell padding="checkbox">
-                          <Tooltip
-                            title={
-                              isExpanded
-                                ? 'Collapse job listings'
-                                : 'Expand job listings'
-                            }
-                          >
-                            <IconButton
-                              onClick={() => handleToggleExpand(site.id)}
-                            >
+                          <Tooltip title={isExpanded ? 'Collapse job listings' : 'Expand job listings'}>
+                            <IconButton onClick={() => handleToggleExpand(site.id)}>
                               <Icon name={isExpanded ? 'down' : 'right'} />
                             </IconButton>
                           </Tooltip>
@@ -486,32 +416,19 @@ const Sites = () => {
                         <TableCell>{site.totalJobs}</TableCell>
                         <TableCell>
                           <Chip
-                            label={
-                              site.status.charAt(0).toUpperCase() +
-                              site.status.slice(1)
-                            }
-                            color={
-                              site.status === 'active' ? 'success' : 'default'
-                            }
+                            label={site.status.charAt(0).toUpperCase() + site.status.slice(1)}
+                            color={site.status === 'active' ? 'success' : 'default'}
                           />
                         </TableCell>
-                        <TableCell>
-                          {new Date(site.updatedAt).toLocaleDateString()}
-                        </TableCell>
+                        <TableCell>{new Date(site.updatedAt).toLocaleDateString()}</TableCell>
                         <TableCell align="right">
-                          <Tooltip
-                            title={`Open site in browser: ` + site.siteUrl}
-                          >
+                          <Tooltip title={`Open site in browser: ${site.siteUrl}`}>
                             <span>
                               <Link url={site.siteUrl} />
                             </span>
                           </Tooltip>
                           <Tooltip title="Debug Site">
-                            <IconButton
-                              onClick={() =>
-                                navigate(ROUTES.debugger.href(site.id))
-                              }
-                            >
+                            <IconButton onClick={() => navigate(ROUTES.debugger.href(site.id))}>
                               <Icon name="debug" />
                             </IconButton>
                           </Tooltip>
@@ -521,40 +438,22 @@ const Sites = () => {
                             </IconButton>
                           </Tooltip>
                           <Tooltip title="Delete site">
-                            <IconButton
-                              onClick={() =>
-                                handleDeleteSite(site.id, site.siteTitle)
-                              }
-                              color="error"
-                            >
+                            <IconButton onClick={() => handleDeleteSite(site.id, site.siteTitle)} color="error">
                               <Icon name="delete" />
                             </IconButton>
                           </Tooltip>
                         </TableCell>
                       </TableRow>
                       <TableRow>
-                        <TableCell
-                          style={{ paddingBottom: 0, paddingTop: 0 }}
-                          colSpan={7}
-                        >
-                          <Collapse
-                            in={isExpanded}
-                            timeout="auto"
-                            unmountOnExit
-                          >
+                        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
+                          <Collapse in={isExpanded} timeout="auto" unmountOnExit>
                             <Box sx={{ margin: 2 }}>
                               {loading ? (
-                                <Typography
-                                  variant="body2"
-                                  color="textSecondary"
-                                >
+                                <Typography variant="body2" color="textSecondary">
                                   Loading jobs...
                                 </Typography>
                               ) : jobs.length === 0 ? (
-                                <Typography
-                                  variant="body2"
-                                  color="textSecondary"
-                                >
+                                <Typography variant="body2" color="textSecondary">
                                   No jobs found for this site.
                                 </Typography>
                               ) : (
@@ -565,18 +464,14 @@ const Sites = () => {
                                       <TableCell>Explanation</TableCell>
                                       <TableCell>Status</TableCell>
                                       <TableCell>Created</TableCell>
-                                      <TableCell align="right">
-                                        Actions
-                                      </TableCell>
+                                      <TableCell align="right">Actions</TableCell>
                                     </TableRow>
                                   </TableHead>
                                   <TableBody>
-                                    {jobs.map(job => (
+                                    {jobs.map((job) => (
                                       <TableRow key={job.id}>
                                         <TableCell>
-                                          <Typography variant="body2">
-                                            {job.title}
-                                          </Typography>
+                                          <Typography variant="body2">{job.title}</Typography>
                                         </TableCell>
                                         <TableCell>
                                           <Typography
@@ -593,49 +488,26 @@ const Sites = () => {
                                           </Typography>
                                         </TableCell>
                                         <TableCell>
-                                          <FormControl
-                                            size="small"
-                                            sx={{ minWidth: 150 }}
-                                          >
+                                          <FormControl size="small" sx={{ minWidth: 150 }}>
                                             <Select
                                               value={job.status}
-                                              onChange={e =>
-                                                handleStatusChange(
-                                                  job.id,
-                                                  e.target
-                                                    .value as PostingStatus,
-                                                  site.id,
-                                                )
+                                              onChange={(e) =>
+                                                handleStatusChange(job.id, e.target.value as PostingStatus, site.id)
                                               }
-                                              renderValue={value => {
-                                                const option =
-                                                  statusOptions.find(
-                                                    opt => opt.value === value,
-                                                  )
-                                                return (
-                                                  <Chip
-                                                    label={option?.label}
-                                                    color={option?.color}
-                                                  />
-                                                )
+                                              renderValue={(value) => {
+                                                const option = statusOptions.find((opt) => opt.value === value)
+                                                return <Chip label={option?.label} color={option?.color} />
                                               }}
                                             >
-                                              {statusOptions.map(option => (
-                                                <MenuItem
-                                                  key={option.value}
-                                                  value={option.value}
-                                                >
+                                              {statusOptions.map((option) => (
+                                                <MenuItem key={option.value} value={option.value}>
                                                   {option.label}
                                                 </MenuItem>
                                               ))}
                                             </Select>
                                           </FormControl>
                                         </TableCell>
-                                        <TableCell>
-                                          {new Date(
-                                            job.createdAt,
-                                          ).toLocaleDateString()}
-                                        </TableCell>
+                                        <TableCell>{new Date(job.createdAt).toLocaleDateString()}</TableCell>
                                         <TableCell align="right">
                                           <Tooltip title="Open job posting in browser">
                                             <span>

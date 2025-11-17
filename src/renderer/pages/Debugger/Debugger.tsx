@@ -23,7 +23,7 @@ const Debugger = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (siteId && !isNaN(Number(siteId))) {
+    if (siteId && !Number.isNaN(Number(siteId))) {
       // Load site data by siteId and populate fields
       ipcMessenger
         .invoke(CHANNEL.SITES.GET_BY_ID, { id: Number(siteId) })
@@ -37,7 +37,7 @@ const Debugger = () => {
             setError('Site not found')
           }
         })
-        .catch(err => {
+        .catch((err) => {
           setError('Failed to load site')
           logger.error(err)
         })
@@ -123,17 +123,13 @@ const Debugger = () => {
     <PageWrapper>
       <Alert severity="info" sx={{ mb: SPACING.MEDIUM.PX }}>
         <Typography variant="subtitle2" gutterBottom>
-          This app is in development and not well polished. This page will help
-          you to debug the postings finder and share data to help me debug.
+          This app is in development and not well polished. This page will help you to debug the postings finder and
+          share data to help me debug.
         </Typography>
       </Alert>
 
       {error && (
-        <Alert
-          severity="error"
-          onClose={() => setError(null)}
-          sx={{ mb: SPACING.MEDIUM.PX }}
-        >
+        <Alert severity="error" onClose={() => setError(null)} sx={{ mb: SPACING.MEDIUM.PX }}>
           {error}
         </Alert>
       )}
@@ -160,12 +156,7 @@ const Debugger = () => {
         />
         <Divider orientation="vertical" flexItem />
 
-        <DebugAI
-          url={url}
-          scrapedHtml={scrapedHtml}
-          promptId={promptId}
-          setPromptId={setPromptId}
-        />
+        <DebugAI url={url} scrapedHtml={scrapedHtml} promptId={promptId} setPromptId={setPromptId} />
       </Box>
 
       <Button
