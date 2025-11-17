@@ -49,8 +49,29 @@ async function insertApiUsage({
     .returning()
 }
 
-async function hashExists(hash: string): Promise<boolean> {
-  const result = await db.select().from(hashes).where(eq(hashes.hash, hash)).limit(1)
+async function hashExists({
+  siteId,
+  siteContentHash,
+  promptHash,
+  jobToJSONPromptHash,
+}: {
+  siteId: string
+  siteContentHash: string
+  promptHash: string
+  jobToJSONPromptHash: string
+}): Promise<boolean> {
+  const result = await db
+    .select()
+    .from(hashes)
+    .where(
+      and(
+        eq(hashes.jobToJSONPromptHash, jobToJSONPromptHash),
+        eq(hashes.siteContentHash, siteContentHash),
+        eq(hashes.promptHash, promptHash),
+        eq(hashes.siteId, siteId),
+      ),
+    )
+    .limit(1)
   return result.length > 0
 }
 
@@ -59,27 +80,6 @@ async function insertHash(data: NewHashDTO) {
     .insert(hashes)
     .values({ ...data, id: uuidv4() })
     .returning()
-}
-
-async function insertHashIfNotExists({
-  hash,
-  siteUrl,
-}: {
-  hash: string
-  siteUrl: string
-}): Promise<{ exists: boolean }> {
-  const exists = await hashExists(hash)
-  if (exists) {
-    await db.select().from(hashes).where(eq(hashes.hash, hash)).limit(1)
-    return {
-      exists: true,
-    }
-  } else {
-    await db.insert(hashes).values({ id: uuidv4(), hash, siteUrl }).returning()
-    return {
-      exists: false,
-    }
-  }
 }
 
 async function insertScrapeRun(data: NewScrapeRunDTO) {
@@ -257,7 +257,6 @@ export default {
   insertApiUsage,
   hashExists,
   insertHash,
-  insertHashIfNotExists,
   insertScrapeRun,
   insertScrapeTask,
   updateScrapeRun,

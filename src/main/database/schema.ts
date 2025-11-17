@@ -33,8 +33,10 @@ export const apiUsage = sqliteTable('api_usage', {
 
 export const hashes = sqliteTable('hashes', {
   id: text('id').primaryKey(),
-  hash: text('hash').notNull().unique(),
-  siteUrl: text('site_url').notNull(),
+  siteContentHash: text('site_content_hash').notNull().unique(),
+  promptHash: text('prompt_hash').notNull().unique(),
+  jobToJSONPromptHash: text('job_to_json_prompt_hash').notNull().unique(),
+  siteId: text('site_id').notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
     .$defaultFn(() => new Date()),

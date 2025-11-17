@@ -1,7 +1,7 @@
-import crypto from 'node:crypto'
 import { JSDOM } from 'jsdom'
 import { launch } from 'puppeteer'
 import store from '../store'
+import { hashContent } from '../utilities'
 
 function extractTextAndLinks(html: string, baseUrl = '') {
   const { window } = new JSDOM(html)
@@ -40,10 +40,6 @@ function extractTextAndLinks(html: string, baseUrl = '') {
   }
 
   return JSON.stringify(unique)
-}
-
-function hashContent(content: string): string {
-  return crypto.createHash('sha256').update(content).digest('hex')
 }
 
 export const scrape = async ({

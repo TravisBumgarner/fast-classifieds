@@ -2,6 +2,7 @@ import type { BrowserWindow } from 'electron'
 import queries from '../database/queries'
 import log from '../logger'
 import store from '../store'
+import { hashContent } from '../utilities'
 import { processText } from './ai'
 import { scrape } from './scrape'
 
@@ -57,10 +58,15 @@ async function processSite({
     log.info(`Processing: ${siteUrl}`)
     onProgress?.('scraping')
 
-    const { siteContent, hash } = await scrape({ siteUrl, selector })
-    log.info(`Scraped content for: ${siteUrl}, hash: ${hash}, content: ${JSON.stringify(siteContent)}`)
+    const { siteContent, hash: siteContentHash } = await scrape({ siteUrl, selector })
+    log.info(`Scraped content for: ${siteUrl}, siteContentHash: ${siteContentHash}`)
 
-    const { exists } = await queries.insertHashIfNotExists({ hash, siteUrl })
+    const promptHash = hashContent(prompt)
+
+    const jobToJSONPrompt = store.get('openAiSiteHTMLToJSONJobsPrompt')
+    const jobToJSONPromptHash = hashContent(jobToJSONPrompt)
+
+    const exists = await queries.hashExists({ siteContentHash, siteId, promptHash, jobToJSONPromptHash })
     log.info(`Hash exists: ${exists}`)
 
     if (exists) {
@@ -85,7 +91,7 @@ async function processSite({
       siteUrl,
       apiKey,
       model,
-      jobToJSONPrompt: store.get('openAiSiteHTMLToJSONJobsPrompt'),
+      jobToJSONPrompt,
       siteId,
     })
 
@@ -113,6 +119,15 @@ async function processSite({
       status: 'new_data',
       newPostingsFound: jobs.length,
       completedAt: new Date(),
+    })
+
+    // Only store the hash once AI has done its thing.
+    // If something errors, we want to be able to retry.
+    queries.insertHash({
+      siteContentHash,
+      promptHash,
+      siteId,
+      jobToJSONPromptHash,
     })
 
     return { newJobsFound: jobs.length, status: 'complete' as const }

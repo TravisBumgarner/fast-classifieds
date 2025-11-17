@@ -30,8 +30,10 @@ export const SITE_STATUS = {
 export type SiteStatus = (typeof SITE_STATUS)[keyof typeof SITE_STATUS]
 
 export type NewHashDTO = {
-  hash: string
-  siteUrl: string
+  siteContentHash: string
+  promptHash: string
+  siteId: string
+  jobToJSONPromptHash: string
 }
 
 export type HashDTO = NewHashDTO & TimestampsAndID
