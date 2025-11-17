@@ -12,6 +12,7 @@ import {
 } from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import type { PromptDTO } from 'src/shared/types'
 import { CHANNEL } from '../../../../shared/messages.types'
 import { ROUTES, TOOLTIPS } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
@@ -29,20 +30,13 @@ export interface AddSiteModalProps {
 
 export interface EditSiteModalProps {
   id: typeof MODAL_ID.EDIT_SITE_MODAL
-  siteId: number
+  siteId: string
   onSuccess?: () => void
 }
 
 type SiteModalProps = AddSiteModalProps | EditSiteModalProps
 
 type SiteStatus = 'active' | 'inactive'
-
-interface Prompt {
-  id: number
-  title: string
-  content: string
-  status: 'active' | 'inactive'
-}
 
 const SiteModal = (props: SiteModalProps) => {
   const isEditMode = props.id === MODAL_ID.EDIT_SITE_MODAL
@@ -51,12 +45,12 @@ const SiteModal = (props: SiteModalProps) => {
 
   const [siteTitle, setSiteTitle] = useState('')
   const [siteUrl, setSiteUrl] = useState('')
-  const [promptId, setPromptId] = useState<number | ''>('')
+  const [promptId, setPromptId] = useState<string>('')
   const [selector, setSelector] = useState('')
   const [status, setStatus] = useState<SiteStatus>('active')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [prompts, setPrompts] = useState<Prompt[]>([])
+  const [prompts, setPrompts] = useState<PromptDTO[]>([])
 
   const handleUrlAndTitleSync = () => {
     if (!siteTitle) {
@@ -293,7 +287,7 @@ const SiteModal = (props: SiteModalProps) => {
 
           <FormControl fullWidth required disabled={loading} size="small">
             <InputLabel>Prompt</InputLabel>
-            <Select value={promptId} onChange={(e) => setPromptId(e.target.value as number)} label="Prompt">
+            <Select value={promptId} onChange={(e) => setPromptId(e.target.value)} label="Prompt">
               {prompts.map((prompt) => (
                 <MenuItem key={prompt.id} value={prompt.id}>
                   {prompt.title}

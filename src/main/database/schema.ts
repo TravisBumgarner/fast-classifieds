@@ -1,8 +1,17 @@
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
-import { STATUS, type Status } from '../../shared/types'
+import {
+  POSTING_STATUS,
+  type PostingStatus,
+  PROMPT_STATUS,
+  type PromptStatus,
+  SITE_STATUS,
+  type SiteStatus,
+  STATUS,
+  type Status,
+} from '../../shared/types'
 
 export const apiUsage = sqliteTable('api_usage', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
+  id: text('id').primaryKey(),
   responseId: text('response_id'),
   model: text('model').notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
@@ -22,11 +31,8 @@ export const apiUsage = sqliteTable('api_usage', {
   reasoningEffort: text('reasoning_effort'),
 })
 
-export type ApiUsage = typeof apiUsage.$inferSelect
-export type NewApiUsage = typeof apiUsage.$inferInsert
-
 export const hashes = sqliteTable('hashes', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
+  id: text('id').primaryKey(),
   hash: text('hash').notNull().unique(),
   siteUrl: text('site_url').notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' })
@@ -34,12 +40,8 @@ export const hashes = sqliteTable('hashes', {
     .$defaultFn(() => new Date()),
 })
 
-export type Hash = typeof hashes.$inferSelect
-export type NewHash = typeof hashes.$inferInsert
-
-// Scrape runs - each run scans all active sites
 export const scrapeRuns = sqliteTable('scrape_runs', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
+  id: text('id').primaryKey(),
   status: text('status', {
     enum: Object.values(STATUS) as [Status, ...Status[]],
   }).notNull(),
@@ -50,17 +52,16 @@ export const scrapeRuns = sqliteTable('scrape_runs', {
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
     .$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
+    .notNull()
+    .$defaultFn(() => new Date()),
   completedAt: integer('completed_at', { mode: 'timestamp' }),
 })
 
-export type ScrapeRun = typeof scrapeRuns.$inferSelect
-export type NewScrapeRun = typeof scrapeRuns.$inferInsert
-
-// Scrape tasks - individual site scans within a run
 export const scrapeTasks = sqliteTable('scrape_tasks', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  scrapeRunId: integer('scrape_run_id').notNull(),
-  siteId: integer('site_id').notNull(),
+  id: text('id').primaryKey(),
+  scrapeRunId: text('scrape_run_id').notNull(),
+  siteId: text('site_id').notNull(),
   siteUrl: text('site_url').notNull(),
   status: text('status', {
     enum: Object.values(STATUS) as [Status, ...Status[]],
@@ -70,31 +71,20 @@ export const scrapeTasks = sqliteTable('scrape_tasks', {
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
     .$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
+    .notNull()
+    .$defaultFn(() => new Date()),
   completedAt: integer('completed_at', { mode: 'timestamp' }),
 })
 
-export type ScrapeTask = typeof scrapeTasks.$inferSelect
-export type NewScrapeTask = typeof scrapeTasks.$inferInsert
-
-export const POSTING_STATUS = {
-  NEW: 'new',
-  APPLIED: 'applied',
-  SKIPPED: 'skipped',
-  INTERVIEW: 'interview',
-  REJECTED: 'rejected',
-  OFFER: 'offer',
-} as const
-
-export type PostingStatus = (typeof POSTING_STATUS)[keyof typeof POSTING_STATUS]
-
-// Job postings - individual job listings found
 export const jobPostings = sqliteTable('job_postings', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  company: text('company'),
+  id: text('id').primaryKey(),
+  company: text('company').notNull(),
   title: text('title').notNull(),
   siteUrl: text('site_url').notNull(),
-  siteId: integer('site_id'),
+  siteId: text('site_id').notNull(),
   explanation: text('explanation').notNull(),
+  location: text('location').notNull(),
   status: text('status', {
     enum: Object.values(POSTING_STATUS) as [PostingStatus, ...PostingStatus[]],
   })
@@ -108,21 +98,11 @@ export const jobPostings = sqliteTable('job_postings', {
     .$defaultFn(() => new Date()),
 })
 
-export type JobPosting = typeof jobPostings.$inferSelect
-export type NewJobPosting = typeof jobPostings.$inferInsert
-
-export const SITE_STATUS = {
-  ACTIVE: 'active',
-  INACTIVE: 'inactive',
-} as const
-
-export type SiteStatus = (typeof SITE_STATUS)[keyof typeof SITE_STATUS]
-
 export const sites = sqliteTable('sites', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
+  id: text('id').primaryKey(),
   siteTitle: text('site_title').notNull(),
   siteUrl: text('site_url').notNull().unique(),
-  promptId: integer('prompt_id').notNull(),
+  promptId: text('prompt_id').notNull(),
   selector: text('selector').notNull(),
   status: text('status', {
     enum: Object.values(SITE_STATUS) as [SiteStatus, ...SiteStatus[]],
@@ -137,15 +117,8 @@ export const sites = sqliteTable('sites', {
     .$defaultFn(() => new Date()),
 })
 
-export const PROMPT_STATUS = {
-  ACTIVE: 'active',
-  INACTIVE: 'inactive',
-} as const
-
-export type PromptStatus = (typeof PROMPT_STATUS)[keyof typeof PROMPT_STATUS]
-
 export const prompts = sqliteTable('prompts', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
+  id: text('id').primaryKey(),
   title: text('title').notNull(),
   content: text('content').notNull(),
   status: text('status', {
@@ -160,6 +133,3 @@ export const prompts = sqliteTable('prompts', {
     .notNull()
     .$defaultFn(() => new Date()),
 })
-
-export type Prompt = typeof prompts.$inferSelect
-export type NewPrompt = typeof prompts.$inferInsert

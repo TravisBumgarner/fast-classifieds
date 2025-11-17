@@ -13,7 +13,7 @@ import {
 } from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CHANNEL } from '../../../../shared/messages.types'
+import { CHANNEL, type SiteProgressDTO } from '../../../../shared/messages.types'
 import { ROUTES } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
 import { activeModalSignal } from '../../../signals'
@@ -25,24 +25,15 @@ import DefaultModal from './DefaultModal'
 export interface ScrapeProgressModalProps {
   id: typeof MODAL_ID.SCRAPE_PROGRESS_MODAL
   onComplete?: () => void
-  retryRunId?: number
-}
-
-type SiteProgress = {
-  siteId: number
-  siteUrl: string
-  siteTitle: string
-  status: 'pending' | 'scraping' | 'processing' | 'complete' | 'error'
-  newJobsFound?: number
-  errorMessage?: string
+  retryRunId?: string
 }
 
 const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
   const navigate = useNavigate()
-  const [sites, setSites] = useState<SiteProgress[]>([])
+  const [sites, setSites] = useState<SiteProgressDTO[]>([])
   const [isComplete, setIsComplete] = useState(false)
   const [totalNewJobs, setTotalNewJobs] = useState(0)
-  const [scrapeRunId, setScrapeRunId] = useState<number | null>(null)
+  const [scrapeRunId, setScrapeRunId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -109,8 +100,8 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
   const handleClose = () => {
     if (isComplete) {
       props.onComplete?.()
-      activeModalSignal.value = null
     }
+    activeModalSignal.value = null
   }
 
   const handleRetry = () => {
@@ -123,7 +114,9 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
     }
   }
 
-  const getStatusColor = (status: SiteProgress['status']): 'default' | 'primary' | 'success' | 'error' | 'warning' => {
+  const getStatusColor = (
+    status: SiteProgressDTO['status'],
+  ): 'default' | 'primary' | 'success' | 'error' | 'warning' => {
     switch (status) {
       case 'pending':
         return 'default'
@@ -139,7 +132,7 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
     }
   }
 
-  const getStatusLabel = (status: SiteProgress['status']): string => {
+  const getStatusLabel = (status: SiteProgressDTO['status']): string => {
     switch (status) {
       case 'pending':
         return 'Pending'

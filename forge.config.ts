@@ -12,13 +12,6 @@ const safeConfig = z.object({
   GITHUB_TOKEN: z.string().min(1),
 })
 
-const safeConfigParsed = safeConfig.parse({
-  APPLE_ID: process.env.APPLE_ID,
-  APPLE_PASSWORD: process.env.APPLE_PASSWORD,
-  APPLE_TEAM_ID: process.env.APPLE_TEAM_ID,
-  GITHUB_TOKEN: process.env.GITHUB_TOKEN,
-})
-
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
@@ -92,6 +85,14 @@ const config: ForgeConfig = {
       if (options.platform === 'darwin' && process.env.NODE_ENV === 'production') {
         const { notarize } = await import('@electron/notarize')
         const appPath = `${options.outputPaths[0]}/Fast Classifieds.app`
+
+        const safeConfigParsed = safeConfig.parse({
+          APPLE_ID: process.env.APPLE_ID,
+          APPLE_PASSWORD: process.env.APPLE_PASSWORD,
+          APPLE_TEAM_ID: process.env.APPLE_TEAM_ID,
+          GITHUB_TOKEN: process.env.GITHUB_TOKEN,
+        })
+
         await notarize({
           appPath,
           appleId: safeConfigParsed.APPLE_ID,

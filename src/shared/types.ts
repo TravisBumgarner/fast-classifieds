@@ -1,6 +1,20 @@
-import { z } from 'zod'
-
 export type PartialWithRequired<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>
+
+type TimestampsAndID = {
+  id: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export const POSTING_STATUS = {
+  NEW: 'new',
+  APPLIED: 'applied',
+  SKIPPED: 'skipped',
+  INTERVIEW: 'interview',
+  REJECTED: 'rejected',
+  OFFER: 'offer',
+} as const
+export type PostingStatus = (typeof POSTING_STATUS)[keyof typeof POSTING_STATUS]
 
 export const STATUS = {
   hash_exists: 'hash_exists',
@@ -9,17 +23,21 @@ export const STATUS = {
 }
 export type Status = keyof typeof STATUS
 
-export type SiteStatus = 'active' | 'inactive'
+export const SITE_STATUS = {
+  ACTIVE: 'active',
+  INACTIVE: 'inactive',
+} as const
+export type SiteStatus = (typeof SITE_STATUS)[keyof typeof SITE_STATUS]
 
-export type HashDTO = {
-  id: number
-  siteUrl: string
+export type NewHashDTO = {
   hash: string
-  createdAt: Date
+  siteUrl: string
 }
 
+export type HashDTO = NewHashDTO & TimestampsAndID
+
 export type ApiUsageDTO = {
-  id: number
+  id: string
   responseId: string
   model: string
   createdAt: Date
@@ -41,36 +59,32 @@ export type ApiUsageDTO = {
 export type NewSiteDTO = {
   siteTitle: string
   siteUrl: string
-  promptId: number
+  promptId: string
   selector: string
   status: SiteStatus
 }
 
-export type SiteDTO = NewSiteDTO & {
-  id: number
-  createdAt: Date
-  updatedAt: Date
-}
+export type SiteDTO = NewSiteDTO & TimestampsAndID
 
 export type UpdateSiteDTO = {
-  id: number
+  id: string
   siteTitle: string
   siteUrl: string
-  promptId: number
+  promptId: string
   selector: string
   status: SiteStatus
 }
 
-export const JobSchema = z.object({
-  title: z.string(),
-  siteUrl: z.string(),
-  explanation: z.string(),
-})
-
-export const JobsResponseSchema = z.array(JobSchema)
-
-export type JobDTO = z.infer<typeof JobSchema>
-export type JobsResponse = z.infer<typeof JobsResponseSchema>
+export type NewJobPostingDTO = {
+  company: string
+  title: string
+  siteUrl: string
+  siteId: string
+  explanation: string
+  location: string
+  status: PostingStatus
+}
+export type JobPostingDTO = NewJobPostingDTO & TimestampsAndID
 
 export interface StoreSchema {
   openaiApiKey: string
@@ -82,7 +96,11 @@ export interface StoreSchema {
   openAiSiteHTMLToJSONJobsPrompt: string
 }
 
-export type PromptStatus = 'active' | 'inactive'
+export const PROMPT_STATUS = {
+  ACTIVE: 'active',
+  INACTIVE: 'inactive',
+} as const
+export type PromptStatus = (typeof PROMPT_STATUS)[keyof typeof PROMPT_STATUS]
 export interface NewPromptDTO {
   title: string
   content: string
@@ -90,37 +108,37 @@ export interface NewPromptDTO {
 }
 
 export interface UpdatePromptDTO {
-  id: number
+  id: string
   title: string
   content: string
   status: PromptStatus
 }
 
 export interface PromptDTO extends NewPromptDTO {
-  id: number
+  id: string
   createdAt: Date
   updatedAt: Date
 }
 
-export interface ScrapeTaskDTO {
-  id: number
-  scrapeRunId: number
-  siteId: number
+export type NewScrapeTaskDTO = {
+  scrapeRunId: string
+  siteId: string
   siteUrl: string
   status: Status
   newPostingsFound: number
   errorMessage?: string | null
-  createdAt: Date
   completedAt?: Date | null
 }
 
-export interface ScrapeRunDTO {
-  id: number
-  completedAt?: Date | null
+export type ScrapeTaskDTO = NewScrapeTaskDTO & TimestampsAndID
+
+export type NewScrapeRunDTO = {
+  status: Status
   totalSites: number
   successfulSites: number
   failedSites: number
-  status: Status
-  createdAt: Date
   comments?: string | null
+  completedAt?: Date | null
 }
+
+export type ScrapeRunDTO = NewScrapeRunDTO & TimestampsAndID

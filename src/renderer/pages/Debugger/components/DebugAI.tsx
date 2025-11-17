@@ -17,8 +17,8 @@ const DebugAI = ({
 }: {
   url: string
   scrapedHtml: string
-  promptId: number | null
-  setPromptId: React.Dispatch<React.SetStateAction<number | null>>
+  promptId: string | null
+  setPromptId: React.Dispatch<React.SetStateAction<string | null>>
 }) => {
   const [loadingPrompts, setLoadingPrompts] = useState(true)
   const [loadingSettings, setLoadingSettings] = useState(true)
@@ -58,6 +58,7 @@ const DebugAI = ({
         prompt: prompts[prompts.findIndex((p) => p.id === promptId)]?.content,
         siteContent: scrapedHtml,
         siteUrl: url,
+        siteId: '',
         jobToJSONPrompt: storeFromServer?.openAiSiteHTMLToJSONJobsPrompt || '',
       })
       setJobs(JSON.stringify(response.jobs, null, 2))
@@ -104,7 +105,7 @@ const DebugAI = ({
 
       <FormControl required size="small" sx={{ gap: SPACING.SMALL.PX }}>
         <InputLabel>Prompt</InputLabel>
-        <Select fullWidth value={promptId} onChange={(e) => setPromptId(e.target.value as number)} label="Prompt">
+        <Select fullWidth value={promptId} onChange={(e) => setPromptId(e.target.value)} label="Prompt">
           {prompts.map((prompt) => (
             <MenuItem key={prompt.id} value={prompt.id}>
               {prompt.title}

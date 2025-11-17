@@ -19,6 +19,7 @@ import {
   Typography,
 } from '@mui/material'
 import { Fragment, useCallback, useEffect, useState } from 'react'
+import type { ScrapeRunDTO, ScrapeTaskDTO, SiteDTO } from 'src/shared/types'
 import { CHANNEL } from '../../shared/messages.types'
 import { PAGINATION } from '../consts'
 import ipcMessenger from '../ipcMessenger'
@@ -32,44 +33,15 @@ import { logger } from '../utilities'
 
 type Status = 'hash_exists' | 'new_data' | 'error'
 
-interface ScrapeTask {
-  id: number
-  scrapeRunId: number
-  siteId: number
-  siteUrl: string
-  status: Status
-  newPostingsFound: number
-  errorMessage?: string | null
-  createdAt: Date
-  completedAt?: Date | null
-}
-
-interface ScrapeRun {
-  id: number
-  status: Status
-  totalSites: number
-  successfulSites: number
-  failedSites: number
-  comments?: string | null
-  createdAt: Date
-  completedAt?: Date | null
-}
-
 type RunSortField = 'createdAt' | 'status' | 'totalSites' | 'successfulSites' | 'failedSites'
 type TaskSortField = 'siteUrl' | 'status' | 'newPostingsFound' | 'completedAt'
 type SortDirection = 'asc' | 'desc'
 
-interface Site {
-  id: number
-  siteTitle: string
-  siteUrl: string
-}
-
 const ScrapeRuns = () => {
-  const [runs, setRuns] = useState<ScrapeRun[]>([])
-  const [tasks, setTasks] = useState<Record<number, ScrapeTask[]>>({})
-  const [sites, setSites] = useState<Site[]>([])
-  const [expandedRunId, setExpandedRunId] = useState<number | null>(null)
+  const [runs, setRuns] = useState<ScrapeRunDTO[]>([])
+  const [tasks, setTasks] = useState<Record<string, ScrapeTaskDTO[]>>({})
+  const [sites, setSites] = useState<SiteDTO[]>([])
+  const [expandedRunId, setExpandedRunId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [runSortField, setRunSortField] = useState<RunSortField>('createdAt')
@@ -97,7 +69,7 @@ const ScrapeRuns = () => {
     }
   }
 
-  const getSiteTitle = (siteId: number): string => {
+  const getSiteTitle = (siteId: string): string => {
     const site = sites.find((s) => s.id === siteId)
     return site?.siteTitle || 'Unknown'
   }
@@ -170,7 +142,7 @@ const ScrapeRuns = () => {
     }
   }, [])
 
-  const handleRetry = async (runId: number) => {
+  const handleRetry = async (runId: string) => {
     try {
       activeModalSignal.value = {
         id: MODAL_ID.SCRAPE_PROGRESS_MODAL,
@@ -183,7 +155,7 @@ const ScrapeRuns = () => {
     }
   }
 
-  const loadTasksForRun = async (runId: number) => {
+  const loadTasksForRun = async (runId: string) => {
     if (tasks[runId]) {
       // Already loaded
       setExpandedRunId(expandedRunId === runId ? null : runId)

@@ -25,7 +25,7 @@ export interface AddPromptModalProps {
 
 export interface EditPromptModalProps {
   id: typeof MODAL_ID.EDIT_PROMPT_MODAL
-  promptId: number
+  promptId: string
   onSuccess?: () => void
 }
 
@@ -41,7 +41,7 @@ const PromptModal = (props: PromptModalProps) => {
 
   const isEdit = props.id === MODAL_ID.EDIT_PROMPT_MODAL
 
-  const loadPrompt = useCallback(async (id: number) => {
+  const loadPrompt = useCallback(async (id: string) => {
     try {
       setLoading(true)
       const result = await ipcMessenger.invoke(CHANNEL.PROMPTS.GET_BY_ID, {
