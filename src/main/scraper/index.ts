@@ -157,21 +157,21 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
 
     if (!model) {
       return {
-        success: false,
+        success: false as const,
         error: 'OpenAI model not configured. Please set it in Settings.',
       }
     }
 
     if (!delay) {
       return {
-        success: false,
+        success: false as const,
         error: 'Scrape delay not configured. Please set it in Settings.',
       }
     }
 
     if (!apiKey) {
       return {
-        success: false,
+        success: false as const,
         error: 'OpenAI API key not configured. Please set it in Settings.',
       }
     }
@@ -181,7 +181,7 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
     const activeSites = allSites.filter((s) => s.status === 'active')
 
     if (activeSites.length === 0) {
-      return { success: false, error: 'No active sites to scrape' }
+      return { success: false as const, error: 'No active sites to scrape' }
     }
 
     // Create scrape run
@@ -268,8 +268,6 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
           },
         })
 
-        log.info('ruda', result)
-
         // Update progress with results
         const updatedProgress = activeRuns.get(scrapeRunId)
         if (updatedProgress) {
@@ -325,20 +323,20 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
     // Start processing sites without blocking
     processSitesAsync()
 
-    return { success: true, scrapeRunId }
+    return { success: true as const, scrapeRunId }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
     log.error('Failed to start scraping:', errorMessage)
-    return { success: false, error: errorMessage }
+    return { success: false as const, error: errorMessage }
   }
 }
 
 export function getProgress(scrapeRunId: string) {
   const progress = activeRuns.get(scrapeRunId)
   if (!progress) {
-    return { success: false, error: 'Scrape run not found' }
+    return { success: false as const, error: 'Scrape run not found' }
   }
-  return { success: true, progress }
+  return { success: true as const, progress }
 }
 
 export async function retryFailedScrapes(mainWindow: BrowserWindow | null, originalRunId: string) {
@@ -349,21 +347,21 @@ export async function retryFailedScrapes(mainWindow: BrowserWindow | null, origi
 
     if (!apiKey) {
       return {
-        success: false,
+        success: false as const,
         error: 'OpenAI API key not configured. Please set it in Settings.',
       }
     }
 
     if (!model) {
       return {
-        success: false,
+        success: false as const,
         error: 'OpenAI model not configured. Please set it in Settings.',
       }
     }
 
     if (!delay) {
       return {
-        success: false,
+        success: false as const,
         error: 'Scrape delay not configured. Please set it in Settings.',
       }
     }
@@ -372,7 +370,7 @@ export async function retryFailedScrapes(mainWindow: BrowserWindow | null, origi
     const failedTasks = await queries.getFailedTasksByRunId(originalRunId)
 
     if (failedTasks.length === 0) {
-      return { success: false, error: 'No failed sites to retry' }
+      return { success: false as const, error: 'No failed sites to retry' }
     }
 
     // Get site details for failed tasks
@@ -518,10 +516,10 @@ export async function retryFailedScrapes(mainWindow: BrowserWindow | null, origi
     // Start processing sites without blocking
     processSitesAsync()
 
-    return { success: true, scrapeRunId }
+    return { success: true as const, scrapeRunId }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
     log.error('Failed to retry scraping:', errorMessage)
-    return { success: false, error: errorMessage }
+    return { success: false as const, error: errorMessage }
   }
 }

@@ -14,7 +14,7 @@ import {
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CHANNEL } from '../../../../shared/messages.types'
-import type { PromptDTO, ScrapedContentDTO, StoreSchema } from '../../../../shared/types'
+import type { JobPostingDTO, PromptDTO, ScrapedContentDTO, StoreSchema } from '../../../../shared/types'
 import { renderPrompt } from '../../../../shared/utils'
 import { ROUTES } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
@@ -39,7 +39,7 @@ const DebugAI = ({
   const [loadingJobs, setLoadingJobs] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [prompts, setPrompts] = useState<PromptDTO[]>([])
-  const [jobs, setJobs] = useState<string>('')
+  const [jobs, setJobs] = useState<JobPostingDTO[]>([])
   const navigate = useNavigate()
   const [storeFromServer, setStoreFromServer] = useState<StoreSchema | null>(null)
 
@@ -86,7 +86,11 @@ const DebugAI = ({
         siteId: '',
         jobToJSONPrompt: storeFromServer?.openAiSiteHTMLToJSONJobsPrompt || '',
       })
-      setJobs(JSON.stringify(response.jobs, null, 2))
+      if (response.success) {
+        setJobs(response.jobs)
+      } else {
+        setError(response.error)
+      }
     } finally {
       setLoadingJobs(false)
     }
@@ -192,7 +196,14 @@ const DebugAI = ({
           minHeight: 0,
         }}
       >
-        {jobs}
+        {jobs.map((job) => (
+          <Box key={job.id} sx={{ mb: SPACING.SMALL.PX }}>
+            <Typography component="pre">
+              {job.company} - {job.title}
+              <Typography component="pre">{job.siteUrl}</Typography>
+            </Typography>
+          </Box>
+        ))}
       </Box>
     </Box>
   )

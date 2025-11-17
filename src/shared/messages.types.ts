@@ -194,15 +194,15 @@ export type Invokes = {
   }
   [CHANNEL.PROMPTS.DELETE]: {
     args: { id: string }
-    result: { success: boolean; error?: string }
+    result: { success: true } | { success: false; error: string }
   }
   [CHANNEL.SCRAPER.START]: {
     args: undefined
-    result: { success: boolean; scrapeRunId?: string; error?: string }
+    result: { success: true; scrapeRunId: string } | { success: false; error: string }
   }
   [CHANNEL.SCRAPER.RETRY]: {
     args: { scrapeRunId: string }
-    result: { success: boolean; scrapeRunId?: string; error?: string }
+    result: { success: true; scrapeRunId: string } | { success: false; error: string }
   }
   [CHANNEL.SCRAPER.GET_PROGRESS]: {
     args: { scrapeRunId: string }
@@ -236,12 +236,16 @@ export type Invokes = {
       siteId: string
       jobToJSONPrompt: string
     }
-    result: {
-      success: boolean
-      jobs?: Array<NewJobPostingDTO>
-      rawResponse?: unknown
-      error?: string
-    }
+    result:
+      | {
+          success: true
+          jobs: Array<JobPostingDTO>
+        }
+      | {
+          success: false
+          // rawResponse?: unknown
+          error: string
+        }
   }
   [CHANNEL.SCRAPE_RUNS.GET_ALL]: {
     args: undefined
