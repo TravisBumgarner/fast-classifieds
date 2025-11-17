@@ -28,7 +28,4 @@ export const getStore = () => {
   return data
 }
 
-// Example usage (will error if key is not in StoreSchema):
-// getStoreValue('openaiApiKey') // OK
-// getStoreValue('goog') // TypeScript error
 export default store

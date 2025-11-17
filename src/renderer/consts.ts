@@ -25,7 +25,7 @@ export const ROUTES = {
     target: '_self',
   },
   debugger: {
-    href: (siteId?: number) => `/debugger${siteId ? `?site_id=${siteId}` : ''}`,
+    href: (siteId?: string) => `/debugger${siteId ? `?site_id=${siteId}` : ''}`,
     label: 'Debugger',
     target: '_self',
   },

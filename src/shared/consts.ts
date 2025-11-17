@@ -1,7 +1,10 @@
+// This string is stored in Electron Store. To update it, navigate Settings -> Reset Jobs to JSON Prompt
+// Which ya know, might be an issue in the future.
 export const SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT = `CRITICAL: Extract ONLY real job postings that actually exist in the provided content.
 
 Return a JSON array of objects with this structure:
- - company: string (company name)
+ - company: string (company name) - Default to "Unknown" if not found
+ - location: string (job location) - Default to "Unknown" if not found
  - title: string (exact job title from the content)
  - siteUrl: string (the ACTUAL URL from the content - DO NOT make up URLs, use the exact link found)
  - explanation?: string (brief why this matches the criteria)

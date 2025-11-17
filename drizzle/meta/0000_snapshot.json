@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "f24ca880-d1df-4853-a894-ef829eec21ef",
+  "id": "b4cef38e-c466-4c8e-91a7-00b28848ec06",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "api_usage": {
@@ -9,10 +9,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "response_id": {
           "name": "response_id",
@@ -138,10 +138,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "hash": {
           "name": "hash",
@@ -168,7 +168,9 @@
       "indexes": {
         "hashes_hash_unique": {
           "name": "hashes_hash_unique",
-          "columns": ["hash"],
+          "columns": [
+            "hash"
+          ],
           "isUnique": true
         }
       },
@@ -182,16 +184,16 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "company": {
           "name": "company",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "title": {
@@ -210,16 +212,23 @@
         },
         "site_id": {
           "name": "site_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "explanation": {
           "name": "explanation",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "location": {
+          "name": "location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
           "autoincrement": false
         },
         "status": {
@@ -256,10 +265,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "title": {
           "name": "title",
@@ -309,10 +318,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "status": {
           "name": "status",
@@ -359,6 +368,13 @@
           "notNull": true,
           "autoincrement": false
         },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "completed_at": {
           "name": "completed_at",
           "type": "integer",
@@ -378,21 +394,21 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "scrape_run_id": {
           "name": "scrape_run_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
         "site_id": {
           "name": "site_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -433,6 +449,13 @@
           "notNull": true,
           "autoincrement": false
         },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "completed_at": {
           "name": "completed_at",
           "type": "integer",
@@ -452,10 +475,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "site_title": {
           "name": "site_title",
@@ -473,7 +496,7 @@
         },
         "prompt_id": {
           "name": "prompt_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -511,7 +534,9 @@
       "indexes": {
         "sites_site_url_unique": {
           "name": "sites_site_url_unique",
-          "columns": ["site_url"],
+          "columns": [
+            "site_url"
+          ],
           "isUnique": true
         }
       },

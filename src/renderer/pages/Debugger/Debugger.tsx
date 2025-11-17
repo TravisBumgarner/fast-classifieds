@@ -18,15 +18,15 @@ const Debugger = () => {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [params] = useSearchParams()
-  const [promptId, setPromptId] = useState<number | null>(null)
+  const [promptId, setPromptId] = useState<string | null>(null)
   const siteId = params.get('site_id')
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (siteId && !Number.isNaN(Number(siteId))) {
+    if (siteId) {
       // Load site data by siteId and populate fields
       ipcMessenger
-        .invoke(CHANNEL.SITES.GET_BY_ID, { id: Number(siteId) })
+        .invoke(CHANNEL.SITES.GET_BY_ID, { id: siteId })
         .then(({ site }) => {
           if (site) {
             setUrl(site.siteUrl)
@@ -55,12 +55,17 @@ const Debugger = () => {
       return
     }
 
+    if (!siteId) {
+      setError('Missing site ID for update')
+      return
+    }
+
     try {
       setLoading(true)
       const title = siteTitle || new URL(url).hostname
 
       const result = await ipcMessenger.invoke(CHANNEL.SITES.UPDATE, {
-        id: Number(siteId),
+        id: siteId,
         siteTitle: title,
         siteUrl: url,
         selector,

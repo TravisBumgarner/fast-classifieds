@@ -7,7 +7,7 @@
     }
   },
   "files": {
-    "includes": ["**", "!.vite", "!node_modules", "!.husky", "!out"]
+    "includes": ["**", "!.vite", "!node_modules", "!.husky", "!out", "!drizzle"]
   },
   "formatter": {
     "enabled": true,

@@ -27,7 +27,7 @@ export interface ImportSitesModalProps {
 
 const ImportSitesModal = (_props: ImportSitesModalProps) => {
   const [urls, setUrls] = useState('')
-  const [promptId, setPromptId] = useState<number | ''>('')
+  const [promptId, setPromptId] = useState<string | ''>('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -182,7 +182,7 @@ const ImportSitesModal = (_props: ImportSitesModalProps) => {
 
           <FormControl fullWidth required disabled={loading} size="small">
             <InputLabel>Prompt</InputLabel>
-            <Select value={promptId} onChange={(e) => setPromptId(e.target.value as number)} label="Prompt">
+            <Select value={promptId} onChange={(e) => setPromptId(e.target.value)} label="Prompt">
               {prompts.map((prompt) => (
                 <MenuItem key={prompt.id} value={prompt.id}>
                   {prompt.title}

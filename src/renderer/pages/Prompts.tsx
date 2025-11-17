@@ -41,7 +41,7 @@ const Prompts = () => {
   const [prompts, setPrompts] = useState<PromptDTO[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set())
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [statusFilter, setStatusFilter] = useState<PromptStatus[]>(['active', 'inactive'])
   const [sortField, setSortField] = useState<SortField>('title')
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
@@ -130,7 +130,7 @@ const Prompts = () => {
     }
   }
 
-  const handleDeletePrompt = async (id: number, title: string) => {
+  const handleDeletePrompt = async (id: string, title: string) => {
     activeModalSignal.value = {
       id: MODAL_ID.CONFIRMATION_MODAL,
       title: 'Delete Prompt',
@@ -154,7 +154,7 @@ const Prompts = () => {
     }
   }
 
-  const toggleRowExpansion = (id: number) => {
+  const toggleRowExpansion = (id: string) => {
     const newExpandedRows = new Set(expandedRows)
     if (newExpandedRows.has(id)) {
       newExpandedRows.delete(id)

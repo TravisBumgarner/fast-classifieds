@@ -23,6 +23,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'
+import type { JobPostingDTO } from 'src/shared/types'
 import { CHANNEL } from '../../shared/messages.types'
 import { PAGINATION } from '../consts'
 import ipcMessenger from '../ipcMessenger'
@@ -36,30 +37,18 @@ import { logger } from '../utilities'
 
 type PostingStatus = 'new' | 'applied' | 'skipped' | 'interview' | 'rejected' | 'offer'
 
-interface JobPosting {
-  id: number
-  company?: string | null
-  title: string
-  siteUrl: string
-  siteId?: number | null
-  explanation?: string | null
-  status: PostingStatus
-  createdAt: Date
-  updatedAt: Date
-}
-
-type SortField = 'company' | 'title' | 'status' | 'createdAt'
+type SortField = 'company' | 'title' | 'status' | 'createdAt' | 'location'
 type SortDirection = 'asc' | 'desc'
 
 const Postings = () => {
   const [hasCheckedOnboarding, setHasCheckedOnboarding] = useState(false)
-  const [jobPostings, setJobPostings] = useState<JobPosting[]>([])
+  const [jobPostings, setJobPostings] = useState<JobPostingDTO[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<PostingStatus[]>(['new', 'applied', 'interview', 'offer'])
   const [sortField, setSortField] = useState<SortField>('createdAt')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
-  const [selectedPostings, setSelectedPostings] = useState<Set<number>>(new Set())
+  const [selectedPostings, setSelectedPostings] = useState<Set<string>>(new Set())
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(PAGINATION.DEFAULT_ROWS_PER_PAGE)
 
@@ -73,8 +62,8 @@ const Postings = () => {
   }
 
   const sortedPostings = [...jobPostings].sort((a, b) => {
-    let aVal: string | number | Date | null | undefined
-    let bVal: string | number | Date | null | undefined
+    let aVal: string | number | Date
+    let bVal: string | number | Date
 
     switch (sortField) {
       case 'company':
@@ -93,6 +82,13 @@ const Postings = () => {
         aVal = new Date(a.createdAt).getTime()
         bVal = new Date(b.createdAt).getTime()
         break
+      case 'location':
+        aVal = a.location?.toLowerCase() || ''
+        bVal = b.location?.toLowerCase() || ''
+        break
+      default:
+        aVal = ''
+        bVal = ''
     }
 
     if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1
@@ -146,7 +142,7 @@ const Postings = () => {
     setSelectedPostings(new Set())
   }
 
-  const handleTogglePosting = (id: number) => {
+  const handleTogglePosting = (id: string) => {
     const newSelected = new Set(selectedPostings)
     if (newSelected.has(id)) {
       newSelected.delete(id)
@@ -164,7 +160,7 @@ const Postings = () => {
     }
   }
 
-  const handleUpdateStatus = async (id: number, newStatus: PostingStatus) => {
+  const handleUpdateStatus = async (id: string, newStatus: PostingStatus) => {
     try {
       const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.UPDATE_STATUS, { id, status: newStatus })
       if (result.success) {
@@ -337,6 +333,16 @@ const Postings = () => {
                 </TableCell>
                 <TableCell>
                   <TableSortLabel
+                    active={sortField === 'location'}
+                    direction={sortField === 'location' ? sortDirection : 'asc'}
+                    onClick={() => handleSort('location')}
+                  >
+                    Location
+                  </TableSortLabel>
+                </TableCell>
+
+                <TableCell>
+                  <TableSortLabel
                     active={sortField === 'status'}
                     direction={sortField === 'status' ? sortDirection : 'asc'}
                     onClick={() => handleSort('status')}
@@ -393,6 +399,7 @@ const Postings = () => {
                     </TableCell>
                     <TableCell>{posting.company || '-'}</TableCell>
                     <TableCell>{posting.title}</TableCell>
+                    <TableCell>{posting.location || '-'}</TableCell>
                     <TableCell>
                       <FormControl size="small" sx={{ minWidth: 120 }}>
                         <Select

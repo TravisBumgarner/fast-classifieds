@@ -1,17 +1,17 @@
 import OpenAI from 'openai'
+import type { NewJobPostingDTO } from 'src/shared/types'
 import { z } from 'zod'
 import { renderPrompt } from '../../shared/utils'
 
-const JobSchema = z.object({
-  company: z.string().optional(),
-  title: z.string(),
-  siteUrl: z.string(),
-  explanation: z.string(),
-})
-
-const JobsResponseSchema = z.array(JobSchema)
-
-export type Job = z.infer<typeof JobSchema>
+const aiJobSchema = z.array(
+  z.object({
+    company: z.string(),
+    title: z.string(),
+    siteUrl: z.string(),
+    explanation: z.string(),
+    location: z.string(),
+  }),
+)
 
 export async function processText({
   prompt,
@@ -20,6 +20,7 @@ export async function processText({
   model,
   siteUrl,
   jobToJSONPrompt,
+  siteId,
 }: {
   prompt: string
   siteContent: string
@@ -27,7 +28,8 @@ export async function processText({
   model: string
   siteUrl: string
   jobToJSONPrompt: string
-}): Promise<{ jobs: Job[]; rawResponse: OpenAI.Responses.Response }> {
+  siteId: string
+}): Promise<{ jobs: NewJobPostingDTO[]; rawResponse: OpenAI.Responses.Response }> {
   if (!apiKey) {
     throw new Error('OpenAI API key is not configured. Please set it in Settings.')
   }
@@ -44,14 +46,16 @@ export async function processText({
     }),
   })
 
-  const parsed = JobsResponseSchema.safeParse(JSON.parse(response.output_text || '[]'))
+  console.log('AI response received', response.output_text)
+
+  const parsed = aiJobSchema.safeParse(JSON.parse(response.output_text || '[]'))
 
   if (!parsed.success) {
-    throw new Error(`Failed to parse AI response: ${parsed.error.message}`)
+    throw new Error(`Failed to parse AI response: ${parsed.error.message} Response was: ${response.output_text}`)
   }
 
   return {
-    jobs: parsed.data,
+    jobs: parsed.data.map((job) => ({ ...job, siteId, status: 'new' })),
     rawResponse: response,
   }
 }

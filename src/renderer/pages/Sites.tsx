@@ -27,7 +27,7 @@ import {
 import { Fragment, useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CHANNEL } from '../../shared/messages.types'
-import type { SiteDTO } from '../../shared/types'
+import type { JobPostingDTO, SiteDTO } from '../../shared/types'
 import { PAGINATION, ROUTES } from '../consts'
 import ipcMessenger from '../ipcMessenger'
 import Icon from '../sharedComponents/Icon'
@@ -43,17 +43,6 @@ type SiteStatus = 'active' | 'inactive'
 
 type PostingStatus = 'new' | 'applied' | 'skipped' | 'interview' | 'rejected' | 'offer'
 
-interface JobPosting {
-  id: number
-  title: string
-  siteUrl: string
-  siteId?: number | null
-  explanation?: string | null
-  status: PostingStatus
-  createdAt: Date
-  updatedAt: Date
-}
-
 type SortField = 'siteTitle' | 'status' | 'updatedAt'
 type SortDirection = 'asc' | 'desc'
 
@@ -64,9 +53,9 @@ const Sites = () => {
   const [statusFilter, setStatusFilter] = useState<SiteStatus[]>(['active', 'inactive'])
   const [sortField, setSortField] = useState<SortField>('siteTitle')
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
-  const [expandedSiteId, setExpandedSiteId] = useState<number | null>(null)
-  const [siteJobs, setSiteJobs] = useState<Record<number, JobPosting[]>>({})
-  const [loadingJobs, setLoadingJobs] = useState<Record<number, boolean>>({})
+  const [expandedSiteId, setExpandedSiteId] = useState<string | null>(null)
+  const [siteJobs, setSiteJobs] = useState<Record<string, JobPostingDTO[]>>({})
+  const [loadingJobs, setLoadingJobs] = useState<Record<string, boolean>>({})
   const [page, setPage] = useState(0)
   const navigate = useNavigate()
   const [rowsPerPage, setRowsPerPage] = useState(PAGINATION.DEFAULT_ROWS_PER_PAGE)
@@ -162,7 +151,7 @@ const Sites = () => {
     }
   }
 
-  const handleDeleteSite = async (id: number, siteTitle: string) => {
+  const handleDeleteSite = async (id: string, siteTitle: string) => {
     activeModalSignal.value = {
       id: MODAL_ID.CONFIRMATION_MODAL,
       title: 'Delete Site',
@@ -184,7 +173,7 @@ const Sites = () => {
     }
   }
 
-  const handleToggleExpand = async (siteId: number) => {
+  const handleToggleExpand = async (siteId: string) => {
     if (expandedSiteId === siteId) {
       setExpandedSiteId(null)
     } else {
@@ -205,7 +194,7 @@ const Sites = () => {
     }
   }
 
-  const handleStatusChange = async (postingId: number, newStatus: PostingStatus, siteId: number) => {
+  const handleStatusChange = async (postingId: string, newStatus: PostingStatus, siteId: string) => {
     try {
       const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.UPDATE_STATUS, {
         id: postingId,

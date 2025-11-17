@@ -1,7 +1,8 @@
 import type {
   ApiUsageDTO,
   HashDTO,
-  JobDTO,
+  JobPostingDTO,
+  NewJobPostingDTO,
   NewPromptDTO,
   NewSiteDTO,
   PromptDTO,
@@ -60,29 +61,35 @@ export const CHANNEL = {
 } as const
 
 export type FromRenderer = {
-  'does-not-exist': { id: number }
+  'does-not-exist': { id: string }
+}
+
+export type ScraperProgress = 'pending' | 'in_progress' | 'completed' | 'failed'
+
+export type ScraperSiteProgress = 'pending' | 'scraping' | 'processing' | 'complete' | 'error'
+
+export type SiteProgressDTO = {
+  siteId: string
+  siteUrl: string
+  siteTitle: string
+  status: ScraperSiteProgress
+  newJobsFound?: number
+  errorMessage?: string
 }
 
 export type FromMain = {
-  'does-not-exist': { ok: boolean; id: number }
+  'does-not-exist': { ok: boolean; id: string }
   'scraper:progress': {
-    scrapeRunId: number
+    scrapeRunId: string
     progress: {
-      status: 'pending' | 'in_progress' | 'completed' | 'failed'
+      status: ScraperProgress
       totalSites: number
       completedSites: number
-      sites: Array<{
-        siteId: number
-        siteTitle: string
-        siteUrl: string
-        status: 'pending' | 'scraping' | 'processing' | 'complete' | 'error'
-        newJobsFound?: number
-        errorMessage?: string
-      }>
+      sites: Array<SiteProgressDTO>
     }
   }
   'scraper:complete': {
-    scrapeRunId: number
+    scrapeRunId: string
     totalNewJobs: number
     successfulSites: number
     failedSites: number
@@ -109,7 +116,7 @@ export type Invokes = {
       data?: {
         sites: Array<SiteDTO>
         prompts: Array<PromptDTO>
-        jobPostings: Array<JobDTO>
+        jobPostings: Array<JobPostingDTO>
         scrapeRuns: Array<ScrapeRunDTO>
         scrapeTasks: Array<ScrapeTaskDTO>
       }
@@ -121,7 +128,7 @@ export type Invokes = {
       data: {
         sites: Array<SiteDTO>
         prompts: Array<PromptDTO>
-        jobPostings: Array<JobDTO>
+        jobPostings: Array<JobPostingDTO>
         scrapeRuns: Array<ScrapeRunDTO>
         scrapeTasks: Array<ScrapeTaskDTO>
         hashes: Array<HashDTO>
@@ -147,21 +154,21 @@ export type Invokes = {
     }
   }
   [CHANNEL.SITES.GET_BY_ID]: {
-    args: { id: number }
+    args: { id: string }
     result: {
       site: SiteDTO | null
     }
   }
   [CHANNEL.SITES.CREATE]: {
     args: NewSiteDTO
-    result: { success: boolean; id?: number; error?: string }
+    result: { success: boolean; id?: string; error?: string }
   }
   [CHANNEL.SITES.UPDATE]: {
     args: UpdateSiteDTO
     result: { success: boolean; error?: string }
   }
   [CHANNEL.SITES.DELETE]: {
-    args: { id: number }
+    args: { id: string }
     result: { success: boolean; error?: string }
   }
   [CHANNEL.PROMPTS.GET_ALL]: {
@@ -171,44 +178,44 @@ export type Invokes = {
     }
   }
   [CHANNEL.PROMPTS.GET_BY_ID]: {
-    args: { id: number }
+    args: { id: string }
     result: {
       prompt: PromptDTO | null
     }
   }
   [CHANNEL.PROMPTS.CREATE]: {
     args: NewPromptDTO
-    result: { success: boolean; id?: number; error?: string }
+    result: { success: boolean; id?: string; error?: string }
   }
   [CHANNEL.PROMPTS.UPDATE]: {
     args: UpdatePromptDTO
     result: { success: boolean; error?: string }
   }
   [CHANNEL.PROMPTS.DELETE]: {
-    args: { id: number }
+    args: { id: string }
     result: { success: boolean; error?: string }
   }
   [CHANNEL.SCRAPER.START]: {
     args: undefined
-    result: { success: boolean; scrapeRunId?: number; error?: string }
+    result: { success: boolean; scrapeRunId?: string; error?: string }
   }
   [CHANNEL.SCRAPER.RETRY]: {
-    args: { scrapeRunId: number }
-    result: { success: boolean; scrapeRunId?: number; error?: string }
+    args: { scrapeRunId: string }
+    result: { success: boolean; scrapeRunId?: string; error?: string }
   }
   [CHANNEL.SCRAPER.GET_PROGRESS]: {
-    args: { scrapeRunId: number }
+    args: { scrapeRunId: string }
     result: {
       success: boolean
       progress?: {
-        status: 'pending' | 'in_progress' | 'completed' | 'failed'
+        status: ScraperProgress
         totalSites: number
         completedSites: number
         sites: Array<{
-          siteId: number
+          siteId: string
           siteTitle: string
           siteUrl: string
-          status: 'pending' | 'scraping' | 'processing' | 'complete' | 'error'
+          status: ScraperSiteProgress
           newJobsFound?: number
           errorMessage?: string
         }>
@@ -225,11 +232,12 @@ export type Invokes = {
       prompt: string
       siteContent: string
       siteUrl: string
+      siteId: string
       jobToJSONPrompt: string
     }
     result: {
       success: boolean
-      jobs?: Array<JobDTO>
+      jobs?: Array<NewJobPostingDTO>
       rawResponse?: unknown
       error?: string
     }
@@ -241,7 +249,7 @@ export type Invokes = {
     }
   }
   [CHANNEL.SCRAPE_RUNS.GET_TASKS]: {
-    args: { scrapeRunId: number }
+    args: { scrapeRunId: string }
     result: {
       tasks: Array<ScrapeTaskDTO>
     }
@@ -249,36 +257,18 @@ export type Invokes = {
   [CHANNEL.JOB_POSTINGS.GET_ALL]: {
     args: undefined
     result: {
-      postings: Array<{
-        id: number
-        title: string
-        siteUrl: string
-        siteId?: number | null
-        explanation?: string | null
-        status: 'new' | 'applied' | 'skipped' | 'interview' | 'rejected' | 'offer'
-        createdAt: Date
-        updatedAt: Date
-      }>
+      postings: Array<JobPostingDTO>
     }
   }
   [CHANNEL.JOB_POSTINGS.GET_BY_SITE_ID]: {
-    args: { siteId: number }
+    args: { siteId: string }
     result: {
-      postings: Array<{
-        id: number
-        title: string
-        siteUrl: string
-        siteId?: number | null
-        explanation?: string | null
-        status: 'new' | 'applied' | 'skipped' | 'interview' | 'rejected' | 'offer'
-        createdAt: Date
-        updatedAt: Date
-      }>
+      postings: Array<JobPostingDTO>
     }
   }
   [CHANNEL.JOB_POSTINGS.UPDATE_STATUS]: {
     args: {
-      id: number
+      id: string
       status: 'new' | 'applied' | 'skipped' | 'interview' | 'rejected' | 'offer'
     }
     result: { success: boolean; error?: string }

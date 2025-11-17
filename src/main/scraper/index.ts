@@ -17,13 +17,13 @@ function sanitizeError(error: unknown, apiKey: string): string {
 
 // Store active scrape runs in memory
 const activeRuns = new Map<
-  number,
+  string,
   {
     status: 'pending' | 'in_progress' | 'completed' | 'failed'
     totalSites: number
     completedSites: number
     sites: Array<{
-      siteId: number
+      siteId: string
       siteTitle: string
       siteUrl: string
       status: 'pending' | 'scraping' | 'processing' | 'complete' | 'error'
@@ -43,11 +43,11 @@ async function processSite({
   model,
   onProgress,
 }: {
-  siteId: number
+  siteId: string
   siteUrl: string
   prompt: string
   selector: string
-  scrapeRunId: number
+  scrapeRunId: string
   apiKey: string
   model: string
   delay?: number
@@ -86,6 +86,7 @@ async function processSite({
       apiKey,
       model,
       jobToJSONPrompt: store.get('openAiSiteHTMLToJSONJobsPrompt'),
+      siteId,
     })
 
     await queries.insertApiUsage({
@@ -97,11 +98,8 @@ async function processSite({
 
     // Insert job postings
     const jobPostings = jobs.map((job) => ({
-      company: job.company,
-      title: job.title,
-      siteUrl: job.siteUrl,
+      ...job,
       siteId,
-      explanation: job.explanation,
     }))
 
     if (jobPostings.length > 0) {
@@ -320,7 +318,7 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
   }
 }
 
-export function getProgress(scrapeRunId: number) {
+export function getProgress(scrapeRunId: string) {
   const progress = activeRuns.get(scrapeRunId)
   if (!progress) {
     return { success: false, error: 'Scrape run not found' }
@@ -328,7 +326,7 @@ export function getProgress(scrapeRunId: number) {
   return { success: true, progress }
 }
 
-export async function retryFailedScrapes(mainWindow: BrowserWindow | null, originalRunId: number) {
+export async function retryFailedScrapes(mainWindow: BrowserWindow | null, originalRunId: string) {
   try {
     const apiKey = store.get('openaiApiKey')
     const model = store.get('openaiModel')

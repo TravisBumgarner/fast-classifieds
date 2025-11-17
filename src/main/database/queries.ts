@@ -1,21 +1,18 @@
 import { and, desc, eq } from 'drizzle-orm'
 import type OpenAI from 'openai'
-import type { NewSiteDTO, Status, UpdateSiteDTO } from '../../shared/types'
+import { v4 as uuidv4 } from 'uuid'
+import type {
+  NewHashDTO,
+  NewJobPostingDTO,
+  NewPromptDTO,
+  NewScrapeRunDTO,
+  NewScrapeTaskDTO,
+  NewSiteDTO,
+  Status,
+  UpdateSiteDTO,
+} from '../../shared/types'
 import { db } from './client'
-import {
-  apiUsage,
-  hashes,
-  jobPostings,
-  type NewHash,
-  type NewJobPosting,
-  type NewPrompt,
-  type NewScrapeRun,
-  type NewScrapeTask,
-  prompts,
-  scrapeRuns,
-  scrapeTasks,
-  sites,
-} from './schema'
+import { apiUsage, hashes, jobPostings, prompts, scrapeRuns, scrapeTasks, sites } from './schema'
 
 async function insertApiUsage({
   response,
@@ -31,6 +28,7 @@ async function insertApiUsage({
   return db
     .insert(apiUsage)
     .values({
+      id: uuidv4(),
       responseId: response.id,
       model: response.model,
       createdAt: new Date(),
@@ -62,8 +60,11 @@ async function hashExists(hash: string): Promise<boolean> {
 /**
  * Insert a new hash into the database
  */
-async function insertHash(data: NewHash) {
-  return db.insert(hashes).values(data).returning()
+async function insertHash(data: NewHashDTO) {
+  return db
+    .insert(hashes)
+    .values({ ...data, id: uuidv4() })
+    .returning()
 }
 
 /**
@@ -83,7 +84,7 @@ async function insertHashIfNotExists({
       exists: true,
     }
   } else {
-    await db.insert(hashes).values({ hash, siteUrl }).returning()
+    await db.insert(hashes).values({ id: uuidv4(), hash, siteUrl }).returning()
     return {
       exists: false,
     }
@@ -93,30 +94,40 @@ async function insertHashIfNotExists({
 /**
  * Insert a scrape run
  */
-async function insertScrapeRun(data: NewScrapeRun) {
-  return db.insert(scrapeRuns).values(data).returning()
+async function insertScrapeRun(data: NewScrapeRunDTO) {
+  return db
+    .insert(scrapeRuns)
+    .values({ ...data, id: uuidv4() })
+    .returning()
 }
 
 /**
  * Insert a scrape task
  */
-async function insertScrapeTask(data: NewScrapeTask) {
-  return db.insert(scrapeTasks).values(data).returning()
+async function insertScrapeTask(data: NewScrapeTaskDTO) {
+  return db
+    .insert(scrapeTasks)
+    .values({ ...data, id: uuidv4() })
+    .returning()
 }
 
 /**
  * Insert a job posting
  */
-async function insertJobPosting(data: NewJobPosting) {
-  return db.insert(jobPostings).values(data).returning()
+async function insertJobPosting(data: NewJobPostingDTO) {
+  return db
+    .insert(jobPostings)
+    .values({ ...data, id: uuidv4() })
+    .returning()
 }
 
 /**
  * Insert multiple job postings
  */
-async function insertJobPostings(data: NewJobPosting[]) {
+async function insertJobPostings(data: NewJobPostingDTO[]) {
   if (data.length === 0) return []
-  return db.insert(jobPostings).values(data).returning()
+  const dataWithIds = data.map((item) => ({ ...item, id: uuidv4() }))
+  return db.insert(jobPostings).values(dataWithIds).returning()
 }
 
 /**
@@ -149,7 +160,7 @@ async function getAllSitesWithJobCounts() {
 /**
  * Get a site by ID
  */
-async function getSiteById(id: number) {
+async function getSiteById(id: string) {
   const result = await db.select().from(sites).where(eq(sites.id, id)).limit(1)
   return result[0] || null
 }
@@ -158,13 +169,16 @@ async function getSiteById(id: number) {
  * Insert a new site
  */
 async function insertSite(data: NewSiteDTO) {
-  return db.insert(sites).values(data).returning()
+  return db
+    .insert(sites)
+    .values({ ...data, id: uuidv4() })
+    .returning()
 }
 
 /**
  * Update a site
  */
-async function updateSite(id: number, data: Partial<UpdateSiteDTO>) {
+async function updateSite(id: string, data: Partial<UpdateSiteDTO>) {
   return db
     .update(sites)
     .set({ ...data, updatedAt: new Date() })
@@ -175,7 +189,7 @@ async function updateSite(id: number, data: Partial<UpdateSiteDTO>) {
 /**
  * Delete a site
  */
-async function deleteSite(id: number) {
+async function deleteSite(id: string) {
   return db.delete(sites).where(eq(sites.id, id)).returning()
 }
 
@@ -201,7 +215,7 @@ async function getAllScrapeTasks() {
 /**
  * Get a prompt by ID
  */
-async function getPromptById(id: number) {
+async function getPromptById(id: string) {
   const result = await db.select().from(prompts).where(eq(prompts.id, id)).limit(1)
   return result[0] || null
 }
@@ -209,14 +223,17 @@ async function getPromptById(id: number) {
 /**
  * Insert a new prompt
  */
-async function insertPrompt(data: NewPrompt) {
-  return db.insert(prompts).values(data).returning()
+async function insertPrompt(data: NewPromptDTO) {
+  return db
+    .insert(prompts)
+    .values({ ...data, id: uuidv4() })
+    .returning()
 }
 
 /**
  * Update a prompt
  */
-async function updatePrompt(id: number, data: Partial<NewPrompt>) {
+async function updatePrompt(id: string, data: Partial<NewPromptDTO>) {
   return db
     .update(prompts)
     .set({ ...data, updatedAt: new Date() })
@@ -227,7 +244,7 @@ async function updatePrompt(id: number, data: Partial<NewPrompt>) {
 /**
  * Delete a prompt
  */
-async function deletePrompt(id: number) {
+async function deletePrompt(id: string) {
   return db.delete(prompts).where(eq(prompts.id, id)).returning()
 }
 
@@ -241,7 +258,7 @@ async function getAllScrapeRuns() {
 /**
  * Get scrape tasks for a specific run
  */
-async function getScrapeTasksByRunId(scrapeRunId: number) {
+async function getScrapeTasksByRunId(scrapeRunId: string) {
   return db
     .select()
     .from(scrapeTasks)
@@ -252,7 +269,7 @@ async function getScrapeTasksByRunId(scrapeRunId: number) {
 /**
  * Get failed scrape tasks for a specific run
  */
-async function getFailedTasksByRunId(scrapeRunId: number) {
+async function getFailedTasksByRunId(scrapeRunId: string) {
   return db
     .select()
     .from(scrapeTasks)
@@ -264,7 +281,7 @@ async function getFailedTasksByRunId(scrapeRunId: number) {
  * Update scrape run completion status
  */
 async function updateScrapeRun(
-  id: number,
+  id: string,
   data: {
     successfulSites?: number
     failedSites?: number
@@ -285,7 +302,7 @@ async function getAllJobPostings() {
 /**
  * Get job postings for a specific site (ordered by most recent first)
  */
-async function getJobPostingsBySiteId(siteId: number) {
+async function getJobPostingsBySiteId(siteId: string) {
   return db.select().from(jobPostings).where(eq(jobPostings.siteId, siteId)).orderBy(desc(jobPostings.createdAt))
 }
 
@@ -293,7 +310,7 @@ async function getJobPostingsBySiteId(siteId: number) {
  * Update job posting status
  */
 async function updateJobPostingStatus(
-  id: number,
+  id: string,
   status: 'new' | 'applied' | 'skipped' | 'interview' | 'rejected' | 'offer',
 ) {
   return db.update(jobPostings).set({ status, updatedAt: new Date() }).where(eq(jobPostings.id, id)).returning()
