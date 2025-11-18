@@ -44,7 +44,6 @@ export const CHANNEL = {
   },
   SCRAPER: {
     START: 'scraper:start',
-    RETRY: 'scraper:retry',
     GET_PROGRESS: 'scraper:get-progress',
   },
   DEBUG: {
@@ -210,10 +209,6 @@ export type Invokes = {
     args: undefined
     result: { success: true; scrapeRunId: string } | { success: false; error: string }
   }
-  [CHANNEL.SCRAPER.RETRY]: {
-    args: { scrapeRunId: string }
-    result: { success: true; scrapeRunId: string } | { success: false; error: string }
-  }
   [CHANNEL.SCRAPER.GET_PROGRESS]: {
     args: { scrapeRunId: string }
     result: {
@@ -271,6 +266,7 @@ export type Invokes = {
     args: undefined
     result: {
       postings: Array<JobPostingDTO>
+      suspectedDuplicatesCount: number
     }
   }
   [CHANNEL.JOB_POSTINGS.GET_BY_SITE_ID]: {

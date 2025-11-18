@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   Chip,
   Collapse,
   IconButton,
@@ -18,15 +17,13 @@ import {
   Typography,
 } from '@mui/material'
 import { Fragment, useCallback, useEffect, useState } from 'react'
-import type { ScrapeRunDTO, ScrapeTaskDTO, SiteDTO } from 'src/shared/types'
 import { CHANNEL } from '../../shared/messages.types'
+import type { ScrapeRunDTO, ScrapeTaskDTO, SiteDTO } from '../../shared/types'
 import { PAGINATION } from '../consts'
 import ipcMessenger from '../ipcMessenger'
 import Icon from '../sharedComponents/Icon'
 import Message from '../sharedComponents/Message'
-import { MODAL_ID } from '../sharedComponents/Modal/Modal.consts'
 import PageWrapper from '../sharedComponents/PageWrapper'
-import { activeModalSignal } from '../signals'
 import { SPACING } from '../styles/consts'
 import { logger } from '../utilities'
 
@@ -140,18 +137,6 @@ const ScrapeRuns = () => {
       logger.error('Failed to load sites:', err)
     }
   }, [])
-
-  const handleRetry = async (runId: string) => {
-    try {
-      activeModalSignal.value = {
-        id: MODAL_ID.SCRAPE_PROGRESS_MODAL,
-        retryRunId: runId,
-      }
-    } catch (err) {
-      setError('Failed to retry scrape')
-      logger.error(err)
-    }
-  }
 
   const loadTasksForRun = async (runId: string) => {
     if (tasks[runId]) {
@@ -341,20 +326,6 @@ const ScrapeRuns = () => {
                         <TableCell>{run.failedSites}</TableCell>
                         <TableCell>{duration !== null ? `${duration}s` : 'In progress...'}</TableCell>
                         <TableCell>{run.comments || '-'}</TableCell>
-                        <TableCell>
-                          {run.failedSites > 0 && (
-                            <Tooltip title="Retry failed sites">
-                              <Button
-                                size="small"
-                                variant="outlined"
-                                color="warning"
-                                onClick={() => handleRetry(run.id)}
-                              >
-                                Retry ({run.failedSites})
-                              </Button>
-                            </Tooltip>
-                          )}
-                        </TableCell>
                       </TableRow>
 
                       {/* Expandable section for tasks */}

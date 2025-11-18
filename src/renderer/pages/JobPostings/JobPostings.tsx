@@ -69,7 +69,7 @@ const JobPostings = () => {
   const { isLoading: isLoadingJobPostings, data: jobPostingsData } = useQuery({
     queryKey: [QUERY_KEYS.POSTINGS],
     queryFn: async () => await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.GET_ALL, undefined),
-    initialData: { postings: [] },
+    initialData: { postings: [], suspectedDuplicatesCount: 0 },
   })
 
   const sortedPostings = [...jobPostingsData.postings].sort((a, b) => {
@@ -228,9 +228,11 @@ const JobPostings = () => {
               Open Selected ({selectedPostings.size})
             </Button>
           )}
-          <Button color="error" size="small" variant="outlined" onClick={handleSelectedDuplicates}>
-            Suspected duplicates found!
-          </Button>
+          {jobPostingsData.suspectedDuplicatesCount > 0 && (
+            <Button color="error" size="small" variant="outlined" onClick={handleSelectedDuplicates}>
+              Suspected duplicates found! ({jobPostingsData.suspectedDuplicatesCount})
+            </Button>
+          )}
         </Stack>
         <Stack direction="row" spacing={SPACING.SMALL.PX} alignItems="center">
           <QuickActions />
@@ -341,7 +343,7 @@ const JobPostings = () => {
             <TableBody>
               {filteredPostings.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} align="center">
+                  <TableCell colSpan={9} align="center">
                     <Stack spacing={SPACING.SMALL.PX} alignItems="center" sx={{ py: 4 }}>
                       <Typography variant="body2" color="textSecondary">
                         {jobPostingsData.postings.length === 0

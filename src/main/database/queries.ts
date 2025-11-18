@@ -1,8 +1,9 @@
-import { and, desc, eq } from 'drizzle-orm'
+import { and, count, desc, eq, inArray } from 'drizzle-orm'
 import type OpenAI from 'openai'
 import { v4 as uuidv4 } from 'uuid'
 import type {
   JobPostingDTO,
+  JobPostingDuplicateStatus,
   NewHashDTO,
   NewJobPostingDTO,
   NewPromptDTO,
@@ -236,7 +237,13 @@ async function updateScrapeRun(
   return db.update(scrapeRuns).set(data).where(eq(scrapeRuns.id, id)).returning()
 }
 
-async function getJobPostings({ siteId }: { siteId?: string }): Promise<JobPostingDTO[]> {
+async function getJobPostings({
+  siteId,
+  duplicateStatusArray,
+}: {
+  siteId?: string
+  duplicateStatusArray?: JobPostingDuplicateStatus[]
+}): Promise<JobPostingDTO[]> {
   const rows = await db
     .select({
       id: jobPostings.id,
@@ -257,13 +264,26 @@ async function getJobPostings({ siteId }: { siteId?: string }): Promise<JobPosti
     })
     .from(jobPostings)
     .leftJoin(sites, eq(jobPostings.siteId, sites.id))
-    .where(siteId ? eq(jobPostings.siteId, siteId) : undefined)
+    .where(
+      and(
+        siteId ? eq(jobPostings.siteId, siteId) : undefined,
+        duplicateStatusArray ? inArray(jobPostings.duplicateStatus, duplicateStatusArray) : undefined,
+      ),
+    )
     .orderBy(desc(jobPostings.createdAt))
 
   return rows.map((r) => ({
     ...r,
     siteTitle: r.siteTitle ?? 'Unknown',
   }))
+}
+
+async function jobPostingsSuspectedDuplicatesCount() {
+  return db
+    .select({ count: count() })
+    .from(jobPostings)
+    .where(eq(jobPostings.duplicateStatus, 'suspected_duplicate'))
+    .all()
 }
 
 async function skipNotRecommendedPostings() {
@@ -304,6 +324,7 @@ export default {
   insertSite,
   updateSite,
   deleteSite,
+  jobPostingsSuspectedDuplicatesCount,
   getAllPrompts,
   getPromptById,
   insertPrompt,

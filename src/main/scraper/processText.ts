@@ -1,7 +1,7 @@
 import OpenAI from 'openai'
 import { zodTextFormat } from 'openai/helpers/zod'
-import type { ScrapedContentDTO } from 'src/shared/types'
 import { z } from 'zod'
+import type { ScrapedContentDTO } from '../../shared/types'
 import { renderPrompt } from '../../shared/utils'
 import log from '../logger'
 

@@ -20,15 +20,14 @@ import ipcMessenger from '../../../ipcMessenger'
 import { activeModalSignal } from '../../../signals'
 import { SPACING } from '../../../styles/consts'
 import { logger } from '../../../utilities'
-import { MODAL_ID } from '../Modal.consts'
+import type { MODAL_ID } from '../Modal.consts'
 import DefaultModal from './DefaultModal'
 
 export interface ScrapeProgressModalProps {
   id: typeof MODAL_ID.SCRAPE_PROGRESS_MODAL
-  retryRunId?: string
 }
 
-const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
+const ScrapeProgressModal = (_props: ScrapeProgressModalProps) => {
   const navigate = useNavigate()
   const [sites, setSites] = useState<SiteProgressDTO[]>([])
   const [isComplete, setIsComplete] = useState(false)
@@ -70,12 +69,7 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
     try {
       logger.info('[ScrapeProgressModal] Starting scrape...')
 
-      // If retryRunId is provided, call retry instead of start
-      const result = props.retryRunId
-        ? await ipcMessenger.invoke(CHANNEL.SCRAPER.RETRY, {
-            scrapeRunId: props.retryRunId,
-          })
-        : await ipcMessenger.invoke(CHANNEL.SCRAPER.START, undefined)
+      const result = await ipcMessenger.invoke(CHANNEL.SCRAPER.START, undefined)
 
       logger.info('[ScrapeProgressModal] Start result:', result)
 
@@ -95,7 +89,7 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
       logger.error('Failed to start scraping:', error)
       setError(error instanceof Error ? error.message : 'Failed to start scraping')
     }
-  }, [props.retryRunId])
+  }, [])
 
   useEffect(() => {
     ;(async () => {
@@ -109,15 +103,6 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SCRAPE_RUNS] })
     }
     activeModalSignal.value = null
-  }
-
-  const handleRetry = () => {
-    if (scrapeRunId && isComplete && errorCount > 0) {
-      activeModalSignal.value = {
-        id: MODAL_ID.SCRAPE_PROGRESS_MODAL,
-        retryRunId: scrapeRunId,
-      }
-    }
   }
 
   const getStatusColor = (
@@ -261,11 +246,6 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
         {isComplete && (
           <Box sx={{ mt: SPACING.MEDIUM.PX }}>
             <Stack spacing={SPACING.SMALL.PX}>
-              {errorCount > 0 && (
-                <Button variant="outlined" color="warning" onClick={handleRetry} fullWidth>
-                  Retry Failed Sites ({errorCount})
-                </Button>
-              )}
               <Button variant="contained" onClick={handleClose} fullWidth>
                 Close
               </Button>
