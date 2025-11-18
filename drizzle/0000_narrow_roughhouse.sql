@@ -33,6 +33,7 @@ CREATE UNIQUE INDEX `hashes_job_to_json_prompt_hash_unique` ON `hashes` (`job_to
 CREATE TABLE `job_postings` (
 	`recommended_by_ai` integer NOT NULL,
 	`id` text PRIMARY KEY NOT NULL,
+	`duplicate_status` text NOT NULL,
 	`scrape_run_id` text NOT NULL,
 	`title` text NOT NULL,
 	`site_url` text NOT NULL,
