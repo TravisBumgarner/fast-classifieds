@@ -164,9 +164,10 @@ const ImportSitesModal = (_props: ImportSitesModalProps) => {
       <Box sx={{ minWidth: 500 }}>
         <Stack spacing={SPACING.MEDIUM.PX}>
           <Typography variant="body2" color="textSecondary">
-            Enter one URL per line. The site title will be fetched automatically, and the selector will be set to
-            &apos;body&apos;.
+            Enter one URL per line. The site title will be fetched automatically.
           </Typography>
+
+          <Typography variant="body2">Advanced Users: The selector will be set to &apos;body&apos;.</Typography>
 
           {error && (
             <Typography color="error" variant="body2">

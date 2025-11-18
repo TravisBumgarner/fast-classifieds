@@ -295,7 +295,6 @@ const Sites = () => {
                     Company
                   </TableSortLabel>
                 </TableCell>
-                <TableCell>Selector</TableCell>
                 <TableCell>Total Jobs</TableCell>
                 <TableCell>
                   <TableSortLabel
@@ -315,6 +314,7 @@ const Sites = () => {
                     Updated
                   </TableSortLabel>
                 </TableCell>
+                <TableCell>Advanced</TableCell>
                 <TableCell
                   align="right"
                   sx={{
@@ -367,9 +367,6 @@ const Sites = () => {
                           </Tooltip>
                         </TableCell>
                         <TableCell>{site.siteTitle}</TableCell>
-                        <TableCell>
-                          <code>{site.selector}</code>
-                        </TableCell>
                         <TableCell>{site.totalJobs}</TableCell>
                         <TableCell>
                           <Chip
@@ -378,6 +375,9 @@ const Sites = () => {
                           />
                         </TableCell>
                         <TableCell>{new Date(site.updatedAt).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          <code>Selector: {site.selector}</code>
+                        </TableCell>
                         <TableCell align="right">
                           <Tooltip title={`Open site in browser: ${site.siteUrl}`}>
                             <span>
