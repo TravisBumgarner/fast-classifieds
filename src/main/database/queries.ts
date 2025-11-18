@@ -262,6 +262,14 @@ async function getJobPostings({ siteId }: { siteId?: string }): Promise<JobPosti
   }))
 }
 
+async function skipNotRecommendedPostings() {
+  return db
+    .update(jobPostings)
+    .set({ status: 'skipped', updatedAt: new Date() })
+    .where(eq(jobPostings.recommendedByAI, false))
+    .returning()
+}
+
 async function nukeDatabase() {
   // Delete in order to respect any dependencies
   await db.delete(scrapeTasks)
@@ -302,4 +310,5 @@ export default {
   getFailedTasksByRunId,
   getJobPostings,
   nukeDatabase,
+  skipNotRecommendedPostings,
 }

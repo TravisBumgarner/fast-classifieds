@@ -34,6 +34,7 @@ import { activeModalSignal } from '../../signals'
 import { SPACING } from '../../styles/consts'
 import { logger } from '../../utilities'
 import Filters, { DEFAULT_STATUS_FILTERS } from './components/Filters'
+import QuickActions from './components/QuickActions'
 
 type SortField = 'company' | 'title' | 'status' | 'createdAt' | 'location' | 'recommendedByAI'
 type SortDirection = 'asc' | 'desc'
@@ -251,14 +252,17 @@ const Postings = () => {
             </Button>
           )}
         </Stack>
-        <Filters
-          scrapeRuns={scrapeRuns}
-          scrapeRunsFilter={scrapeRunsFilter}
-          setScrapeRunsFilter={setScrapeRunsFilter}
-          setPage={setPage}
-          statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-        />
+        <Stack direction="row" spacing={SPACING.SMALL.PX} alignItems="center">
+          <QuickActions />
+          <Filters
+            scrapeRuns={scrapeRuns}
+            scrapeRunsFilter={scrapeRunsFilter}
+            setScrapeRunsFilter={setScrapeRunsFilter}
+            setPage={setPage}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+          />
+        </Stack>
       </Stack>
 
       {error && <Message message={error} color="error" />}

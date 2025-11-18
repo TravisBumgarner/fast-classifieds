@@ -1,0 +1,52 @@
+import { Button, ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material'
+import { useState } from 'react'
+import { CHANNEL } from '../../../../shared/messages.types'
+import ipcMessenger from '../../../ipcMessenger'
+import Icon from '../../../sharedComponents/Icon'
+import { MODAL_ID } from '../../../sharedComponents/Modal/Modal.consts'
+import { activeModalSignal } from '../../../signals'
+
+const QuickActions = () => {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const open = Boolean(anchorEl)
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handleMenuClose = () => {
+    setAnchorEl(null)
+  }
+
+  const handleSkipNotRecommended = () => {
+    activeModalSignal.value = {
+      id: MODAL_ID.CONFIRMATION_MODAL,
+      title: "Skip all 'Not Recommended' listings?",
+      body: "Are you sure you want to skip all job postings marked as 'Not Recommended'? This action cannot be undone.",
+      confirmationCallback: () => {
+        ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.SKIP_NOT_RECOMMENDED_POSTINGS).catch((error) => {
+          console.error('Error skipping not recommended postings:', error)
+        })
+      },
+    }
+    handleMenuClose()
+  }
+
+  return (
+    <>
+      <Button variant="outlined" onClick={handleMenuOpen} startIcon={<Icon name="menu" />}>
+        Quick Actions
+      </Button>
+      <Menu anchorEl={anchorEl} open={open} onClose={handleMenuClose}>
+        <MenuItem onClick={handleSkipNotRecommended}>
+          <ListItemIcon>
+            <Icon name="skip" />
+          </ListItemIcon>
+          <ListItemText primary="Skip all 'Not Recommended' listings" />
+        </MenuItem>
+      </Menu>
+    </>
+  )
+}
+
+export default QuickActions
