@@ -35,7 +35,7 @@ import { SPACING } from '../../styles/consts'
 import { logger } from '../../utilities'
 import Filters, { DEFAULT_STATUS_FILTERS } from './components/Filters'
 
-type SortField = 'company' | 'title' | 'status' | 'createdAt' | 'location'
+type SortField = 'company' | 'title' | 'status' | 'createdAt' | 'location' | 'recommendedByAI'
 type SortDirection = 'asc' | 'desc'
 
 const Postings = () => {
@@ -116,7 +116,7 @@ const Postings = () => {
   })
 
   const paginatedPostings = filteredPostings.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-
+  console.log(paginatedPostings)
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage)
   }
@@ -320,6 +320,25 @@ const Postings = () => {
                     Status
                   </TableSortLabel>
                 </TableCell>
+
+                <TableCell>
+                  <Tooltip
+                    title="AI matched jobs are highlighted, but accuracy is still being evaluated. All results are shown regardless."
+                    arrow
+                  >
+                    <span style={{ position: 'relative', top: 6, paddingRight: SPACING.SMALL.PX }}>
+                      <Icon name="info" />
+                    </span>
+                  </Tooltip>
+                  <TableSortLabel
+                    active={sortField === 'recommendedByAI'}
+                    direction={sortField === 'recommendedByAI' ? sortDirection : 'asc'}
+                    onClick={() => handleSort('recommendedByAI' as SortField)}
+                  >
+                    Recommended{' '}
+                  </TableSortLabel>
+                </TableCell>
+
                 <TableCell>Explanation</TableCell>
                 <TableCell>
                   <TableSortLabel
@@ -405,6 +424,13 @@ const Postings = () => {
                           </IconButton>
                         </Tooltip>
                       </Stack>
+                    </TableCell>
+                    <TableCell>
+                      {posting.recommendedByAI ? (
+                        <Chip label="AI Match" color="success" size="small" />
+                      ) : (
+                        <Chip label="Not Recommended" color="default" size="small" />
+                      )}
                     </TableCell>
                     <TableCell>
                       <Tooltip title={posting.explanation || 'No explanation'}>

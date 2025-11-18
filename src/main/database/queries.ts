@@ -249,6 +249,7 @@ async function getJobPostings({ siteId }: { siteId?: string }): Promise<JobPosti
       updatedAt: jobPostings.updatedAt,
       scrapeRunId: jobPostings.scrapeRunId,
       siteTitle: sites.siteTitle,
+      recommendedByAI: jobPostings.recommendedByAI,
     })
     .from(jobPostings)
     .leftJoin(sites, eq(jobPostings.siteId, sites.id))

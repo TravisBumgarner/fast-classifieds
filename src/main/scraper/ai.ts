@@ -9,6 +9,7 @@ const aiJobSchema = z.array(
     siteUrl: z.string(),
     explanation: z.string(),
     location: z.string(),
+    recommendedByAI: z.boolean(),
   }),
 )
 
