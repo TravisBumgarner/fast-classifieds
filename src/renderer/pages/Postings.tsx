@@ -1,5 +1,4 @@
 import {
-  Alert,
   Box,
   Button,
   Checkbox,
@@ -23,9 +22,9 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { CHANNEL } from '../../shared/messages.types'
-import { type JobPostingDTO, POSTING_STATUS } from '../../shared/types'
+import { type JobPostingDTO, POSTING_STATUS, type PostingStatus } from '../../shared/types'
 import { PAGINATION } from '../consts'
 import ipcMessenger from '../ipcMessenger'
 import Icon from '../sharedComponents/Icon'
@@ -36,8 +35,6 @@ import PageWrapper from '../sharedComponents/PageWrapper'
 import { activeModalSignal } from '../signals'
 import { SPACING } from '../styles/consts'
 import { logger } from '../utilities'
-
-type PostingStatus = 'new' | 'applied' | 'skipped' | 'interview' | 'rejected' | 'offer'
 
 type SortField = 'company' | 'title' | 'status' | 'createdAt' | 'location'
 type SortDirection = 'asc' | 'desc'
@@ -126,6 +123,10 @@ const Postings = () => {
       setLoading(false)
     }
   }, [])
+
+  useEffect(() => {
+    loadJobPostings()
+  }, [loadJobPostings])
 
   const handleFindJobs = () => {
     activeModalSignal.value = {
@@ -241,18 +242,6 @@ const Postings = () => {
           </FormGroup>
         </FormControl>
       </Stack>
-
-      {jobPostings.length === 0 && !error && !loading && (
-        <Alert severity="info" sx={{ mb: SPACING.MEDIUM.PX }}>
-          <Typography variant="subtitle2" gutterBottom>
-            <strong>No job postings yet</strong>
-          </Typography>
-          <Typography variant="body2">
-            Job postings will appear here after you run your first scrape. Make sure you&apos;ve added sites and
-            prompts, then run a scrape to find matching jobs.
-          </Typography>
-        </Alert>
-      )}
 
       {error && <Message message={error} color="error" />}
 

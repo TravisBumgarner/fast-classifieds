@@ -130,8 +130,7 @@ const Debugger = () => {
     <PageWrapper>
       <Alert severity="info" sx={{ mb: SPACING.MEDIUM.PX }}>
         <Typography variant="subtitle2" gutterBottom>
-          This app is in development and not well polished. This page will help you to debug the postings finder and
-          share data to help me debug.
+          The debugger allows you to test and refine your scraping setup before adding it as a site.
         </Typography>
       </Alert>
 

@@ -9,10 +9,10 @@ type TimestampsAndID = {
 export const POSTING_STATUS = {
   NEW: 'new',
   APPLIED: 'applied',
-  SKIPPED: 'skipped',
   INTERVIEW: 'interview',
-  REJECTED: 'rejected',
   OFFER: 'offer',
+  REJECTED: 'rejected',
+  SKIPPED: 'skipped',
 } as const
 export type PostingStatus = (typeof POSTING_STATUS)[keyof typeof POSTING_STATUS]
 

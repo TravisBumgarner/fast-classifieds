@@ -1,8 +1,11 @@
 import {
+  Alert,
   Box,
   Button,
   FormControl,
   InputLabel,
+  List,
+  ListItem,
   MenuItem,
   Select,
   Stack,
@@ -46,7 +49,7 @@ const SiteModal = (props: SiteModalProps) => {
   const [siteTitle, setSiteTitle] = useState('')
   const [siteUrl, setSiteUrl] = useState('')
   const [promptId, setPromptId] = useState<string>('')
-  const [selector, setSelector] = useState('')
+  const [selector, setSelector] = useState('body')
   const [status, setStatus] = useState<SiteStatus>('active')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -217,6 +220,44 @@ const SiteModal = (props: SiteModalProps) => {
 
   return (
     <DefaultModal title={isEditMode ? 'Edit Site' : 'Add Site'}>
+      <Alert severity="info" sx={{ mb: SPACING.MEDIUM.PX }}>
+        <Typography variant="subtitle2" gutterBottom>
+          <strong>Getting started with sites:</strong>
+        </Typography>
+        <Typography variant="body2">
+          Add career pages from companies you&apos;re interested in. For each site, you&apos;ll need:
+        </Typography>
+        <ul style={{ padding: 0, margin: 0 }}>
+          <li>
+            <strong>Site Title: </strong> Company name (e.g., &quot;Acme Corp&quot;)
+          </li>
+          <li>
+            <strong>URL:</strong> Link to their careers page
+          </li>
+          <li>
+            <strong>CSS Selector:</strong> Target the job listings container (e.g., &quot;.job-list&quot; or
+            &quot;#jobs&quot;). Use &quot;body&quot; if unsure. New to selectors?{' '}
+            <a
+              href="https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                textDecoration: 'underline',
+              }}
+              onClick={(e) => {
+                e.preventDefault()
+                window.electron.shell.openExternal('https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be')
+              }}
+            >
+              Watch the tutorial
+            </a>
+          </li>
+          <li>
+            <strong>Prompt:</strong> Select which prompt to use for matching jobs
+          </li>
+        </ul>
+      </Alert>
+
       <Box component="form" onSubmit={handleSubmit}>
         <Stack spacing={SPACING.MEDIUM.PX}>
           {error && (
@@ -261,28 +302,6 @@ const SiteModal = (props: SiteModalProps) => {
               disabled={loading}
               placeholder=".job-list or #jobs"
             />
-            <Typography variant="body2">
-              New to selectors?{' '}
-              <a
-                href="https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  textDecoration: 'underline',
-                }}
-                onClick={(e) => {
-                  e.preventDefault()
-                  window.electron.shell.openExternal('https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be')
-                }}
-              >
-                Watch the tutorial
-              </a>
-            </Typography>
-            <Tooltip title={TOOLTIPS.CSS_SELECTOR} arrow>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Icon name="info" size={20} />
-              </Box>
-            </Tooltip>
           </Stack>
 
           <FormControl fullWidth required disabled={loading} size="small">

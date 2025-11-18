@@ -1,5 +1,4 @@
 import {
-  Alert,
   Box,
   Button,
   Checkbox,
@@ -205,27 +204,6 @@ const Prompts = () => {
         </FormControl>
       </Stack>
 
-      {prompts.length === 0 && !error && (
-        <Alert severity="info" sx={{ mb: SPACING.MEDIUM.PX }}>
-          <Typography variant="subtitle2" gutterBottom>
-            <strong>How to create effective prompts:</strong>
-          </Typography>
-          <Typography variant="body2" paragraph>
-            1. Upload your resume(s) to ChatGPT and ask: &quot;Take my resume and extract all useful tokens and keywords
-            for finding relevant jobs, return this as a prompt I can give you in the future..&quot;
-          </Typography>
-          <Typography variant="body2" paragraph>
-            2. Create a prompt like: &quot;I&apos;m looking for jobs that match my background. Use the following tokens
-            and keywords to find highly relevant roles for me: Full Stack Software Engineer, Senior Software Engineer,
-            Tech Lead, React, English, Spanish, Remote&quot;
-          </Typography>
-          <Typography variant="body2">
-            3. You can create multiple prompts for different job types (e.g., one for senior roles, one for startup
-            positions, etc.)
-          </Typography>
-        </Alert>
-      )}
-
       {error && <Message message={error} color="error" />}
 
       <TableContainer
@@ -276,7 +254,7 @@ const Prompts = () => {
             <TableBody>
               {filteredPrompts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} align="center">
+                  <TableCell colSpan={6} align="center">
                     <Stack spacing={SPACING.SMALL.PX} alignItems="center" sx={{ py: 4 }}>
                       <Typography variant="body2" color="textSecondary">
                         {prompts.length === 0
@@ -294,12 +272,6 @@ const Prompts = () => {
                         >
                           Clear Filters
                         </Button>
-                      )}
-                      {prompts.length === 0 && (
-                        <Typography variant="caption" color="textSecondary" sx={{ fontStyle: 'italic' }}>
-                          Example: &quot;Senior Full Stack Engineer&quot; with keywords like React, TypeScript, Node.js,
-                          Remote
-                        </Typography>
                       )}
                     </Stack>
                   </TableCell>

@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   Button,
   FormControl,
@@ -8,6 +9,7 @@ import {
   RadioGroup,
   Stack,
   TextField,
+  Typography,
 } from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'
 import { CHANNEL } from '../../../../shared/messages.types'
@@ -122,7 +124,7 @@ const PromptModal = (props: PromptModalProps) => {
   }
 
   return (
-    <DefaultModal title={isEdit ? 'Edit Prompt' : 'Add Prompt'}>
+    <DefaultModal title={isEdit ? 'Edit Prompt' : 'Add Prompt'} sx={{ width: '800px' }}>
       <Box>
         <Stack spacing={SPACING.MEDIUM.PX}>
           {error && <Box sx={{ color: 'error.main', fontSize: '0.875rem' }}>{error}</Box>}
@@ -136,8 +138,26 @@ const PromptModal = (props: PromptModalProps) => {
             fullWidth
             disabled={loading}
             placeholder="e.g., Senior Full Stack Engineer"
-            helperText="Give your prompt a descriptive name"
           />
+
+          <Alert severity="info" sx={{ mb: SPACING.MEDIUM.PX }}>
+            <Typography variant="subtitle2" gutterBottom>
+              <strong>How to create effective prompts:</strong>
+            </Typography>
+            <Typography variant="body2">
+              1. Upload your resume(s) to ChatGPT and ask: &quot;Take my resume and extract all useful tokens and
+              keywords for finding relevant jobs, return this as a prompt I can give you in the future.&quot;
+            </Typography>
+            <Typography variant="body2">
+              2. Create a prompt like: &quot;I&apos;m looking for jobs that match my background. Use the following
+              tokens and keywords to find highly relevant roles for me: Full Stack Software Engineer, Senior Software
+              Engineer, Tech Lead, React, English, Spanish, Remote&quot;
+            </Typography>
+            <Typography variant="body2">
+              3. You can create multiple prompts for different job types (e.g., one for senior roles, one for startup
+              positions, etc.)
+            </Typography>
+          </Alert>
 
           <TextField
             size="small"
@@ -147,14 +167,8 @@ const PromptModal = (props: PromptModalProps) => {
             required
             fullWidth
             multiline
-            rows={12}
+            rows={6}
             disabled={loading}
-            placeholder={`I'm looking for jobs that match my background. Use the following tokens and keywords to find highly relevant roles for me:
-
-Full Stack Software Engineer, Senior Software Engineer, Tech Lead, React, TypeScript, Node.js, Python, Remote, USA
-
-Use these to match roles by relevance, not just by keyword overlap.`}
-            helperText="Enter the full prompt text that will be used for job matching. Include relevant skills, technologies, job titles, and locations."
           />
 
           <FormControl component="fieldset" disabled={loading}>
