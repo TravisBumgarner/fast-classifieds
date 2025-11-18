@@ -26,7 +26,7 @@ export const ROUTES = {
   },
   debugger: {
     href: (siteId?: string) => `/debugger${siteId ? `?site_id=${siteId}` : ''}`,
-    label: 'Debugger',
+    label: 'Debug',
     target: '_self',
   },
 } as const

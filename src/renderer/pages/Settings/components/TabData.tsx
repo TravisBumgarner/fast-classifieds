@@ -213,6 +213,14 @@ const TabData = () => {
     input.click()
   }
 
+  const handleClearLocalStorage = () => {
+    ipcMessenger.invoke(CHANNEL.APP.CLEAR_LOCAL_STORAGE, undefined)
+    setDataMessage({
+      type: 'success',
+      text: 'Local storage cleared successfully',
+    })
+  }
+
   useEffect(() => {
     const getBackupDirectory = async () => {
       try {
@@ -280,16 +288,20 @@ const TabData = () => {
         <Typography variant="body2" color="textSecondary" sx={{ mb: SPACING.SMALL.PX }}>
           Permanently delete all data from the database
         </Typography>
-
-        <Button
-          variant="outlined"
-          color="error"
-          onClick={handleNukeDatabase}
-          disabled={isExporting || isRestoring || isNuking}
-          fullWidth
-        >
-          {isNuking ? 'Nuking...' : 'Nuke Database'}
-        </Button>
+        <Stack spacing={SPACING.SMALL.PX} sx={{ mb: SPACING.MEDIUM.PX }}>
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={handleNukeDatabase}
+            disabled={isExporting || isRestoring || isNuking}
+            fullWidth
+          >
+            {isNuking ? 'Nuking...' : 'Nuke Database'}
+          </Button>
+          <Button variant="outlined" color="error" onClick={handleClearLocalStorage} fullWidth>
+            {isNuking ? 'Clearing...' : 'Clear Local Storage'}
+          </Button>
+        </Stack>
       </Box>
       {/* Confirmation Dialog */}
       <Dialog

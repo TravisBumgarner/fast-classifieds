@@ -270,38 +270,6 @@ const Sites = () => {
         </FormControl>
       </Stack>
 
-      {sites.length === 0 && !error && !loading && (
-        <Alert severity="info" sx={{ mb: SPACING.MEDIUM.PX }}>
-          <Typography variant="subtitle2" gutterBottom>
-            <strong>Getting started with sites:</strong>
-          </Typography>
-          <Typography variant="body2" paragraph>
-            Add career pages from companies you&apos;re interested in. For each site, you&apos;ll need:
-          </Typography>
-          <Typography variant="body2" component="div">
-            • <strong>Site Title:</strong> Company name (e.g., &quot;Acme Corp&quot;)
-            <br />• <strong>URL:</strong> Link to their careers page
-            <br />• <strong>CSS Selector:</strong> Target the job listings container (e.g., &quot;.job-list&quot; or
-            &quot;#jobs&quot;). Use &quot;body&quot; if unsure. New to selectors?{' '}
-            <a
-              href="https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                textDecoration: 'underline',
-              }}
-              onClick={(e) => {
-                e.preventDefault()
-                window.electron.shell.openExternal('https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be')
-              }}
-            >
-              Watch the tutorial
-            </a>
-            <br />• <strong>Prompt:</strong> Select which prompt to use for matching jobs
-          </Typography>
-        </Alert>
-      )}
-
       {error && <Message message={error} color="error" />}
 
       <TableContainer
@@ -327,7 +295,6 @@ const Sites = () => {
                     Company
                   </TableSortLabel>
                 </TableCell>
-                <TableCell>Selector</TableCell>
                 <TableCell>Total Jobs</TableCell>
                 <TableCell>
                   <TableSortLabel
@@ -347,6 +314,7 @@ const Sites = () => {
                     Updated
                   </TableSortLabel>
                 </TableCell>
+                <TableCell>Advanced</TableCell>
                 <TableCell
                   align="right"
                   sx={{
@@ -399,9 +367,6 @@ const Sites = () => {
                           </Tooltip>
                         </TableCell>
                         <TableCell>{site.siteTitle}</TableCell>
-                        <TableCell>
-                          <code>{site.selector}</code>
-                        </TableCell>
                         <TableCell>{site.totalJobs}</TableCell>
                         <TableCell>
                           <Chip
@@ -410,6 +375,9 @@ const Sites = () => {
                           />
                         </TableCell>
                         <TableCell>{new Date(site.updatedAt).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          <code>Selector: {site.selector}</code>
+                        </TableCell>
                         <TableCell align="right">
                           <Tooltip title={`Open site in browser: ${site.siteUrl}`}>
                             <span>

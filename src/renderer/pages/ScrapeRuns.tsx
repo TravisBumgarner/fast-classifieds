@@ -210,22 +210,6 @@ const ScrapeRuns = () => {
 
   return (
     <PageWrapper>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: SPACING.MEDIUM.PX }}>
-        <Typography variant="h4">Scrape Run History</Typography>
-      </Stack>
-
-      {runs.length === 0 && !error && !loading && (
-        <Alert severity="info" sx={{ mb: SPACING.MEDIUM.PX }}>
-          <Typography variant="subtitle2" gutterBottom>
-            <strong>No scrape runs yet</strong>
-          </Typography>
-          <Typography variant="body2">
-            Scrape runs will appear here once you start scanning your sites for job postings. Each run shows which sites
-            were scanned, how many new jobs were found, and any errors encountered.
-          </Typography>
-        </Alert>
-      )}
-
       {error && <Message message={error} color="error" />}
 
       <TableContainer

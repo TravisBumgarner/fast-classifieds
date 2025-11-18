@@ -1,4 +1,8 @@
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Alert,
   Box,
   Button,
   FormControl,
@@ -7,14 +11,13 @@ import {
   Select,
   Stack,
   TextField,
-  Tooltip,
   Typography,
 } from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { PromptDTO } from 'src/shared/types'
 import { CHANNEL } from '../../../../shared/messages.types'
-import { ROUTES, TOOLTIPS } from '../../../consts'
+import { ROUTES } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
 import { activeModalSignal } from '../../../signals'
 import { SPACING } from '../../../styles/consts'
@@ -46,7 +49,7 @@ const SiteModal = (props: SiteModalProps) => {
   const [siteTitle, setSiteTitle] = useState('')
   const [siteUrl, setSiteUrl] = useState('')
   const [promptId, setPromptId] = useState<string>('')
-  const [selector, setSelector] = useState('')
+  const [selector, setSelector] = useState('body')
   const [status, setStatus] = useState<SiteStatus>('active')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -69,7 +72,6 @@ const SiteModal = (props: SiteModalProps) => {
   const loadPrompts = useCallback(async () => {
     try {
       const result = await ipcMessenger.invoke(CHANNEL.PROMPTS.GET_ALL, undefined)
-      // Filter to only show active prompts
       const activePrompts = result.prompts.filter((p) => p.status === 'active')
       setPrompts(activePrompts)
     } catch (err) {
@@ -86,16 +88,13 @@ const SiteModal = (props: SiteModalProps) => {
 
     try {
       setLoading(true)
-      const result = await ipcMessenger.invoke(CHANNEL.SITES.GET_BY_ID, {
-        id: siteId,
-      })
+      const result = await ipcMessenger.invoke(CHANNEL.SITES.GET_BY_ID, { id: siteId })
       if (result.site) {
         setSiteTitle(result.site.siteTitle)
         setSiteUrl(result.site.siteUrl)
         setSelector(result.site.selector)
         setStatus(result.site.status || 'active')
 
-        // Find matching prompt by content
         const matchingPrompt = prompts.find((p) => p.id === result.site?.promptId)
         if (matchingPrompt) {
           setPromptId(matchingPrompt.id)
@@ -190,7 +189,6 @@ const SiteModal = (props: SiteModalProps) => {
               onClick={() => {
                 navigate(ROUTES.prompts.href())
                 activeModalSignal.value = null
-                // Navigate to Prompts page
               }}
             >
               Manage Prompts
@@ -200,10 +198,7 @@ const SiteModal = (props: SiteModalProps) => {
               onClick={() => {
                 activeModalSignal.value = {
                   id: MODAL_ID.ADD_PROMPT_MODAL,
-                  onSuccess: () => {
-                    // Reload prompts after creating new one
-                    loadPrompts()
-                  },
+                  onSuccess: () => loadPrompts(),
                 }
               }}
             >
@@ -219,11 +214,7 @@ const SiteModal = (props: SiteModalProps) => {
     <DefaultModal title={isEditMode ? 'Edit Site' : 'Add Site'}>
       <Box component="form" onSubmit={handleSubmit}>
         <Stack spacing={SPACING.MEDIUM.PX}>
-          {error && (
-            <Typography color="error" variant="body2">
-              {error}
-            </Typography>
-          )}
+          {error && <Typography color="error">{error}</Typography>}
 
           <TextField
             size="small"
@@ -235,6 +226,7 @@ const SiteModal = (props: SiteModalProps) => {
             fullWidth
             disabled={loading}
             type="url"
+            helperText="Full URL to the careers page"
             placeholder="https://example.com/careers"
           />
 
@@ -247,43 +239,7 @@ const SiteModal = (props: SiteModalProps) => {
             fullWidth
             disabled={loading}
             placeholder="e.g., Company Name"
-            helperText="Auto-generated from URL, but you can edit it"
           />
-
-          <Stack direction="row" spacing={SPACING.SMALL.PX} alignItems="center">
-            <TextField
-              size="small"
-              label="CSS Selector"
-              value={selector}
-              onChange={(e) => setSelector(e.target.value)}
-              required
-              fullWidth
-              disabled={loading}
-              placeholder=".job-list or #jobs"
-            />
-            <Typography variant="body2">
-              New to selectors?{' '}
-              <a
-                href="https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  textDecoration: 'underline',
-                }}
-                onClick={(e) => {
-                  e.preventDefault()
-                  window.electron.shell.openExternal('https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be')
-                }}
-              >
-                Watch the tutorial
-              </a>
-            </Typography>
-            <Tooltip title={TOOLTIPS.CSS_SELECTOR} arrow>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Icon name="info" size={20} />
-              </Box>
-            </Tooltip>
-          </Stack>
 
           <FormControl fullWidth required disabled={loading} size="small">
             <InputLabel>Prompt</InputLabel>
@@ -303,6 +259,49 @@ const SiteModal = (props: SiteModalProps) => {
               <MenuItem value="inactive">Inactive</MenuItem>
             </Select>
           </FormControl>
+
+          {/* --- ADVANCED CONFIG WRAP --- */}
+          <Accordion disableGutters>
+            <AccordionSummary expandIcon={<Icon name="down" />}>
+              <Typography variant="subtitle2">Advanced Config</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Stack spacing={SPACING.SMALL.PX}>
+                <Alert severity="info" sx={{ mb: SPACING.MEDIUM.PX }}>
+                  <ul style={{ padding: 0, margin: 0 }}>
+                    <li>
+                      <strong>CSS Selector:</strong> The part of the page to scan for job postings. To save on Open AI
+                      tokens, target a more specific section.
+                      <a
+                        href="https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ textDecoration: 'underline', marginLeft: 4 }}
+                        onClick={(e) => {
+                          e.preventDefault()
+                          window.electron.shell.openExternal(
+                            'https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be',
+                          )
+                        }}
+                      >
+                        Watch tutorial
+                      </a>
+                    </li>
+                  </ul>
+                </Alert>
+
+                <TextField
+                  size="small"
+                  label="CSS Selector"
+                  value={selector}
+                  onChange={(e) => setSelector(e.target.value)}
+                  fullWidth
+                  disabled={loading}
+                  placeholder=".job-list or #jobs"
+                />
+              </Stack>
+            </AccordionDetails>
+          </Accordion>
 
           <Stack direction="row" spacing={SPACING.SMALL.PX} justifyContent="flex-end">
             <Button variant="outlined" onClick={handleClose} disabled={loading}>
