@@ -45,6 +45,8 @@ const Modal: FC<ActiveModal> = ({ children, closeCallback, sx, title }) => {
         sx={{
           width: '600px',
           maxWidth: '90%',
+          maxHeight: '90vh',
+          overflow: 'auto',
           display: 'flex',
           flexDirection: 'column',
           backgroundColor: 'background.paper',

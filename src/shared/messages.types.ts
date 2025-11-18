@@ -59,6 +59,8 @@ export const CHANNEL = {
     GET_BY_SITE_ID: 'job-postings:get-by-site-id',
     UPDATE: 'job-postings:update',
     SKIP_NOT_RECOMMENDED_POSTINGS: 'job-postings:skip-not-recommended-postings',
+    GET_SUSPECTED_DUPLICATES: 'job-postings:get-suspected-duplicates',
+    GET_DUPLICATE_GROUP: 'job-postings:get-duplicate-group',
   },
 } as const
 
@@ -271,6 +273,24 @@ export type Invokes = {
   }
   [CHANNEL.JOB_POSTINGS.GET_BY_SITE_ID]: {
     args: { siteId: string }
+    result: {
+      postings: Array<JobPostingDTO>
+    }
+  }
+  [CHANNEL.JOB_POSTINGS.GET_SUSPECTED_DUPLICATES]: {
+    args: undefined
+    result: {
+      groups: Array<{
+        duplicationDetectionId: string
+        total: number
+        titleSample: string
+        siteTitleSample: string
+        latestCreatedAt: Date
+      }>
+    }
+  }
+  [CHANNEL.JOB_POSTINGS.GET_DUPLICATE_GROUP]: {
+    args: { duplicationDetectionId: string }
     result: {
       postings: Array<JobPostingDTO>
     }

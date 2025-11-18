@@ -502,6 +502,28 @@ typedIpcMain.handle(CHANNEL.JOB_POSTINGS.GET_ALL, async () => {
   }
 })
 
+// Suspected duplicates list
+typedIpcMain.handle(CHANNEL.JOB_POSTINGS.GET_SUSPECTED_DUPLICATES, async () => {
+  try {
+    const groups = await queries.getSuspectedDuplicateGroups()
+    return { groups }
+  } catch (error) {
+    logger.error('Error getting suspected duplicate groups:', error)
+    return { groups: [] }
+  }
+})
+
+// Duplicate group detail
+typedIpcMain.handle(CHANNEL.JOB_POSTINGS.GET_DUPLICATE_GROUP, async (_event, params) => {
+  try {
+    const postings = await queries.getJobPostingsByDuplicationId(params.duplicationDetectionId)
+    return { postings }
+  } catch (error) {
+    logger.error('Error getting duplicate group:', error)
+    return { postings: [] }
+  }
+})
+
 typedIpcMain.handle(CHANNEL.JOB_POSTINGS.GET_BY_SITE_ID, async (_event, params) => {
   try {
     const postings = await queries.getJobPostings({ siteId: params.siteId })
