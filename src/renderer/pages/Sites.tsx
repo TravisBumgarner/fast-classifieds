@@ -24,8 +24,8 @@ import {
   Typography,
 } from '@mui/material'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Fragment, useCallback, useState } from 'react'
-import { Link as LinkReactRouterDom, useNavigate } from 'react-router-dom'
+import { Fragment, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { CHANNEL } from '../../shared/messages.types'
 import type { JobPostingDTO, SiteDTO } from '../../shared/types'
 import { PAGINATION, QUERY_KEYS, ROUTES } from '../consts'

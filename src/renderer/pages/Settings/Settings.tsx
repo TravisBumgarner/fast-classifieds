@@ -58,7 +58,6 @@ const Settings = () => {
             initialOpenAiApiKey={storeFromServer.openaiApiKey}
             loadStoreSettings={loadStoreSettings}
             initialOpenAIModel={storeFromServer.openaiModel}
-            initialOpenAiSiteHTMLToJSONJobsPrompt={storeFromServer.openAiSiteHTMLToJSONJobsPrompt}
           />
         )}
 

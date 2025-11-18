@@ -96,7 +96,6 @@ export interface StoreSchema {
   scrapeDelay: number
   showStatusBarProgress: boolean
   onboardingCompleted: boolean
-  openAiSiteHTMLToJSONJobsPrompt: string
 }
 
 export const PROMPT_STATUS = {

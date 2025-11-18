@@ -1,6 +1,5 @@
 import { Alert, Box, Button, Stack, TextField, Tooltip, Typography } from '@mui/material'
 import { useState } from 'react'
-import { SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT } from '../../../../shared/consts'
 import { CHANNEL } from '../../../../shared/messages.types'
 import ipcMessenger from '../../../ipcMessenger'
 import Icon from '../../../sharedComponents/Icon'
@@ -10,20 +9,14 @@ const TabOpenAI = ({
   loadStoreSettings,
   initialOpenAiApiKey,
   initialOpenAIModel,
-  initialOpenAiSiteHTMLToJSONJobsPrompt,
 }: {
   loadStoreSettings: () => Promise<void>
   initialOpenAiApiKey: string
   initialOpenAIModel: string
-  initialOpenAiSiteHTMLToJSONJobsPrompt: string
 }) => {
   const [apiKey, setApiKey] = useState<string>(initialOpenAiApiKey)
   const [model, setModel] = useState<string>(initialOpenAIModel)
-  const [jobsToJSONPrompt, setJobsToJSONPrompt] = useState<string>(initialOpenAiSiteHTMLToJSONJobsPrompt)
-  const hasChanges =
-    apiKey !== initialOpenAiApiKey ||
-    model !== initialOpenAIModel ||
-    jobsToJSONPrompt !== initialOpenAiSiteHTMLToJSONJobsPrompt
+  const hasChanges = apiKey !== initialOpenAiApiKey || model !== initialOpenAIModel
 
   const [apiMessage, setApiMessage] = useState<{
     type: 'success' | 'error'
@@ -35,7 +28,6 @@ const TabOpenAI = ({
       await ipcMessenger.invoke(CHANNEL.STORE.SET, {
         openaiApiKey: apiKey,
         openaiModel: model,
-        openAiSiteHTMLToJSONJobsPrompt: jobsToJSONPrompt,
       })
       setApiMessage({
         type: 'success',
@@ -131,50 +123,6 @@ const TabOpenAI = ({
                 >
                   View available models
                 </a>
-              </span>
-            }
-            arrow
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Icon name="info" size={20} />
-            </Box>
-          </Tooltip>
-        </Stack>
-
-        <Alert severity="error" sx={{ mb: SPACING.SMALL.PX }}>
-          Do not customize Jobs to JSON Prompts unless you fully understand how it works.
-        </Alert>
-        <Button variant="outlined" onClick={() => setJobsToJSONPrompt(SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT)}>
-          Reset Jobs to JSON Prompt
-        </Button>
-
-        <Stack direction="row" spacing={SPACING.SMALL.PX} alignItems="center">
-          <TextField
-            label="Jobs to JSON Prompts"
-            value={jobsToJSONPrompt}
-            onChange={(e) => setJobsToJSONPrompt(e.target.value)}
-            placeholder="sk-..."
-            fullWidth
-            rows={8}
-            multiline
-            size="small"
-            error
-            sx={{
-              '& .MuiInputBase-input': {
-                color: 'red !important',
-              },
-              '& .MuiInputLabel-root': {
-                color: 'red !important',
-              },
-              '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: 'red !important',
-              },
-            }}
-          />
-          <Tooltip
-            title={
-              <span>
-                This prompt is used to instruct the AI on how to extract job postings from the scraped HTML content.
               </span>
             }
             arrow

@@ -1,17 +1,22 @@
 import OpenAI from 'openai'
+import { zodTextFormat } from 'openai/helpers/zod'
 import type { NewJobPostingDTO, ScrapedContentDTO } from 'src/shared/types'
 import { z } from 'zod'
 import { renderPrompt } from '../../shared/utils'
+import log from '../logger'
 
-const aiJobSchema = z.array(
-  z.object({
-    title: z.string(),
-    siteUrl: z.string(),
-    explanation: z.string(),
-    location: z.string(),
-    recommendedByAI: z.boolean(),
-  }),
-)
+const aiJobSchema = z.object({
+  title: z.string(),
+  siteUrl: z.string(),
+  explanation: z.string(),
+  location: z.string(),
+  recommendedByAI: z.boolean(),
+})
+
+// Root must be an object
+const aiJobsSchema = z.object({
+  jobs: z.array(aiJobSchema),
+})
 
 export async function processText({
   prompt,
@@ -38,7 +43,7 @@ export async function processText({
 
   const client = new OpenAI({ apiKey })
 
-  const response = await client.responses.create({
+  const response = await client.responses.parse({
     model,
     input: renderPrompt({
       prompt,
@@ -46,18 +51,27 @@ export async function processText({
       siteUrl,
       jobToJSONPrompt,
     }),
+    text: {
+      format: zodTextFormat(aiJobsSchema, 'jobs'),
+    },
   })
 
-  console.log('AI response received', response.output_text)
+  console.log('AI response received', response.output_parsed)
 
-  const parsed = aiJobSchema.safeParse(JSON.parse(response.output_text || '[]'))
+  const parsedJobs = response.output_parsed?.jobs || []
 
-  if (!parsed.success) {
-    throw new Error(`Failed to parse AI response: ${parsed.error.message} Response was: ${response.output_text}`)
+  if (parsedJobs.length === 0) {
+    log.info('AI response did not contain any job postings.')
+    return { jobs: [], rawResponse: response }
   }
 
   return {
-    jobs: parsed.data.map((job) => ({ ...job, siteId, status: 'new', scrapeRunId })),
+    jobs: parsedJobs.map((job) => ({
+      ...job,
+      siteId,
+      status: 'new',
+      scrapeRunId,
+    })),
     rawResponse: response,
   }
 }
