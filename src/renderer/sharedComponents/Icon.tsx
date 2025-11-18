@@ -1,5 +1,6 @@
 import { CgDebug } from 'react-icons/cg'
 import { FaExternalLinkAlt } from 'react-icons/fa'
+import { FaFilterCircleXmark } from 'react-icons/fa6'
 import { GiHamburgerMenu } from 'react-icons/gi'
 import { IoIosSkipForward, IoMdSettings } from 'react-icons/io'
 import { IoInformationCircleOutline } from 'react-icons/io5'
@@ -34,6 +35,7 @@ export const iconMap = {
   right: MdKeyboardArrowRight,
   left: MdKeyboardArrowLeft,
   up: MdKeyboardArrowUp,
+  filterClear: FaFilterCircleXmark,
 }
 
 const Icon = ({

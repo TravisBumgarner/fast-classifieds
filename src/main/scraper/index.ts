@@ -94,14 +94,14 @@ async function processSite({
       siteUrl,
     })
 
-    // Insert job postings
-    const jobPostings = jobs.map((job) => ({
-      ...job,
-      siteId,
-    }))
+    // // Insert job postings
+    // const jobPostings = jobs.map((job) => ({
+    //   ...job,
+    //   siteId,
+    // }))
 
-    if (jobPostings.length > 0) {
-      await queries.insertJobPostings(jobPostings)
+    if (jobs.length > 0) {
+      await queries.insertJobPostings(jobs)
     }
 
     await queries.insertScrapeTask({
