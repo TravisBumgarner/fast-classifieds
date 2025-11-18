@@ -116,6 +116,7 @@ async function updateJobPosting(id: string, data: Partial<NewJobPostingDTO>) {
 async function insertJobPostings(data: NewJobPostingDTO[]) {
   if (data.length === 0) return []
   const dataWithIds = data.map((item) => ({ ...item, id: uuidv4() }))
+  console.log(`Inserting ${JSON.stringify(dataWithIds)} job postings...`)
   return db.insert(jobPostings).values(dataWithIds).returning()
 }
 

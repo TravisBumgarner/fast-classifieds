@@ -114,9 +114,11 @@ const Filters = ({
           </Select>
         </FormControl>
         <Tooltip title="Clear filters">
-          <IconButton onClick={handleClearAll} size="small" disabled={noneSelected}>
-            <Icon name="filterClear" />
-          </IconButton>
+          <span>
+            <IconButton onClick={handleClearAll} size="small" disabled={noneSelected}>
+              <Icon name="filterClear" />
+            </IconButton>
+          </span>
         </Tooltip>
       </Stack>
     </Stack>

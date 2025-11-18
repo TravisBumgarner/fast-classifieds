@@ -83,7 +83,7 @@ export const scrapeTasks = sqliteTable('scrape_tasks', {
 
 export const jobPostings = sqliteTable('job_postings', {
   recommendedByAI: integer('recommended_by_ai', { mode: 'boolean' }).notNull(),
-  duplicationDetectionId: text('id').primaryKey(), // See duplicateDetection.ts for more details.
+  duplicationDetectionId: text('duplication_detection_id').notNull(), // See duplicateDetection.ts for more details.
   duplicateStatus: text('duplicate_status', {
     enum: Object.values(JOB_POSTING_DUPLICATE_STATUS) as [JobPostingDuplicateStatus, ...JobPostingDuplicateStatus[]],
   }).notNull(),
