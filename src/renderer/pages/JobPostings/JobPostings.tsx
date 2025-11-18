@@ -168,6 +168,12 @@ const JobPostings = () => {
     }
   }
 
+  const handleSelectedDuplicates = () => {
+    activeModalSignal.value = {
+      id: MODAL_ID.DUPLICATE_POSTINGS_MODAL,
+    }
+  }
+
   const handleUpdateStatus = async (id: string, newStatus: JobPostingStatus) => {
     try {
       const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.UPDATE, { id, data: { status: newStatus } })
@@ -222,6 +228,9 @@ const JobPostings = () => {
               Open Selected ({selectedPostings.size})
             </Button>
           )}
+          <Button color="error" size="small" variant="outlined" onClick={handleSelectedDuplicates}>
+            Suspected duplicates found!
+          </Button>
         </Stack>
         <Stack direction="row" spacing={SPACING.SMALL.PX} alignItems="center">
           <QuickActions />
