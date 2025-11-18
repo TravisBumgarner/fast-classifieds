@@ -1,5 +1,4 @@
 import { useSignalEffect, useSignals } from '@preact/signals-react/runtime'
-import { useEffect } from 'react'
 import { CURRENT_VERSION } from '../../shared/changelog'
 import { CHANNEL } from '../../shared/messages.types'
 import ipcMessenger from '../ipcMessenger'

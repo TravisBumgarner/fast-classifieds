@@ -12,7 +12,6 @@ import DefaultModal from './DefaultModal'
 export interface EditPostingModalProps {
   id: typeof MODAL_ID.EDIT_POSTING_MODAL
   postingId: string
-  onSuccess?: () => void
 }
 
 type PostingModalProps = EditPostingModalProps
@@ -86,7 +85,6 @@ const PostingModal = (props: PostingModalProps) => {
           },
         })
         if (result.success) {
-          props.onSuccess?.()
           activeModalSignal.value = null
         } else {
           setError(result.error || 'Failed to update posting')

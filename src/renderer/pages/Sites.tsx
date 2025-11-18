@@ -131,14 +131,12 @@ const Sites = () => {
   const handleAddSite = () => {
     activeModalSignal.value = {
       id: MODAL_ID.ADD_SITE_MODAL,
-      onSuccess: loadSites,
     }
   }
 
   const handleImportSites = () => {
     activeModalSignal.value = {
       id: MODAL_ID.IMPORT_SITES_MODAL,
-      onSuccess: loadSites,
     }
   }
 
@@ -146,7 +144,6 @@ const Sites = () => {
     activeModalSignal.value = {
       id: MODAL_ID.EDIT_SITE_MODAL,
       siteId: site.id,
-      onSuccess: loadSites,
     }
   }
 

@@ -22,13 +22,11 @@ import DefaultModal from './DefaultModal'
 
 export interface AddPromptModalProps {
   id: typeof MODAL_ID.ADD_PROMPT_MODAL
-  onSuccess?: () => void
 }
 
 export interface EditPromptModalProps {
   id: typeof MODAL_ID.EDIT_PROMPT_MODAL
   promptId: string
-  onSuccess?: () => void
 }
 
 type PromptModalProps = AddPromptModalProps | EditPromptModalProps
@@ -40,7 +38,6 @@ const PromptModal = (props: PromptModalProps) => {
   const [status, setStatus] = useState<PromptStatus>('active')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
   const isEdit = props.id === MODAL_ID.EDIT_PROMPT_MODAL
 
   const loadPrompt = useCallback(async (id: string) => {
@@ -113,7 +110,6 @@ const PromptModal = (props: PromptModalProps) => {
         }
       }
 
-      props.onSuccess?.()
       activeModalSignal.value = null
     } catch (err) {
       setError('An error occurred')

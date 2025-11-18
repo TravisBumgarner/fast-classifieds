@@ -444,7 +444,6 @@ const Postings = () => {
                             activeModalSignal.value = {
                               id: MODAL_ID.EDIT_POSTING_MODAL,
                               postingId: posting.id,
-                              onSuccess: () => queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.POSTINGS] }),
                             }
                           }}
                         >

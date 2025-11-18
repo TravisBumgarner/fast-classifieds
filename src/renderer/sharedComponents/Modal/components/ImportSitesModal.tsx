@@ -22,7 +22,6 @@ import DefaultModal from './DefaultModal'
 
 export interface ImportSitesModalProps {
   id: typeof MODAL_ID.IMPORT_SITES_MODAL
-  onSuccess?: () => void
 }
 
 const ImportSitesModal = (_props: ImportSitesModalProps) => {

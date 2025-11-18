@@ -117,7 +117,6 @@ const Prompts = () => {
   const handleAddPrompt = () => {
     activeModalSignal.value = {
       id: MODAL_ID.ADD_PROMPT_MODAL,
-      onSuccess: loadPrompts,
     }
   }
 
@@ -125,7 +124,6 @@ const Prompts = () => {
     activeModalSignal.value = {
       id: MODAL_ID.EDIT_PROMPT_MODAL,
       promptId: prompt.id,
-      onSuccess: loadPrompts,
     }
   }
 
