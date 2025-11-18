@@ -4,8 +4,6 @@ import {
   Checkbox,
   Chip,
   FormControl,
-  FormControlLabel,
-  FormGroup,
   IconButton,
   MenuItem,
   Paper,
@@ -24,7 +22,7 @@ import {
 } from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'
 import { CHANNEL } from '../../../shared/messages.types'
-import { type JobPostingDTO, POSTING_STATUS, type PostingStatus } from '../../../shared/types'
+import type { JobPostingDTO, PostingStatus } from '../../../shared/types'
 import { PAGINATION } from '../../consts'
 import ipcMessenger from '../../ipcMessenger'
 import Icon from '../../sharedComponents/Icon'
@@ -35,6 +33,7 @@ import PageWrapper from '../../sharedComponents/PageWrapper'
 import { activeModalSignal } from '../../signals'
 import { SPACING } from '../../styles/consts'
 import { logger } from '../../utilities'
+import Filters from './components/Filters'
 
 type SortField = 'company' | 'title' | 'status' | 'createdAt' | 'location'
 type SortDirection = 'asc' | 'desc'
@@ -217,30 +216,7 @@ const Postings = () => {
             </Button>
           )}
         </Stack>
-
-        <FormControl component="fieldset">
-          <FormGroup row>
-            {Object.values(POSTING_STATUS).map((status) => (
-              <FormControlLabel
-                key={status}
-                control={
-                  <Checkbox
-                    checked={statusFilter.includes(status)}
-                    onChange={() => {
-                      const newFilter = statusFilter.includes(status)
-                        ? statusFilter.filter((s) => s !== status)
-                        : [...statusFilter, status]
-                      setStatusFilter(newFilter)
-                      setPage(0)
-                    }}
-                    size="small"
-                  />
-                }
-                label={status.charAt(0).toUpperCase() + status.slice(1)}
-              />
-            ))}
-          </FormGroup>
-        </FormControl>
+        <Filters setPage={setPage} statusFilter={statusFilter} setStatusFilter={setStatusFilter} />
       </Stack>
 
       {error && <Message message={error} color="error" />}
