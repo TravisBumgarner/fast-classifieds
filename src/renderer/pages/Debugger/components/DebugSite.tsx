@@ -18,6 +18,7 @@ const DebugSite = ({
   setSiteTitle,
   scrapedContent,
   setScrapedContent,
+  setScraping,
 }: {
   url: string
   setUrl: (url: string) => void
@@ -27,6 +28,7 @@ const DebugSite = ({
   setSiteTitle: (siteTitle: string) => void
   scrapedContent: ScrapedContentDTO
   setScrapedContent: (scrapedContent: ScrapedContentDTO) => void
+  setScraping: (scraping: boolean) => void
 }) => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -112,6 +114,7 @@ const DebugSite = ({
 
     try {
       setLoading(true)
+      setScraping(true)
       const result = await ipcMessenger.invoke(CHANNEL.DEBUG.SCRAPE, {
         url,
         selector,
@@ -125,6 +128,7 @@ const DebugSite = ({
     } catch {
       setError('Failed to scrape site')
     } finally {
+      setScraping(false)
       setLoading(false)
     }
   }

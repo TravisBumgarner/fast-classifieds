@@ -1,20 +1,11 @@
 import type { BrowserWindow } from 'electron'
+import { errorCodeToMessage } from '../../shared/errors'
 import queries from '../database/queries'
 import log from '../logger'
 import store from '../store'
 import { hashContent } from '../utilities'
 import { processText } from './ai'
 import { scrape } from './scrape'
-
-// Helper function to sanitize error messages and remove API keys
-function sanitizeError(error: unknown, apiKey: string): string {
-  const errorMessage = error instanceof Error ? error.message : String(error)
-  // Remove any instance of the API key from the error message
-  if (apiKey) {
-    return errorMessage.replace(new RegExp(apiKey, 'g'), '[API_KEY_REDACTED]')
-  }
-  return errorMessage
-}
 
 // Store active scrape runs in memory
 const activeRuns = new Map<
@@ -132,8 +123,8 @@ async function processSite({
 
     return { newJobsFound: jobs.length, status: 'complete' as const }
   } catch (error) {
-    const errorMessage = sanitizeError(error, apiKey)
-    log.error(`✗ Error processing ${siteUrl}:`, errorMessage)
+    const errorMessage = errorCodeToMessage(error)
+    log.error(`✗ Error processing ${siteUrl}:`, error)
 
     await queries.insertScrapeTask({
       scrapeRunId,

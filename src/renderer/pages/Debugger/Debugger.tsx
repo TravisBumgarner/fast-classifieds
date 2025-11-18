@@ -12,12 +12,13 @@ import DebugAI from './components/DebugAI'
 import DebugSite from './components/DebugSite'
 
 const Debugger = () => {
-  const [url, setUrl] = useState('')
-  const [selector, setSelector] = useState('')
-  const [siteTitle, setSiteTitle] = useState('')
+  const [url, setUrl] = useState('http://localhost:3000')
+  const [selector, setSelector] = useState('body')
+  const [siteTitle, setSiteTitle] = useState('local')
   const [scrapedContent, setScrapedContent] = useState<ScrapedContentDTO>([])
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [scraping, setScraping] = useState(false)
   const [params] = useSearchParams()
   const [promptId, setPromptId] = useState<string | null>(null)
   const siteId = params.get('site_id')
@@ -151,6 +152,7 @@ const Debugger = () => {
         }}
       >
         <DebugSite
+          setScraping={setScraping}
           url={url}
           setUrl={setUrl}
           selector={selector}
@@ -162,7 +164,13 @@ const Debugger = () => {
         />
         <Divider orientation="vertical" flexItem />
 
-        <DebugAI url={url} scrapedContent={scrapedContent} promptId={promptId} setPromptId={setPromptId} />
+        <DebugAI
+          scraping={scraping}
+          url={url}
+          scrapedContent={scrapedContent}
+          promptId={promptId}
+          setPromptId={setPromptId}
+        />
       </Box>
 
       <Button

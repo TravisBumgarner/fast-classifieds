@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "b4cef38e-c466-4c8e-91a7-00b28848ec06",
+  "id": "9e1ec63d-88d6-4766-b11a-45698058664b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "api_usage": {
@@ -143,15 +143,29 @@
           "notNull": true,
           "autoincrement": false
         },
-        "hash": {
-          "name": "hash",
+        "site_content_hash": {
+          "name": "site_content_hash",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "site_url": {
-          "name": "site_url",
+        "prompt_hash": {
+          "name": "prompt_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "job_to_json_prompt_hash": {
+          "name": "job_to_json_prompt_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "site_id": {
+          "name": "site_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -166,10 +180,24 @@
         }
       },
       "indexes": {
-        "hashes_hash_unique": {
-          "name": "hashes_hash_unique",
+        "hashes_site_content_hash_unique": {
+          "name": "hashes_site_content_hash_unique",
           "columns": [
-            "hash"
+            "site_content_hash"
+          ],
+          "isUnique": true
+        },
+        "hashes_prompt_hash_unique": {
+          "name": "hashes_prompt_hash_unique",
+          "columns": [
+            "prompt_hash"
+          ],
+          "isUnique": true
+        },
+        "hashes_job_to_json_prompt_hash_unique": {
+          "name": "hashes_job_to_json_prompt_hash_unique",
+          "columns": [
+            "job_to_json_prompt_hash"
           ],
           "isUnique": true
         }
