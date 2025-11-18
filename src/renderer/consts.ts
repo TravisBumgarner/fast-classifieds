@@ -33,6 +33,8 @@ export const ROUTES = {
 
 export const QUERY_KEYS = {
   POSTINGS: 'postings',
+  PROMPTS: 'prompts',
+  SCRAPE_RUNS: 'scrapeRuns',
 }
 
 export const PAGINATION = {
