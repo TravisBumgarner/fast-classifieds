@@ -1,7 +1,7 @@
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
-import type { JobPostingDTO, PostingStatus } from 'src/shared/types'
+import type { JobPostingDTO, JobPostingStatus } from 'src/shared/types'
 import { CHANNEL } from '../../../../shared/messages.types'
 import { QUERY_KEYS } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
@@ -18,7 +18,7 @@ export interface EditPostingModalProps {
 
 type PostingModalProps = EditPostingModalProps
 
-const POSTING_STATUSES: PostingStatus[] = ['new', 'applied', 'skipped', 'interview', 'rejected', 'offer']
+const JOB_POSTING_STATUSES: JobPostingStatus[] = ['new', 'applied', 'skipped', 'interview', 'rejected', 'offer']
 
 const PostingModal = (props: PostingModalProps) => {
   const isEditMode = props.id === 'EDIT_POSTING_MODAL'
@@ -29,7 +29,7 @@ const PostingModal = (props: PostingModalProps) => {
   const [siteUrl, setSiteUrl] = useState('')
   const [explanation, setExplanation] = useState('')
   const [location, setLocation] = useState('')
-  const [status, setStatus] = useState<PostingStatus>('new')
+  const [status, setStatus] = useState<JobPostingStatus>('new')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const queryClient = useQueryClient()
@@ -172,8 +172,8 @@ const PostingModal = (props: PostingModalProps) => {
 
           <FormControl fullWidth required disabled={loading} size="small">
             <InputLabel>Status</InputLabel>
-            <Select value={status} onChange={(e) => setStatus(e.target.value as PostingStatus)} label="Status">
-              {POSTING_STATUSES.map((s) => (
+            <Select value={status} onChange={(e) => setStatus(e.target.value as JobPostingStatus)} label="Status">
+              {JOB_POSTING_STATUSES.map((s) => (
                 <MenuItem key={s} value={s}>
                   {s.charAt(0).toUpperCase() + s.slice(1)}
                 </MenuItem>

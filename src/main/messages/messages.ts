@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT } from '../../shared/consts'
 import { errorCodeToMessage } from '../../shared/errors'
 import { CHANNEL } from '../../shared/messages.types'
-import { POSTING_STATUS } from '../../shared/types'
+import { JOB_POSTING_STATUS } from '../../shared/types'
 import { db } from '../database/client'
 import queries from '../database/queries'
 import { apiUsage, hashes, jobPostings, prompts, scrapeRuns, scrapeTasks, sites } from '../database/schema'
@@ -438,7 +438,7 @@ typedIpcMain.handle(CHANNEL.DEBUG.AI, async (_event, params) => {
       jobs: result.jobs.map((job) => ({
         ...job,
         id: uuidv4(),
-        status: POSTING_STATUS.NEW,
+        status: JOB_POSTING_STATUS.NEW,
         createdAt: new Date(),
         updatedAt: new Date(),
         siteTitle: params.siteUrl, // Just for debugging, not being shown as of now.
@@ -531,7 +531,7 @@ typedIpcMain.handle(CHANNEL.JOB_POSTINGS.UPDATE, async (_event, params) => {
   } catch (error) {
     logger.error('Error updating job posting status:', error)
     return {
-      type: 'update_job_posting_status',
+      type: 'update_JOB_POSTING_STATUS',
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
     }

@@ -5,7 +5,7 @@ Extract real job postings found in the scraped content.
 
 For each job posting, provide:
 - title (exact from content)
-- siteUrl (use real URL; if missing, use SITE_URL)
+- jobUrl (use real URL; if missing, use SITE_URL)
 - location (or "Unknown")
 - explanation (why it matches or doesn't match what the user is looking for)
 - recommendedByAI (true/false)

@@ -7,7 +7,7 @@ import log from '../logger'
 
 const aiJobSchema = z.object({
   title: z.string(),
-  siteUrl: z.string(),
+  jobUrl: z.string(),
   explanation: z.string(),
   location: z.string(),
   recommendedByAI: z.boolean(),
@@ -71,6 +71,7 @@ export async function processText({
       siteId,
       status: 'new',
       scrapeRunId,
+      siteUrl,
     })),
     rawResponse: response,
   }

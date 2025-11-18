@@ -1,7 +1,7 @@
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import {
-  POSTING_STATUS,
-  type PostingStatus,
+  JOB_POSTING_STATUS,
+  type JobPostingStatus,
   PROMPT_STATUS,
   type PromptStatus,
   SITE_STATUS,
@@ -85,14 +85,15 @@ export const jobPostings = sqliteTable('job_postings', {
   scrapeRunId: text('scrape_run_id').notNull(),
   title: text('title').notNull(),
   siteUrl: text('site_url').notNull(),
+  jobUrl: text('job_url').notNull(),
   siteId: text('site_id').notNull(),
   explanation: text('explanation').notNull(),
   location: text('location').notNull(),
   status: text('status', {
-    enum: Object.values(POSTING_STATUS) as [PostingStatus, ...PostingStatus[]],
+    enum: Object.values(JOB_POSTING_STATUS) as [JobPostingStatus, ...JobPostingStatus[]],
   })
     .notNull()
-    .default(POSTING_STATUS.NEW),
+    .default(JOB_POSTING_STATUS.NEW),
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
     .$defaultFn(() => new Date()),

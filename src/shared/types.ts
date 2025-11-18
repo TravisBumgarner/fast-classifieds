@@ -6,7 +6,7 @@ type TimestampsAndID = {
   updatedAt: Date
 }
 
-export const POSTING_STATUS = {
+export const JOB_POSTING_STATUS = {
   NEW: 'new',
   APPLIED: 'applied',
   INTERVIEW: 'interview',
@@ -14,7 +14,7 @@ export const POSTING_STATUS = {
   REJECTED: 'rejected',
   SKIPPED: 'skipped',
 } as const
-export type PostingStatus = (typeof POSTING_STATUS)[keyof typeof POSTING_STATUS]
+export type JobPostingStatus = (typeof JOB_POSTING_STATUS)[keyof typeof JOB_POSTING_STATUS]
 
 export const STATUS = {
   hash_exists: 'hash_exists',
@@ -80,10 +80,11 @@ export type UpdateSiteDTO = {
 export type NewJobPostingDTO = {
   title: string
   siteUrl: string
+  jobUrl: string
   siteId: string
   explanation: string
   location: string
-  status: PostingStatus
+  status: JobPostingStatus
   scrapeRunId: string
   recommendedByAI: boolean
 }
