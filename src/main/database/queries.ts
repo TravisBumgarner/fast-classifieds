@@ -247,6 +247,7 @@ async function getJobPostings({ siteId }: { siteId?: string }): Promise<JobPosti
       status: jobPostings.status,
       createdAt: jobPostings.createdAt,
       updatedAt: jobPostings.updatedAt,
+      scrapeRunId: jobPostings.scrapeRunId,
       siteTitle: sites.siteTitle,
     })
     .from(jobPostings)

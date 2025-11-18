@@ -84,6 +84,7 @@ export type NewJobPostingDTO = {
   explanation: string
   location: string
   status: PostingStatus
+  scrapeRunId: string
 }
 export type JobPostingDTO = { siteTitle: string } & NewJobPostingDTO & TimestampsAndID
 

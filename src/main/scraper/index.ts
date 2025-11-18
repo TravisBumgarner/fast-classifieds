@@ -84,6 +84,7 @@ async function processSite({
       model,
       jobToJSONPrompt,
       siteId,
+      scrapeRunId,
     })
 
     await queries.insertApiUsage({

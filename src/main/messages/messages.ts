@@ -410,6 +410,7 @@ typedIpcMain.handle(CHANNEL.DEBUG.AI, async (_event, params) => {
       siteUrl: params.siteUrl,
       siteId: params.siteId,
       jobToJSONPrompt: storeData.openAiSiteHTMLToJSONJobsPrompt,
+      scrapeRunId: 'debug-run',
     })
     logger.info('Debug AI result:', result.jobs)
 
