@@ -1,4 +1,4 @@
-import { JOB_POSTING_DUPLICATE_STATUS, JOB_POSTING_STATUS, type NewJobPostingDTO } from 'src/shared/types'
+import { JOB_POSTING_DUPLICATE_STATUS, JOB_POSTING_STATUS, type NewJobPostingDTO } from '../../shared/types'
 import { generateDuplicationDetectionId } from './duplicateDetection'
 
 export const buildNewJobPostingDTO = (job: {
