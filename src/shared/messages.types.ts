@@ -59,6 +59,7 @@ export const CHANNEL = {
     GET_ALL: 'job-postings:get-all',
     GET_BY_SITE_ID: 'job-postings:get-by-site-id',
     UPDATE: 'job-postings:update',
+    SKIP_NOT_RECOMMENDED_POSTINGS: 'job-postings:skip-not-recommended-postings',
   },
 } as const
 
@@ -164,6 +165,10 @@ export type Invokes = {
     result: {
       site: SiteDTO | null
     }
+  }
+  [CHANNEL.JOB_POSTINGS.SKIP_NOT_RECOMMENDED_POSTINGS]: {
+    args: undefined
+    result: { success: true } | { success: false; error: string }
   }
   [CHANNEL.SITES.CREATE]: {
     args: NewSiteDTO

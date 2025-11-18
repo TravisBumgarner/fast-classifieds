@@ -4,8 +4,6 @@ import {
   Checkbox,
   Chip,
   FormControl,
-  FormControlLabel,
-  FormGroup,
   IconButton,
   MenuItem,
   Paper,
@@ -23,30 +21,37 @@ import {
   Typography,
 } from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'
-import { CHANNEL } from '../../shared/messages.types'
-import { type JobPostingDTO, POSTING_STATUS, type PostingStatus } from '../../shared/types'
-import { PAGINATION } from '../consts'
-import ipcMessenger from '../ipcMessenger'
-import Icon from '../sharedComponents/Icon'
-import Link from '../sharedComponents/Link'
-import Message from '../sharedComponents/Message'
-import { MODAL_ID } from '../sharedComponents/Modal/Modal.consts'
-import PageWrapper from '../sharedComponents/PageWrapper'
-import { activeModalSignal } from '../signals'
-import { SPACING } from '../styles/consts'
-import { logger } from '../utilities'
+import { CHANNEL } from '../../../shared/messages.types'
+import type { JobPostingDTO, PostingStatus, ScrapeRunDTO } from '../../../shared/types'
+import { PAGINATION } from '../../consts'
+import ipcMessenger from '../../ipcMessenger'
+import Icon from '../../sharedComponents/Icon'
+import Link from '../../sharedComponents/Link'
+import Message from '../../sharedComponents/Message'
+import { MODAL_ID } from '../../sharedComponents/Modal/Modal.consts'
+import PageWrapper from '../../sharedComponents/PageWrapper'
+import { activeModalSignal } from '../../signals'
+import { SPACING } from '../../styles/consts'
+import { logger } from '../../utilities'
+import Filters, { DEFAULT_STATUS_FILTERS } from './components/Filters'
+import QuickActions from './components/QuickActions'
 
-type SortField = 'company' | 'title' | 'status' | 'createdAt' | 'location'
+type SortField = 'company' | 'title' | 'status' | 'createdAt' | 'location' | 'recommendedByAI'
 type SortDirection = 'asc' | 'desc'
 
 const Postings = () => {
   const [jobPostings, setJobPostings] = useState<JobPostingDTO[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState<{ loadingScrapeRuns: boolean; loadingJobPostings: boolean }>({
+    loadingScrapeRuns: false,
+    loadingJobPostings: false,
+  })
   const [error, setError] = useState<string | null>(null)
-  const [statusFilter, setStatusFilter] = useState<PostingStatus[]>(['new', 'applied', 'interview', 'offer'])
+  const [statusFilter, setStatusFilter] = useState<PostingStatus[]>([...DEFAULT_STATUS_FILTERS])
+  const [scrapeRunsFilter, setScrapeRunsFilter] = useState<string[]>([])
   const [sortField, setSortField] = useState<SortField>('createdAt')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [selectedPostings, setSelectedPostings] = useState<Set<string>>(new Set())
+  const [scrapeRuns, setScrapeRuns] = useState<ScrapeRunDTO[]>([])
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(PAGINATION.DEFAULT_ROWS_PER_PAGE)
 
@@ -95,12 +100,24 @@ const Postings = () => {
   })
 
   const filteredPostings = sortedPostings.filter((posting) => {
-    if (statusFilter.length === 0) return true
-    return statusFilter.includes(posting.status)
+    const truthyChecks = []
+
+    if (statusFilter.length === 0) {
+      truthyChecks.push(true)
+    } else {
+      truthyChecks.push(statusFilter.includes(posting.status))
+    }
+
+    if (scrapeRunsFilter.length === 0) {
+      truthyChecks.push(true)
+    } else {
+      truthyChecks.push(scrapeRunsFilter.includes(posting.scrapeRunId))
+    }
+    return truthyChecks.every(Boolean)
   })
 
   const paginatedPostings = filteredPostings.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-
+  console.log(paginatedPostings)
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage)
   }
@@ -110,9 +127,27 @@ const Postings = () => {
     setPage(0)
   }
 
+  const loadScrapeRuns = useCallback(async () => {
+    try {
+      setLoading((prev) => ({ ...prev, loadingScrapeRuns: true }))
+      setError(null)
+      const result = await ipcMessenger.invoke(CHANNEL.SCRAPE_RUNS.GET_ALL, undefined)
+      setScrapeRuns(result.runs)
+    } catch (err) {
+      setError('Failed to load scrape runs')
+      logger.error(err)
+    } finally {
+      setLoading((prev) => ({ ...prev, loadingScrapeRuns: false }))
+    }
+  }, [])
+
+  useEffect(() => {
+    loadScrapeRuns()
+  }, [loadScrapeRuns])
+
   const loadJobPostings = useCallback(async () => {
     try {
-      setLoading(true)
+      setLoading((prev) => ({ ...prev, loadingJobPostings: true }))
       setError(null)
       const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.GET_ALL, undefined)
       setJobPostings(result.postings)
@@ -120,7 +155,7 @@ const Postings = () => {
       setError('Failed to load job postings')
       logger.error(err)
     } finally {
-      setLoading(false)
+      setLoading((prev) => ({ ...prev, loadingJobPostings: false }))
     }
   }, [])
 
@@ -195,7 +230,7 @@ const Postings = () => {
     }
   }
 
-  if (loading) {
+  if (Object.values(loading).some((loading) => loading)) {
     return
   }
 
@@ -217,30 +252,17 @@ const Postings = () => {
             </Button>
           )}
         </Stack>
-
-        <FormControl component="fieldset">
-          <FormGroup row>
-            {Object.values(POSTING_STATUS).map((status) => (
-              <FormControlLabel
-                key={status}
-                control={
-                  <Checkbox
-                    checked={statusFilter.includes(status)}
-                    onChange={() => {
-                      const newFilter = statusFilter.includes(status)
-                        ? statusFilter.filter((s) => s !== status)
-                        : [...statusFilter, status]
-                      setStatusFilter(newFilter)
-                      setPage(0)
-                    }}
-                    size="small"
-                  />
-                }
-                label={status.charAt(0).toUpperCase() + status.slice(1)}
-              />
-            ))}
-          </FormGroup>
-        </FormControl>
+        <Stack direction="row" spacing={SPACING.SMALL.PX} alignItems="center">
+          <QuickActions />
+          <Filters
+            scrapeRuns={scrapeRuns}
+            scrapeRunsFilter={scrapeRunsFilter}
+            setScrapeRunsFilter={setScrapeRunsFilter}
+            setPage={setPage}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+          />
+        </Stack>
       </Stack>
 
       {error && <Message message={error} color="error" />}
@@ -302,6 +324,25 @@ const Postings = () => {
                     Status
                   </TableSortLabel>
                 </TableCell>
+
+                <TableCell>
+                  <Tooltip
+                    title="AI matched jobs are highlighted, but accuracy is still being evaluated. All results are shown regardless."
+                    arrow
+                  >
+                    <span style={{ position: 'relative', top: 6, paddingRight: SPACING.SMALL.PX }}>
+                      <Icon name="info" />
+                    </span>
+                  </Tooltip>
+                  <TableSortLabel
+                    active={sortField === 'recommendedByAI'}
+                    direction={sortField === 'recommendedByAI' ? sortDirection : 'asc'}
+                    onClick={() => handleSort('recommendedByAI' as SortField)}
+                  >
+                    Recommended{' '}
+                  </TableSortLabel>
+                </TableCell>
+
                 <TableCell>Explanation</TableCell>
                 <TableCell>
                   <TableSortLabel
@@ -332,8 +373,9 @@ const Postings = () => {
                           size="small"
                           variant="outlined"
                           onClick={() => {
-                            setStatusFilter([])
+                            setStatusFilter([...DEFAULT_STATUS_FILTERS])
                             setPage(0)
+                            setScrapeRunsFilter([])
                           }}
                         >
                           Clear Filters
@@ -386,6 +428,13 @@ const Postings = () => {
                           </IconButton>
                         </Tooltip>
                       </Stack>
+                    </TableCell>
+                    <TableCell>
+                      {posting.recommendedByAI ? (
+                        <Chip label="AI Match" color="success" size="small" />
+                      ) : (
+                        <Chip label="Not Recommended" color="default" size="small" />
+                      )}
                     </TableCell>
                     <TableCell>
                       <Tooltip title={posting.explanation || 'No explanation'}>

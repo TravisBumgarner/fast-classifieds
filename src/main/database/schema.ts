@@ -80,7 +80,9 @@ export const scrapeTasks = sqliteTable('scrape_tasks', {
 })
 
 export const jobPostings = sqliteTable('job_postings', {
+  recommendedByAI: integer('recommended_by_ai', { mode: 'boolean' }).notNull(),
   id: text('id').primaryKey(),
+  scrapeRunId: text('scrape_run_id').notNull(),
   title: text('title').notNull(),
   siteUrl: text('site_url').notNull(),
   siteId: text('site_id').notNull(),

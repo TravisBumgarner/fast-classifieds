@@ -398,6 +398,24 @@ typedIpcMain.handle(CHANNEL.DEBUG.SCRAPE, async (_event, params) => {
   }
 })
 
+typedIpcMain.handle(CHANNEL.JOB_POSTINGS.SKIP_NOT_RECOMMENDED_POSTINGS, async () => {
+  try {
+    const result = await queries.skipNotRecommendedPostings()
+    return {
+      type: 'skip_not_recommended_postings',
+      success: true as const,
+      skippedCount: result.length,
+    }
+  } catch (error) {
+    logger.error('Error skipping not recommended postings:', error)
+    return {
+      type: 'skip_not_recommended_postings',
+      success: false as const,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    }
+  }
+})
+
 typedIpcMain.handle(CHANNEL.DEBUG.AI, async (_event, params) => {
   try {
     logger.info('Debug AI params:', params)
@@ -410,6 +428,7 @@ typedIpcMain.handle(CHANNEL.DEBUG.AI, async (_event, params) => {
       siteUrl: params.siteUrl,
       siteId: params.siteId,
       jobToJSONPrompt: storeData.openAiSiteHTMLToJSONJobsPrompt,
+      scrapeRunId: 'debug-run',
     })
     logger.info('Debug AI result:', result.jobs)
 

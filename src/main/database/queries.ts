@@ -247,7 +247,9 @@ async function getJobPostings({ siteId }: { siteId?: string }): Promise<JobPosti
       status: jobPostings.status,
       createdAt: jobPostings.createdAt,
       updatedAt: jobPostings.updatedAt,
+      scrapeRunId: jobPostings.scrapeRunId,
       siteTitle: sites.siteTitle,
+      recommendedByAI: jobPostings.recommendedByAI,
     })
     .from(jobPostings)
     .leftJoin(sites, eq(jobPostings.siteId, sites.id))
@@ -258,6 +260,14 @@ async function getJobPostings({ siteId }: { siteId?: string }): Promise<JobPosti
     ...r,
     siteTitle: r.siteTitle ?? 'Unknown',
   }))
+}
+
+async function skipNotRecommendedPostings() {
+  return db
+    .update(jobPostings)
+    .set({ status: 'skipped', updatedAt: new Date() })
+    .where(eq(jobPostings.recommendedByAI, false))
+    .returning()
 }
 
 async function nukeDatabase() {
@@ -300,4 +310,5 @@ export default {
   getFailedTasksByRunId,
   getJobPostings,
   nukeDatabase,
+  skipNotRecommendedPostings,
 }

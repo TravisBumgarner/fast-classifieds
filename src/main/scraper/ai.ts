@@ -9,6 +9,7 @@ const aiJobSchema = z.array(
     siteUrl: z.string(),
     explanation: z.string(),
     location: z.string(),
+    recommendedByAI: z.boolean(),
   }),
 )
 
@@ -20,6 +21,7 @@ export async function processText({
   siteUrl,
   jobToJSONPrompt,
   siteId,
+  scrapeRunId,
 }: {
   prompt: string
   scrapedContent: ScrapedContentDTO
@@ -28,6 +30,7 @@ export async function processText({
   siteUrl: string
   jobToJSONPrompt: string
   siteId: string
+  scrapeRunId: string
 }): Promise<{ jobs: NewJobPostingDTO[]; rawResponse: OpenAI.Responses.Response }> {
   if (!apiKey) {
     throw new Error('OpenAI API key is not configured. Please set it in Settings.')
@@ -54,7 +57,7 @@ export async function processText({
   }
 
   return {
-    jobs: parsed.data.map((job) => ({ ...job, siteId, status: 'new' })),
+    jobs: parsed.data.map((job) => ({ ...job, siteId, status: 'new', scrapeRunId })),
     rawResponse: response,
   }
 }

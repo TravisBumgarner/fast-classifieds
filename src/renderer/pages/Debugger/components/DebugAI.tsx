@@ -199,11 +199,12 @@ const DebugAI = ({
         }}
       >
         {jobs.map((job) => (
-          <Box key={job.id} sx={{ mb: SPACING.SMALL.PX }}>
+          <Box key={job.id} sx={{ mb: SPACING.MEDIUM.PX }}>
             <Typography component="pre">
-              {job.siteTitle} - {job.title}
-              <Typography component="pre">{job.siteUrl}</Typography>
+              {job.title} - {job.siteTitle}
             </Typography>
+            <Typography component="pre">Recommended By AI: {job.recommendedByAI ? 'Yes' : 'No'}</Typography>
+            <Typography component="pre">{job.siteUrl}</Typography>
           </Box>
         ))}
       </Box>
