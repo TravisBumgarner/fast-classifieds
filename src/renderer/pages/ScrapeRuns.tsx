@@ -145,7 +145,6 @@ const ScrapeRuns = () => {
     try {
       activeModalSignal.value = {
         id: MODAL_ID.SCRAPE_PROGRESS_MODAL,
-        onComplete: loadScrapeRuns,
         retryRunId: runId,
       }
     } catch (err) {
