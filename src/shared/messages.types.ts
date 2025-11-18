@@ -157,7 +157,7 @@ export type Invokes = {
   [CHANNEL.SITES.GET_ALL_WITH_JOB_COUNTS]: {
     args: undefined
     result: {
-      sites: Array<SiteDTO & { totalJobs: number }>
+      sites: Array<SiteDTO & { totalJobs: number; promptTitle: string }>
     }
   }
   [CHANNEL.SITES.GET_BY_ID]: {

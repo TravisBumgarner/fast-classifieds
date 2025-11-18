@@ -56,7 +56,7 @@ const Prompts = () => {
     }
   }
 
-  const { isLoading: isLoadingPrompts, data: promptsData } = useQuery<{ prompts: PromptDTO[] }>({
+  const { isLoading: isLoadingPrompts, data: promptsData } = useQuery({
     queryKey: [QUERY_KEYS.PROMPTS],
     queryFn: async () => await ipcMessenger.invoke(CHANNEL.PROMPTS.GET_ALL, undefined),
     initialData: { prompts: [] },

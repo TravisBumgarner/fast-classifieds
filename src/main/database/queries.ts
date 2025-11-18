@@ -128,10 +128,11 @@ async function getAllSitesWithJobCounts() {
   const sitesWithCounts = await Promise.all(
     allSites.map(async (site) => {
       const jobs = await db.select().from(jobPostings).where(eq(jobPostings.siteId, site.id))
-
+      const prompt = await db.select().from(prompts).where(eq(prompts.id, site.promptId)).limit(1)
       return {
         ...site,
         totalJobs: jobs.length,
+        promptTitle: prompt[0]?.title || 'Unknown Prompt',
       }
     }),
   )

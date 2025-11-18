@@ -113,6 +113,7 @@ const PromptModal = (props: PromptModalProps) => {
         }
       }
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROMPTS] })
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SITES] })
       activeModalSignal.value = null
     } catch (err) {
       setError('An error occurred')

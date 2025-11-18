@@ -23,11 +23,12 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { Fragment, useCallback, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { Fragment, useCallback, useState } from 'react'
+import { Link as LinkReactRouterDom, useNavigate } from 'react-router-dom'
 import { CHANNEL } from '../../shared/messages.types'
 import type { JobPostingDTO, SiteDTO } from '../../shared/types'
-import { PAGINATION, ROUTES } from '../consts'
+import { PAGINATION, QUERY_KEYS, ROUTES } from '../consts'
 import ipcMessenger from '../ipcMessenger'
 import Icon from '../sharedComponents/Icon'
 import Link from '../sharedComponents/Link'
@@ -42,12 +43,10 @@ type SiteStatus = 'active' | 'inactive'
 
 type PostingStatus = 'new' | 'applied' | 'skipped' | 'interview' | 'rejected' | 'offer'
 
-type SortField = 'siteTitle' | 'status' | 'updatedAt'
+type SortField = 'siteTitle' | 'status' | 'updatedAt' | 'prompt'
 type SortDirection = 'asc' | 'desc'
 
 const Sites = () => {
-  const [sites, setSites] = useState<(SiteDTO & { totalJobs: number })[]>([])
-  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<SiteStatus[]>(['active', 'inactive'])
   const [sortField, setSortField] = useState<SortField>('siteTitle')
@@ -58,6 +57,7 @@ const Sites = () => {
   const [page, setPage] = useState(0)
   const navigate = useNavigate()
   const [rowsPerPage, setRowsPerPage] = useState(PAGINATION.DEFAULT_ROWS_PER_PAGE)
+  const queryClient = useQueryClient()
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -68,7 +68,13 @@ const Sites = () => {
     }
   }
 
-  const sortedSites = [...sites].sort((a, b) => {
+  const { isLoading: isLoadingSites, data: sitesData } = useQuery({
+    queryKey: [QUERY_KEYS.SITES],
+    queryFn: async () => await ipcMessenger.invoke(CHANNEL.SITES.GET_ALL_WITH_JOB_COUNTS, undefined),
+    initialData: { sites: [] },
+  })
+
+  const sortedSites = [...sitesData.sites].sort((a, b) => {
     let aVal: string | number | Date
     let bVal: string | number | Date
 
@@ -84,6 +90,10 @@ const Sites = () => {
       case 'updatedAt':
         aVal = new Date(a.updatedAt).getTime()
         bVal = new Date(b.updatedAt).getTime()
+        break
+      case 'prompt':
+        aVal = a.promptId.toLowerCase()
+        bVal = b.promptId.toLowerCase()
         break
     }
 
@@ -109,24 +119,6 @@ const Sites = () => {
     setPage(0)
     setExpandedSiteId(null)
   }
-
-  const loadSites = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const result = await ipcMessenger.invoke(CHANNEL.SITES.GET_ALL_WITH_JOB_COUNTS, undefined)
-      setSites(result.sites)
-    } catch (err) {
-      setError('Failed to load sites')
-      logger.error(err)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    loadSites()
-  }, [loadSites])
 
   const handleAddSite = () => {
     activeModalSignal.value = {
@@ -157,7 +149,7 @@ const Sites = () => {
         try {
           const result = await ipcMessenger.invoke(CHANNEL.SITES.DELETE, { id })
           if (result.success) {
-            await loadSites()
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SITES] })
           } else {
             setError('Failed to delete site')
           }
@@ -222,7 +214,7 @@ const Sites = () => {
     { value: 'offer', label: 'Offer', color: 'success' },
   ]
 
-  if (loading) {
+  if (isLoadingSites) {
     return
   }
 
@@ -310,6 +302,15 @@ const Sites = () => {
                     Updated
                   </TableSortLabel>
                 </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortField === 'prompt'}
+                    direction={sortField === 'prompt' ? sortDirection : 'asc'}
+                    onClick={() => handleSort('prompt')}
+                  >
+                    Prompt
+                  </TableSortLabel>
+                </TableCell>
                 <TableCell>Advanced</TableCell>
                 <TableCell
                   align="right"
@@ -327,11 +328,11 @@ const Sites = () => {
                   <TableCell colSpan={7} align="center">
                     <Stack spacing={SPACING.SMALL.PX} alignItems="center" sx={{ py: 4 }}>
                       <Typography variant="body2" color="textSecondary">
-                        {sites.length === 0
+                        {sitesData.sites.length === 0
                           ? 'No sites found. Click "Add Site" or "Import Sites" to get started.'
                           : 'No sites match the current filter.'}
                       </Typography>
-                      {sites.length > 0 && statusFilter.length > 0 && (
+                      {sitesData.sites.length > 0 && statusFilter.length > 0 && (
                         <Button
                           size="small"
                           variant="outlined"
@@ -352,6 +353,10 @@ const Sites = () => {
                   const jobs = siteJobs[site.id] || []
                   const loading = loadingJobs[site.id] || false
 
+                  const openPrompt = () => {
+                    activeModalSignal.value = { id: MODAL_ID.EDIT_PROMPT_MODAL, promptId: site.promptId }
+                  }
+
                   return (
                     <Fragment key={site.id}>
                       <TableRow hover>
@@ -371,6 +376,14 @@ const Sites = () => {
                           />
                         </TableCell>
                         <TableCell>{new Date(site.updatedAt).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          <Tooltip title={site.promptTitle}>
+                            <Button variant="outlined" onClick={openPrompt}>
+                              {site.promptTitle.slice(0, 20)}
+                              {site.promptTitle.length > 20 ? '...' : ''}
+                            </Button>
+                          </Tooltip>
+                        </TableCell>
                         <TableCell>
                           <code>Selector: {site.selector}</code>
                         </TableCell>
@@ -398,7 +411,7 @@ const Sites = () => {
                         </TableCell>
                       </TableRow>
                       <TableRow>
-                        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
+                        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
                           <Collapse in={isExpanded} timeout="auto" unmountOnExit>
                             <Box sx={{ margin: 2 }}>
                               {loading ? (

@@ -23,7 +23,7 @@ import {
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { CHANNEL } from '../../../shared/messages.types'
-import type { JobPostingDTO, PostingStatus, ScrapeRunDTO } from '../../../shared/types'
+import type { PostingStatus } from '../../../shared/types'
 import { PAGINATION, QUERY_KEYS } from '../../consts'
 import ipcMessenger from '../../ipcMessenger'
 import Icon from '../../sharedComponents/Icon'
@@ -60,13 +60,13 @@ const Postings = () => {
     }
   }
 
-  const { isLoading: isLoadingScrapeRuns, data: scrapeRunsData } = useQuery<{ runs: ScrapeRunDTO[] }>({
+  const { isLoading: isLoadingScrapeRuns, data: scrapeRunsData } = useQuery({
     queryKey: [QUERY_KEYS.SCRAPE_RUNS],
     queryFn: async () => await ipcMessenger.invoke(CHANNEL.SCRAPE_RUNS.GET_ALL, undefined),
     initialData: { runs: [] },
   })
 
-  const { isLoading: isLoadingJobPostings, data: jobPostingsData } = useQuery<{ postings: JobPostingDTO[] }>({
+  const { isLoading: isLoadingJobPostings, data: jobPostingsData } = useQuery({
     queryKey: [QUERY_KEYS.POSTINGS],
     queryFn: async () => await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.GET_ALL, undefined),
     initialData: { postings: [] },
