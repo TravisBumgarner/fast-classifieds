@@ -23,7 +23,7 @@ const PostingModal = (props: PostingModalProps) => {
   const isEditMode = props.id === 'EDIT_POSTING_MODAL'
   const postingId = isEditMode ? (props as EditPostingModalProps).postingId : undefined
 
-  const [company, setCompany] = useState('')
+  const [siteTitle, setSiteTitle] = useState('')
   const [title, setTitle] = useState('')
   const [siteUrl, setSiteUrl] = useState('')
   const [explanation, setExplanation] = useState('')
@@ -43,7 +43,7 @@ const PostingModal = (props: PostingModalProps) => {
       const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.GET_ALL, undefined)
       const posting = result.postings.find((p: JobPostingDTO) => p.id === postingId)
       if (posting) {
-        setCompany(posting.company)
+        setSiteTitle(posting.siteTitle)
         setTitle(posting.title)
         setSiteUrl(posting.siteUrl)
         setExplanation(posting.explanation)
@@ -78,7 +78,6 @@ const PostingModal = (props: PostingModalProps) => {
         const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.UPDATE, {
           id: postingId,
           data: {
-            company,
             title,
             siteUrl,
             explanation,
@@ -117,10 +116,10 @@ const PostingModal = (props: PostingModalProps) => {
           <TextField
             size="small"
             label="Company"
-            value={company}
-            onChange={(e) => setCompany(e.target.value)}
+            value={siteTitle}
+            onChange={(e) => setSiteTitle(e.target.value)}
             fullWidth
-            disabled={loading}
+            disabled
             placeholder="e.g., Acme Corp"
           />
 

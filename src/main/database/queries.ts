@@ -2,6 +2,7 @@ import { and, desc, eq } from 'drizzle-orm'
 import type OpenAI from 'openai'
 import { v4 as uuidv4 } from 'uuid'
 import type {
+  JobPostingDTO,
   NewHashDTO,
   NewJobPostingDTO,
   NewPromptDTO,
@@ -234,12 +235,29 @@ async function updateScrapeRun(
   return db.update(scrapeRuns).set(data).where(eq(scrapeRuns.id, id)).returning()
 }
 
-async function getAllJobPostings() {
-  return db.select().from(jobPostings).orderBy(desc(jobPostings.createdAt))
-}
+async function getJobPostings({ siteId }: { siteId?: string }): Promise<JobPostingDTO[]> {
+  const rows = await db
+    .select({
+      id: jobPostings.id,
+      title: jobPostings.title,
+      siteUrl: jobPostings.siteUrl,
+      siteId: jobPostings.siteId,
+      explanation: jobPostings.explanation,
+      location: jobPostings.location,
+      status: jobPostings.status,
+      createdAt: jobPostings.createdAt,
+      updatedAt: jobPostings.updatedAt,
+      siteTitle: sites.siteTitle,
+    })
+    .from(jobPostings)
+    .leftJoin(sites, eq(jobPostings.siteId, sites.id))
+    .where(siteId ? eq(jobPostings.siteId, siteId) : undefined)
+    .orderBy(desc(jobPostings.createdAt))
 
-async function getJobPostingsBySiteId(siteId: string) {
-  return db.select().from(jobPostings).where(eq(jobPostings.siteId, siteId)).orderBy(desc(jobPostings.createdAt))
+  return rows.map((r) => ({
+    ...r,
+    siteTitle: r.siteTitle ?? 'Unknown',
+  }))
 }
 
 async function nukeDatabase() {
@@ -280,7 +298,6 @@ export default {
   getAllScrapeRuns,
   getScrapeTasksByRunId,
   getFailedTasksByRunId,
-  getAllJobPostings,
-  getJobPostingsBySiteId,
+  getJobPostings,
   nukeDatabase,
 }

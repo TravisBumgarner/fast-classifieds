@@ -78,7 +78,6 @@ export type UpdateSiteDTO = {
 }
 
 export type NewJobPostingDTO = {
-  company: string
   title: string
   siteUrl: string
   siteId: string
@@ -86,7 +85,7 @@ export type NewJobPostingDTO = {
   location: string
   status: PostingStatus
 }
-export type JobPostingDTO = NewJobPostingDTO & TimestampsAndID
+export type JobPostingDTO = { siteTitle: string } & NewJobPostingDTO & TimestampsAndID
 
 export interface StoreSchema {
   openaiApiKey: string

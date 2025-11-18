@@ -43,7 +43,7 @@ typedIpcMain.handle(CHANNEL.STORE.SET, async (_event, params) => {
 typedIpcMain.handle(CHANNEL.APP.EXPORT_ALL_DATA, async () => {
   const sites = await queries.getAllSites()
   const prompts = await queries.getAllPrompts()
-  const jobPostings = await queries.getAllJobPostings()
+  const jobPostings = await queries.getJobPostings({})
   const scrapeRuns = await queries.getAllScrapeRuns()
   const hashes = await queries.getAllHashes()
   const apiUsage = await queries.getAllApiUsage()
@@ -411,6 +411,7 @@ typedIpcMain.handle(CHANNEL.DEBUG.AI, async (_event, params) => {
         status: POSTING_STATUS.NEW,
         createdAt: new Date(),
         updatedAt: new Date(),
+        siteTitle: params.siteUrl, // Just for debugging, not being shown as of now.
       })),
       // rawResponse: result.rawResponse,
     }
@@ -460,7 +461,7 @@ typedIpcMain.handle(CHANNEL.SCRAPE_RUNS.GET_TASKS, async (_event, params) => {
 // Job postings handlers
 typedIpcMain.handle(CHANNEL.JOB_POSTINGS.GET_ALL, async () => {
   try {
-    const postings = await queries.getAllJobPostings()
+    const postings = await queries.getJobPostings({})
     return {
       type: 'get_all_job_postings',
       postings,
@@ -476,7 +477,7 @@ typedIpcMain.handle(CHANNEL.JOB_POSTINGS.GET_ALL, async () => {
 
 typedIpcMain.handle(CHANNEL.JOB_POSTINGS.GET_BY_SITE_ID, async (_event, params) => {
   try {
-    const postings = await queries.getJobPostingsBySiteId(params.siteId)
+    const postings = await queries.getJobPostings({ siteId: params.siteId })
     return {
       type: 'get_job_postings_by_site_id',
       postings,

@@ -5,7 +5,6 @@ import { renderPrompt } from '../../shared/utils'
 
 const aiJobSchema = z.array(
   z.object({
-    company: z.string(),
     title: z.string(),
     siteUrl: z.string(),
     explanation: z.string(),

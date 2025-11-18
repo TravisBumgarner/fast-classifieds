@@ -109,7 +109,7 @@ const Debugger = () => {
         siteUrl: url,
         selector,
         promptId,
-        status: 'inactive',
+        status: 'active',
       })
 
       if (result.success) {

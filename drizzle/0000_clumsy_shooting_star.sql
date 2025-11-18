@@ -32,7 +32,6 @@ CREATE UNIQUE INDEX `hashes_prompt_hash_unique` ON `hashes` (`prompt_hash`);--> 
 CREATE UNIQUE INDEX `hashes_job_to_json_prompt_hash_unique` ON `hashes` (`job_to_json_prompt_hash`);--> statement-breakpoint
 CREATE TABLE `job_postings` (
 	`id` text PRIMARY KEY NOT NULL,
-	`company` text NOT NULL,
 	`title` text NOT NULL,
 	`site_url` text NOT NULL,
 	`site_id` text NOT NULL,

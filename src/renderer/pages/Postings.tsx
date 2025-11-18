@@ -69,8 +69,8 @@ const Postings = () => {
 
     switch (sortField) {
       case 'company':
-        aVal = a.company?.toLowerCase() || ''
-        bVal = b.company?.toLowerCase() || ''
+        aVal = a.siteTitle?.toLowerCase() || ''
+        bVal = b.siteTitle?.toLowerCase() || ''
         break
       case 'title':
         aVal = a.title.toLowerCase()
@@ -401,7 +401,7 @@ const Postings = () => {
                         onChange={() => handleTogglePosting(posting.id)}
                       />
                     </TableCell>
-                    <TableCell>{posting.company || '-'}</TableCell>
+                    <TableCell>{posting.siteTitle || '-'}</TableCell>
                     <TableCell>{posting.title}</TableCell>
                     <TableCell>{posting.location || '-'}</TableCell>
                     <TableCell>
