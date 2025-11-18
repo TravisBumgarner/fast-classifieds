@@ -5,7 +5,17 @@ import { IoIosSkipForward, IoMdSettings } from 'react-icons/io'
 import { IoInformationCircleOutline } from 'react-icons/io5'
 import { LuPartyPopper } from 'react-icons/lu'
 
-import { MdAdd, MdClose, MdDelete, MdEdit, MdError, MdKeyboardArrowDown, MdKeyboardArrowRight } from 'react-icons/md'
+import {
+  MdAdd,
+  MdClose,
+  MdDelete,
+  MdEdit,
+  MdError,
+  MdKeyboardArrowDown,
+  MdKeyboardArrowLeft,
+  MdKeyboardArrowRight,
+  MdKeyboardArrowUp,
+} from 'react-icons/md'
 
 export const iconMap = {
   edit: MdEdit,
@@ -22,6 +32,8 @@ export const iconMap = {
   externalLink: FaExternalLinkAlt,
   down: MdKeyboardArrowDown,
   right: MdKeyboardArrowRight,
+  left: MdKeyboardArrowLeft,
+  up: MdKeyboardArrowUp,
 }
 
 const Icon = ({

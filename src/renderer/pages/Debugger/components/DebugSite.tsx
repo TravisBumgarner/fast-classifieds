@@ -1,5 +1,5 @@
-import { Box, Button, Stack, TextField, Tooltip, Typography } from '@mui/material'
-import { useState } from 'react'
+import { Box, Button, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material'
+import { useEffect, useState } from 'react'
 import type { ScrapedContentDTO } from 'src/shared/types'
 import { CHANNEL } from '../../../../shared/messages.types'
 import { TOOLTIPS } from '../../../consts'
@@ -18,6 +18,7 @@ const DebugSite = ({
   setSiteTitle,
   scrapedContent,
   setScrapedContent,
+  setScraping,
 }: {
   url: string
   setUrl: (url: string) => void
@@ -27,9 +28,70 @@ const DebugSite = ({
   setSiteTitle: (siteTitle: string) => void
   scrapedContent: ScrapedContentDTO
   setScrapedContent: (scrapedContent: ScrapedContentDTO) => void
+  setScraping: (scraping: boolean) => void
 }) => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [search, setSearch] = useState('')
+  const [matchIndexes, setMatchIndexes] = useState<number[]>([])
+  const [currentMatch, setCurrentMatch] = useState(0)
+  const [highlightedHtml, setHighlightedHtml] = useState('')
+
+  useEffect(() => {
+    const raw = scrapedContent.map((i) => (i.link ? `${i.text} - ${i.link}` : i.text)).join('\n\n')
+
+    if (!search || scrapedContent.length === 0) {
+      setMatchIndexes([])
+      setCurrentMatch(0)
+      setHighlightedHtml(raw)
+      return
+    }
+
+    const haystack = raw.toLowerCase()
+    const needle = search.toLowerCase()
+
+    const indexes: number[] = []
+    let pos = haystack.indexOf(needle)
+    while (pos !== -1) {
+      indexes.push(pos)
+      pos = haystack.indexOf(needle, pos + needle.length)
+    }
+
+    setMatchIndexes(indexes)
+    setCurrentMatch(0)
+
+    // highlight all
+    const highlighted = raw.replace(
+      new RegExp(needle, 'gi'),
+      (match) => `<mark style="background:yellow">${match}</mark>`,
+    )
+
+    setHighlightedHtml(highlighted)
+  }, [search, scrapedContent])
+
+  useEffect(() => {
+    if (matchIndexes.length === 0) return
+
+    const el = document.getElementById('scrape-output')
+    if (!el) return
+
+    // find the Nth mark
+    const marks = el.querySelectorAll('mark')
+    const target = marks[currentMatch]
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [currentMatch, matchIndexes])
+
+  const goPrev = () => {
+    if (matchIndexes.length === 0) return
+    setCurrentMatch((i) => (i - 1 + matchIndexes.length) % matchIndexes.length)
+  }
+
+  const goNext = () => {
+    if (matchIndexes.length === 0) return
+    setCurrentMatch((i) => (i + 1) % matchIndexes.length)
+  }
 
   const handleUrlAndTitleSync = () => {
     if (!siteTitle) {
@@ -52,6 +114,7 @@ const DebugSite = ({
 
     try {
       setLoading(true)
+      setScraping(true)
       const result = await ipcMessenger.invoke(CHANNEL.DEBUG.SCRAPE, {
         url,
         selector,
@@ -65,6 +128,7 @@ const DebugSite = ({
     } catch {
       setError('Failed to scrape site')
     } finally {
+      setScraping(false)
       setLoading(false)
     }
   }
@@ -137,8 +201,8 @@ const DebugSite = ({
         {loading ? 'Scraping...' : 'Scrape'}
       </Button>
 
-      {/* SCROLL REGION */}
       <Box
+        id="scrape-output"
         sx={{
           flex: 1,
           overflow: 'auto',
@@ -148,10 +212,37 @@ const DebugSite = ({
           minHeight: 0,
           border: '1px solid #ccc',
         }}
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: The HTML here is generated on the backend.
+        dangerouslySetInnerHTML={{
+          __html: highlightedHtml || 'No HTML scraped yet.',
+        }}
+      />
+
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: SPACING.SMALL.PX,
+          mt: SPACING.SMALL.PX,
+        }}
       >
-        {scrapedContent.length > 0
-          ? scrapedContent.map((item) => (item.link ? `${item.text} - ${item.link}` : item.text)).join('\n\n')
-          : 'No HTML scraped yet.'}
+        <TextField size="small" label="Search" value={search} onChange={(e) => setSearch(e.target.value)} fullWidth />
+
+        <Tooltip title="Previous match" arrow>
+          <IconButton size="small" onClick={goPrev} sx={{ cursor: 'pointer', opacity: matchIndexes.length ? 1 : 0.3 }}>
+            <Icon name="left" size={20} />
+          </IconButton>
+        </Tooltip>
+
+        <Tooltip title="Next match" arrow>
+          <IconButton size="small" onClick={goNext} sx={{ cursor: 'pointer', opacity: matchIndexes.length ? 1 : 0.3 }}>
+            <Icon name="right" size={20} />
+          </IconButton>
+        </Tooltip>
+
+        <Typography variant="body2" sx={{ whiteSpace: 'nowrap', width: '60px' }}>
+          {matchIndexes.length > 0 ? `${currentMatch + 1} / ${matchIndexes.length}` : '0 / 0'}
+        </Typography>
       </Box>
 
       {error && <Message message={error} color="error" />}

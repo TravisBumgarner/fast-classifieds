@@ -20,15 +20,18 @@ CREATE TABLE `api_usage` (
 --> statement-breakpoint
 CREATE TABLE `hashes` (
 	`id` text PRIMARY KEY NOT NULL,
-	`hash` text NOT NULL,
-	`site_url` text NOT NULL,
+	`site_content_hash` text NOT NULL,
+	`prompt_hash` text NOT NULL,
+	`job_to_json_prompt_hash` text NOT NULL,
+	`site_id` text NOT NULL,
 	`created_at` integer NOT NULL
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `hashes_hash_unique` ON `hashes` (`hash`);--> statement-breakpoint
+CREATE UNIQUE INDEX `hashes_site_content_hash_unique` ON `hashes` (`site_content_hash`);--> statement-breakpoint
+CREATE UNIQUE INDEX `hashes_prompt_hash_unique` ON `hashes` (`prompt_hash`);--> statement-breakpoint
+CREATE UNIQUE INDEX `hashes_job_to_json_prompt_hash_unique` ON `hashes` (`job_to_json_prompt_hash`);--> statement-breakpoint
 CREATE TABLE `job_postings` (
 	`id` text PRIMARY KEY NOT NULL,
-	`company` text NOT NULL,
 	`title` text NOT NULL,
 	`site_url` text NOT NULL,
 	`site_id` text NOT NULL,

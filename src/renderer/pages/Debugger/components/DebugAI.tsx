@@ -28,11 +28,13 @@ const DebugAI = ({
   scrapedContent,
   promptId,
   setPromptId,
+  scraping,
 }: {
   url: string
   scrapedContent: ScrapedContentDTO
   promptId: string | null
   setPromptId: React.Dispatch<React.SetStateAction<string | null>>
+  scraping: boolean
 }) => {
   const [loadingPrompts, setLoadingPrompts] = useState(true)
   const [loadingSettings, setLoadingSettings] = useState(true)
@@ -176,7 +178,7 @@ const DebugAI = ({
         onClick={handleGenerateJobs}
         fullWidth
         variant="contained"
-        disabled={!promptId || !scrapedContent || !url || loadingJobs}
+        disabled={!promptId || !scrapedContent.length || !url || loadingJobs || scraping}
       >
         {loadingJobs ? 'Generating Jobs...' : 'Generate Jobs'}
       </Button>
@@ -199,7 +201,7 @@ const DebugAI = ({
         {jobs.map((job) => (
           <Box key={job.id} sx={{ mb: SPACING.SMALL.PX }}>
             <Typography component="pre">
-              {job.company} - {job.title}
+              {job.siteTitle} - {job.title}
               <Typography component="pre">{job.siteUrl}</Typography>
             </Typography>
           </Box>
