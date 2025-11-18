@@ -1,7 +1,9 @@
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
 import type { JobPostingDTO, PostingStatus } from 'src/shared/types'
 import { CHANNEL } from '../../../../shared/messages.types'
+import { QUERY_KEYS } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
 import { activeModalSignal } from '../../../signals'
 import { SPACING } from '../../../styles/consts'
@@ -12,7 +14,6 @@ import DefaultModal from './DefaultModal'
 export interface EditPostingModalProps {
   id: typeof MODAL_ID.EDIT_POSTING_MODAL
   postingId: string
-  onSuccess?: () => void
 }
 
 type PostingModalProps = EditPostingModalProps
@@ -31,6 +32,7 @@ const PostingModal = (props: PostingModalProps) => {
   const [status, setStatus] = useState<PostingStatus>('new')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const queryClient = useQueryClient()
 
   const handleClose = () => {
     activeModalSignal.value = null
@@ -86,7 +88,7 @@ const PostingModal = (props: PostingModalProps) => {
           },
         })
         if (result.success) {
-          props.onSuccess?.()
+          queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.POSTINGS] })
           activeModalSignal.value = null
         } else {
           setError(result.error || 'Failed to update posting')

@@ -11,10 +11,11 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CHANNEL, type SiteProgressDTO } from '../../../../shared/messages.types'
-import { ROUTES } from '../../../consts'
+import { QUERY_KEYS, ROUTES } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
 import { activeModalSignal } from '../../../signals'
 import { SPACING } from '../../../styles/consts'
@@ -24,7 +25,6 @@ import DefaultModal from './DefaultModal'
 
 export interface ScrapeProgressModalProps {
   id: typeof MODAL_ID.SCRAPE_PROGRESS_MODAL
-  onComplete?: () => void
   retryRunId?: string
 }
 
@@ -35,6 +35,7 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
   const [totalNewJobs, setTotalNewJobs] = useState(0)
   const [scrapeRunId, setScrapeRunId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     if (scrapeRunId === null) return
@@ -104,7 +105,8 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
 
   const handleClose = () => {
     if (isComplete) {
-      props.onComplete?.()
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.POSTINGS] })
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SCRAPE_RUNS] })
     }
     activeModalSignal.value = null
   }
@@ -113,7 +115,6 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
     if (scrapeRunId && isComplete && errorCount > 0) {
       activeModalSignal.value = {
         id: MODAL_ID.SCRAPE_PROGRESS_MODAL,
-        onComplete: props.onComplete,
         retryRunId: scrapeRunId,
       }
     }

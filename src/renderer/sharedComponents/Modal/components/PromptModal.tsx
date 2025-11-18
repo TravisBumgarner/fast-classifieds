@@ -11,8 +11,10 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
 import { CHANNEL } from '../../../../shared/messages.types'
+import { QUERY_KEYS } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
 import { activeModalSignal } from '../../../signals'
 import { SPACING } from '../../../styles/consts'
@@ -22,13 +24,11 @@ import DefaultModal from './DefaultModal'
 
 export interface AddPromptModalProps {
   id: typeof MODAL_ID.ADD_PROMPT_MODAL
-  onSuccess?: () => void
 }
 
 export interface EditPromptModalProps {
   id: typeof MODAL_ID.EDIT_PROMPT_MODAL
   promptId: string
-  onSuccess?: () => void
 }
 
 type PromptModalProps = AddPromptModalProps | EditPromptModalProps
@@ -40,8 +40,8 @@ const PromptModal = (props: PromptModalProps) => {
   const [status, setStatus] = useState<PromptStatus>('active')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
   const isEdit = props.id === MODAL_ID.EDIT_PROMPT_MODAL
+  const queryClient = useQueryClient()
 
   const loadPrompt = useCallback(async (id: string) => {
     try {
@@ -112,8 +112,8 @@ const PromptModal = (props: PromptModalProps) => {
           return
         }
       }
-
-      props.onSuccess?.()
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROMPTS] })
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SITES] })
       activeModalSignal.value = null
     } catch (err) {
       setError('An error occurred')

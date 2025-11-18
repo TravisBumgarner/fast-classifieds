@@ -20,10 +20,11 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useCallback, useEffect, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { CHANNEL } from '../../../shared/messages.types'
-import type { JobPostingDTO, PostingStatus, ScrapeRunDTO } from '../../../shared/types'
-import { PAGINATION } from '../../consts'
+import type { PostingStatus } from '../../../shared/types'
+import { PAGINATION, QUERY_KEYS } from '../../consts'
 import ipcMessenger from '../../ipcMessenger'
 import Icon from '../../sharedComponents/Icon'
 import Link from '../../sharedComponents/Link'
@@ -40,20 +41,15 @@ type SortField = 'company' | 'title' | 'status' | 'createdAt' | 'location' | 're
 type SortDirection = 'asc' | 'desc'
 
 const Postings = () => {
-  const [jobPostings, setJobPostings] = useState<JobPostingDTO[]>([])
-  const [loading, setLoading] = useState<{ loadingScrapeRuns: boolean; loadingJobPostings: boolean }>({
-    loadingScrapeRuns: false,
-    loadingJobPostings: false,
-  })
   const [error, setError] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<PostingStatus[]>([...DEFAULT_STATUS_FILTERS])
   const [scrapeRunsFilter, setScrapeRunsFilter] = useState<string[]>([])
   const [sortField, setSortField] = useState<SortField>('createdAt')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [selectedPostings, setSelectedPostings] = useState<Set<string>>(new Set())
-  const [scrapeRuns, setScrapeRuns] = useState<ScrapeRunDTO[]>([])
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(PAGINATION.DEFAULT_ROWS_PER_PAGE)
+  const queryClient = useQueryClient()
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -64,7 +60,19 @@ const Postings = () => {
     }
   }
 
-  const sortedPostings = [...jobPostings].sort((a, b) => {
+  const { isLoading: isLoadingScrapeRuns, data: scrapeRunsData } = useQuery({
+    queryKey: [QUERY_KEYS.SCRAPE_RUNS],
+    queryFn: async () => await ipcMessenger.invoke(CHANNEL.SCRAPE_RUNS.GET_ALL, undefined),
+    initialData: { runs: [] },
+  })
+
+  const { isLoading: isLoadingJobPostings, data: jobPostingsData } = useQuery({
+    queryKey: [QUERY_KEYS.POSTINGS],
+    queryFn: async () => await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.GET_ALL, undefined),
+    initialData: { postings: [] },
+  })
+
+  const sortedPostings = [...jobPostingsData.postings].sort((a, b) => {
     let aVal: string | number | Date
     let bVal: string | number | Date
 
@@ -117,7 +125,7 @@ const Postings = () => {
   })
 
   const paginatedPostings = filteredPostings.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-  console.log(paginatedPostings)
+
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage)
   }
@@ -127,46 +135,9 @@ const Postings = () => {
     setPage(0)
   }
 
-  const loadScrapeRuns = useCallback(async () => {
-    try {
-      setLoading((prev) => ({ ...prev, loadingScrapeRuns: true }))
-      setError(null)
-      const result = await ipcMessenger.invoke(CHANNEL.SCRAPE_RUNS.GET_ALL, undefined)
-      setScrapeRuns(result.runs)
-    } catch (err) {
-      setError('Failed to load scrape runs')
-      logger.error(err)
-    } finally {
-      setLoading((prev) => ({ ...prev, loadingScrapeRuns: false }))
-    }
-  }, [])
-
-  useEffect(() => {
-    loadScrapeRuns()
-  }, [loadScrapeRuns])
-
-  const loadJobPostings = useCallback(async () => {
-    try {
-      setLoading((prev) => ({ ...prev, loadingJobPostings: true }))
-      setError(null)
-      const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.GET_ALL, undefined)
-      setJobPostings(result.postings)
-    } catch (err) {
-      setError('Failed to load job postings')
-      logger.error(err)
-    } finally {
-      setLoading((prev) => ({ ...prev, loadingJobPostings: false }))
-    }
-  }, [])
-
-  useEffect(() => {
-    loadJobPostings()
-  }, [loadJobPostings])
-
   const handleFindJobs = () => {
     activeModalSignal.value = {
       id: MODAL_ID.SCRAPE_PROGRESS_MODAL,
-      onComplete: loadJobPostings,
     }
   }
 
@@ -201,7 +172,7 @@ const Postings = () => {
     try {
       const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.UPDATE, { id, data: { status: newStatus } })
       if (result.success) {
-        await loadJobPostings()
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.POSTINGS] })
       } else {
         setError('Failed to update job posting status')
       }
@@ -230,7 +201,7 @@ const Postings = () => {
     }
   }
 
-  if (Object.values(loading).some((loading) => loading)) {
+  if (isLoadingJobPostings || isLoadingScrapeRuns) {
     return
   }
 
@@ -255,7 +226,7 @@ const Postings = () => {
         <Stack direction="row" spacing={SPACING.SMALL.PX} alignItems="center">
           <QuickActions />
           <Filters
-            scrapeRuns={scrapeRuns}
+            scrapeRuns={scrapeRunsData.runs}
             scrapeRunsFilter={scrapeRunsFilter}
             setScrapeRunsFilter={setScrapeRunsFilter}
             setPage={setPage}
@@ -364,11 +335,11 @@ const Postings = () => {
                   <TableCell colSpan={7} align="center">
                     <Stack spacing={SPACING.SMALL.PX} alignItems="center" sx={{ py: 4 }}>
                       <Typography variant="body2" color="textSecondary">
-                        {jobPostings.length === 0
+                        {jobPostingsData.postings.length === 0
                           ? 'No job postings found. Run your first scrape to find jobs.'
                           : 'No postings match the current filter.'}
                       </Typography>
-                      {jobPostings.length > 0 && statusFilter.length > 0 && (
+                      {jobPostingsData.postings.length > 0 && statusFilter.length > 0 && (
                         <Button
                           size="small"
                           variant="outlined"
@@ -457,7 +428,6 @@ const Postings = () => {
                             activeModalSignal.value = {
                               id: MODAL_ID.EDIT_POSTING_MODAL,
                               postingId: posting.id,
-                              onSuccess: loadJobPostings,
                             }
                           }}
                         >

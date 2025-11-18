@@ -70,9 +70,6 @@ const DebugAI = ({
     activeModalSignal.value = {
       id: 'EDIT_PROMPT_MODAL',
       promptId,
-      onSuccess: () => {
-        loadPrompts()
-      },
     }
   }
 

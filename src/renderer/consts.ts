@@ -31,7 +31,12 @@ export const ROUTES = {
   },
 } as const
 
-export const QUERY_KEYS = {}
+export const QUERY_KEYS = {
+  POSTINGS: 'postings',
+  PROMPTS: 'prompts',
+  SCRAPE_RUNS: 'scrapeRuns',
+  SITES: 'sites',
+}
 
 export const PAGINATION = {
   DEFAULT_ROWS_PER_PAGE: 10 as number,

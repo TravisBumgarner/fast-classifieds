@@ -1,7 +1,7 @@
 import path from 'node:path'
 import { app, type BrowserWindow, ipcMain, shell } from 'electron'
 import { v4 as uuidv4 } from 'uuid'
-import { ERRORS, errorCodeToMessage } from '../../shared/errors'
+import { errorCodeToMessage } from '../../shared/errors'
 import { CHANNEL } from '../../shared/messages.types'
 import { POSTING_STATUS } from '../../shared/types'
 import { db } from '../database/client'

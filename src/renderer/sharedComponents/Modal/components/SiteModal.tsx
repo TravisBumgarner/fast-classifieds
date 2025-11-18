@@ -13,11 +13,12 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { PromptDTO } from 'src/shared/types'
 import { CHANNEL } from '../../../../shared/messages.types'
-import { ROUTES } from '../../../consts'
+import { QUERY_KEYS, ROUTES } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
 import { activeModalSignal } from '../../../signals'
 import { SPACING } from '../../../styles/consts'
@@ -28,13 +29,11 @@ import DefaultModal from './DefaultModal'
 
 export interface AddSiteModalProps {
   id: typeof MODAL_ID.ADD_SITE_MODAL
-  onSuccess?: () => void
 }
 
 export interface EditSiteModalProps {
   id: typeof MODAL_ID.EDIT_SITE_MODAL
   siteId: string
-  onSuccess?: () => void
 }
 
 type SiteModalProps = AddSiteModalProps | EditSiteModalProps
@@ -54,6 +53,7 @@ const SiteModal = (props: SiteModalProps) => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [prompts, setPrompts] = useState<PromptDTO[]>([])
+  const queryClient = useQueryClient()
 
   const handleUrlAndTitleSync = () => {
     if (!siteTitle) {
@@ -141,7 +141,7 @@ const SiteModal = (props: SiteModalProps) => {
           status,
         })
         if (result.success) {
-          props.onSuccess?.()
+          queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SITES] })
           activeModalSignal.value = null
         } else {
           setError(result.error || 'Failed to update site')
@@ -155,7 +155,7 @@ const SiteModal = (props: SiteModalProps) => {
           status,
         })
         if (result.success) {
-          props.onSuccess?.()
+          queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SITES] })
           activeModalSignal.value = null
         } else {
           setError(result.error || 'Failed to create site')
@@ -198,7 +198,6 @@ const SiteModal = (props: SiteModalProps) => {
               onClick={() => {
                 activeModalSignal.value = {
                   id: MODAL_ID.ADD_PROMPT_MODAL,
-                  onSuccess: () => loadPrompts(),
                 }
               }}
             >

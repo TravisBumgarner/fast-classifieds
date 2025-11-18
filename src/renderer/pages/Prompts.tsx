@@ -20,10 +20,11 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useCallback, useEffect, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { CHANNEL } from '../../shared/messages.types'
 import type { PromptDTO, PromptStatus } from '../../shared/types'
-import { PAGINATION } from '../consts'
+import { PAGINATION, QUERY_KEYS } from '../consts'
 import ipcMessenger from '../ipcMessenger'
 import Icon from '../sharedComponents/Icon'
 import Message from '../sharedComponents/Message'
@@ -37,8 +38,6 @@ type SortField = 'title' | 'status' | 'updatedAt'
 type SortDirection = 'asc' | 'desc'
 
 const Prompts = () => {
-  const [prompts, setPrompts] = useState<PromptDTO[]>([])
-  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [statusFilter, setStatusFilter] = useState<PromptStatus[]>(['active', 'inactive'])
@@ -46,6 +45,7 @@ const Prompts = () => {
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(PAGINATION.DEFAULT_ROWS_PER_PAGE)
+  const queryClient = useQueryClient()
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -56,7 +56,13 @@ const Prompts = () => {
     }
   }
 
-  const sortedPrompts = [...prompts].sort((a, b) => {
+  const { isLoading: isLoadingPrompts, data: promptsData } = useQuery({
+    queryKey: [QUERY_KEYS.PROMPTS],
+    queryFn: async () => await ipcMessenger.invoke(CHANNEL.PROMPTS.GET_ALL, undefined),
+    initialData: { prompts: [] },
+  })
+
+  const sortedPrompts = [...promptsData.prompts].sort((a, b) => {
     let aVal: string | number
     let bVal: string | number
 
@@ -96,28 +102,9 @@ const Prompts = () => {
     setPage(0)
   }
 
-  const loadPrompts = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const result = await ipcMessenger.invoke(CHANNEL.PROMPTS.GET_ALL, undefined)
-      setPrompts(result.prompts)
-    } catch (err) {
-      setError('Failed to load prompts')
-      logger.error(err)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    loadPrompts()
-  }, [loadPrompts])
-
   const handleAddPrompt = () => {
     activeModalSignal.value = {
       id: MODAL_ID.ADD_PROMPT_MODAL,
-      onSuccess: loadPrompts,
     }
   }
 
@@ -125,7 +112,6 @@ const Prompts = () => {
     activeModalSignal.value = {
       id: MODAL_ID.EDIT_PROMPT_MODAL,
       promptId: prompt.id,
-      onSuccess: loadPrompts,
     }
   }
 
@@ -141,7 +127,7 @@ const Prompts = () => {
             id,
           })
           if (result.success) {
-            await loadPrompts()
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROMPTS] })
           } else {
             setError('Failed to delete prompt')
           }
@@ -163,7 +149,7 @@ const Prompts = () => {
     setExpandedRows(newExpandedRows)
   }
 
-  if (loading) {
+  if (isLoadingPrompts) {
     return
   }
 
@@ -257,11 +243,11 @@ const Prompts = () => {
                   <TableCell colSpan={6} align="center">
                     <Stack spacing={SPACING.SMALL.PX} alignItems="center" sx={{ py: 4 }}>
                       <Typography variant="body2" color="textSecondary">
-                        {prompts.length === 0
+                        {promptsData.prompts.length === 0
                           ? 'No prompts found. Click "Add Prompt" to create your first one.'
                           : 'No prompts match the current filter.'}
                       </Typography>
-                      {prompts.length > 0 && statusFilter.length > 0 && (
+                      {promptsData.prompts.length > 0 && statusFilter.length > 0 && (
                         <Button
                           size="small"
                           variant="outlined"
