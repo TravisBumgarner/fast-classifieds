@@ -40,6 +40,7 @@ export const CHANNEL = {
     EXPORT_ALL_DATA: 'app:export-all-data',
     RESTORE_ALL_DATA: 'app:restore-all-data',
     NUKE_DATABASE: 'app:nuke-database',
+    CLEAR_LOCAL_STORAGE: 'app:clear-local-storage',
   },
   SCRAPER: {
     START: 'scraper:start',
@@ -139,6 +140,10 @@ export type Invokes = {
     result: { success: boolean; error?: string }
   }
   [CHANNEL.APP.NUKE_DATABASE]: {
+    args: undefined
+    result: { success: boolean; error?: string }
+  }
+  [CHANNEL.APP.CLEAR_LOCAL_STORAGE]: {
     args: undefined
     result: { success: boolean; error?: string }
   }

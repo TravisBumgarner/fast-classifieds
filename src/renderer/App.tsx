@@ -1,17 +1,13 @@
 import { Box } from '@mui/material'
 import * as Sentry from '@sentry/electron/renderer'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useEffect } from 'react'
 import { MemoryRouter } from 'react-router-dom'
-import { CURRENT_VERSION } from '../shared/changelog'
-import { CHANNEL } from '../shared/messages.types'
 import ErrorBoundary from './components/ErrorBoundary'
 import Navigation from './components/Navigation'
 import Router from './components/Router'
-import ipcMessenger from './ipcMessenger'
+import useShowChangelog from './hooks/useShowChangelog'
+import useShowOnboarding from './hooks/useShowOnboarding'
 import RenderModal from './sharedComponents/Modal'
-import { MODAL_ID } from './sharedComponents/Modal/Modal.consts'
-import { activeModalSignal, onboardingCompletedSignal } from './signals'
 import { SPACING } from './styles/consts'
 import AppThemeProvider from './styles/Theme'
 
@@ -22,26 +18,8 @@ Sentry.init({
 const queryClient = new QueryClient()
 
 function App() {
-  useEffect(() => {
-    // Wait for onboarding check to complete before showing changelog
-    if (!onboardingCompletedSignal.value) return
-
-    ipcMessenger.invoke(CHANNEL.STORE.GET, undefined).then(({ changelogLastSeenVersion }) => {
-      if (changelogLastSeenVersion !== CURRENT_VERSION) {
-        // Show changelog modal after a short delay to let the app render
-        setTimeout(() => {
-          activeModalSignal.value = {
-            id: MODAL_ID.CHANGELOG_MODAL,
-            showLatestOnly: true,
-          }
-          // Update the last seen version
-          ipcMessenger.invoke(CHANNEL.STORE.SET, {
-            changelogLastSeenVersion: CURRENT_VERSION,
-          })
-        }, 500)
-      }
-    })
-  }, [])
+  useShowChangelog()
+  useShowOnboarding()
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>

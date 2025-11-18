@@ -23,9 +23,9 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useCallback, useEffect, useState } from 'react'
-import type { JobPostingDTO } from 'src/shared/types'
+import { useCallback, useState } from 'react'
 import { CHANNEL } from '../../shared/messages.types'
+import { type JobPostingDTO, POSTING_STATUS } from '../../shared/types'
 import { PAGINATION } from '../consts'
 import ipcMessenger from '../ipcMessenger'
 import Icon from '../sharedComponents/Icon'
@@ -33,7 +33,7 @@ import Link from '../sharedComponents/Link'
 import Message from '../sharedComponents/Message'
 import { MODAL_ID } from '../sharedComponents/Modal/Modal.consts'
 import PageWrapper from '../sharedComponents/PageWrapper'
-import { activeModalSignal, onboardingCompletedSignal } from '../signals'
+import { activeModalSignal } from '../signals'
 import { SPACING } from '../styles/consts'
 import { logger } from '../utilities'
 
@@ -43,7 +43,6 @@ type SortField = 'company' | 'title' | 'status' | 'createdAt' | 'location'
 type SortDirection = 'asc' | 'desc'
 
 const Postings = () => {
-  const [hasCheckedOnboarding, setHasCheckedOnboarding] = useState(false)
   const [jobPostings, setJobPostings] = useState<JobPostingDTO[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -176,44 +175,6 @@ const Postings = () => {
     }
   }
 
-  useEffect(() => {
-    const checkFirstLaunch = async () => {
-      if (hasCheckedOnboarding) return
-
-      // Check if user has already completed onboarding
-      const { onboardingCompleted } = await ipcMessenger.invoke(CHANNEL.STORE.GET, undefined)
-      if (onboardingCompleted) {
-        setHasCheckedOnboarding(true)
-        onboardingCompletedSignal.value = true
-        return
-      }
-
-      try {
-        // Check if user has any prompts or sites
-        const [promptsResult, sitesResult] = await Promise.all([
-          ipcMessenger.invoke(CHANNEL.PROMPTS.GET_ALL, undefined),
-          ipcMessenger.invoke(CHANNEL.SITES.GET_ALL, undefined),
-        ])
-
-        // If no prompts and no sites, show onboarding
-        if (promptsResult.prompts.length === 0 && sitesResult.sites.length === 0) {
-          activeModalSignal.value = { id: MODAL_ID.ONBOARDING_MODAL }
-        }
-
-        setHasCheckedOnboarding(true)
-        // Signal that onboarding check is complete (whether shown or not)
-        onboardingCompletedSignal.value = true
-      } catch (err) {
-        logger.error('Error checking first launch:', err)
-        setHasCheckedOnboarding(true)
-        onboardingCompletedSignal.value = true
-      }
-    }
-
-    checkFirstLaunch()
-    loadJobPostings()
-  }, [hasCheckedOnboarding, loadJobPostings])
-
   const getStatusColor = (status: PostingStatus): 'primary' | 'success' | 'error' | 'info' => {
     switch (status) {
       case 'new':
@@ -258,7 +219,7 @@ const Postings = () => {
 
         <FormControl component="fieldset">
           <FormGroup row>
-            {(['new', 'applied', 'interview', 'offer', 'skipped', 'rejected'] as PostingStatus[]).map((status) => (
+            {Object.values(POSTING_STATUS).map((status) => (
               <FormControlLabel
                 key={status}
                 control={

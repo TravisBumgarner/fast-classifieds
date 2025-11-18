@@ -113,6 +113,16 @@ typedIpcMain.handle(CHANNEL.APP.RESTORE_ALL_DATA, async (_event, params) => {
   }
 })
 
+typedIpcMain.handle(CHANNEL.APP.CLEAR_LOCAL_STORAGE, async () => {
+  // Clear all keys in localStorage
+  store.clear()
+
+  return {
+    type: 'clear_local_storage',
+    success: true,
+  }
+})
+
 typedIpcMain.handle(CHANNEL.APP.NUKE_DATABASE, async () => {
   try {
     await queries.nukeDatabase()
