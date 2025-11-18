@@ -13,6 +13,7 @@ import {
 } from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT } from '../../../../shared/consts'
 import { CHANNEL } from '../../../../shared/messages.types'
 import type { JobPostingDTO, PromptDTO, ScrapedContentDTO, StoreSchema } from '../../../../shared/types'
 import { renderPrompt } from '../../../../shared/utils'
@@ -83,7 +84,6 @@ const DebugAI = ({
         scrapedContent,
         siteUrl: url,
         siteId: '',
-        jobToJSONPrompt: storeFromServer?.openAiSiteHTMLToJSONJobsPrompt || '',
       })
       if (response.success) {
         setJobs(response.jobs)
@@ -167,7 +167,7 @@ const DebugAI = ({
           prompt: prompts[prompts.findIndex((p) => p.id === promptId)]?.content || '',
           scrapedContent,
           siteUrl: url,
-          jobToJSONPrompt: storeFromServer.openAiSiteHTMLToJSONJobsPrompt,
+          jobToJSONPrompt: SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT,
         })}
       </Typography>
 

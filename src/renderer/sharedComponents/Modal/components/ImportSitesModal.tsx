@@ -10,9 +10,11 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
 import { CHANNEL } from '../../../../shared/messages.types'
 import type { PromptDTO } from '../../../../shared/types'
+import { QUERY_KEYS } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
 import { activeModalSignal } from '../../../signals'
 import { SPACING } from '../../../styles/consts'
@@ -31,6 +33,7 @@ const ImportSitesModal = (_props: ImportSitesModalProps) => {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [prompts, setPrompts] = useState<PromptDTO[]>([])
+  const queryClient = useQueryClient()
 
   const loadPrompts = useCallback(async () => {
     try {
@@ -147,6 +150,7 @@ const ImportSitesModal = (_props: ImportSitesModalProps) => {
         )
         setUrls('')
         activeModalSignal.value = null
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SITES] })
       } else {
         setError(`Failed to import all ${failCount} sites`)
       }

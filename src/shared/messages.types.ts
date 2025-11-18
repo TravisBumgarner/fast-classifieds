@@ -244,7 +244,6 @@ export type Invokes = {
       scrapedContent: ScrapedContentDTO
       siteUrl: string
       siteId: string
-      jobToJSONPrompt: string
     }
     result:
       | {
@@ -253,7 +252,6 @@ export type Invokes = {
         }
       | {
           success: false
-          // rawResponse?: unknown
           error: string
         }
   }

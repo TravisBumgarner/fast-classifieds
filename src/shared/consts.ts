@@ -1,19 +1,19 @@
 // This string is stored in Electron Store. To update it, navigate Settings -> Reset Jobs to JSON Prompt
 // Which ya know, might be an issue in the future.
-export const SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT = `CRITICAL: Extract ONLY real job postings that actually exist in the provided content.
+export const SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT = `
+Extract real job postings found in the scraped content.
 
-Return a JSON array of objects with this structure:
- - location: string (job location) - Default to "Unknown" if not found
- - title: string (exact job title from the content)
- - siteUrl: string (the ACTUAL URL from the content - DO NOT make up URLs, use the exact link found)
- - explanation: string (brief why this matches the criteria)
- - recommendedByAI: boolean (true if you think this is a good match, false otherwise)
+For each job posting, provide:
+- title (exact from content)
+- siteUrl (use real URL; if missing, use SITE_URL)
+- location (or "Unknown")
+- explanation (why it matches or doesn't match what the user is looking for)
+- recommendedByAI (true/false)
 
 Rules:
-0. DO NOT filter out any jobs. Always return EVERY job posting found. Use recommendedByAI to mark relevance.
-1. Extract ONLY jobs that are actually present in the scraped content
-2. Present all jobs to the user, even if you are unsure, make proper use of the recommendedByAI field
-3. Use the EXACT URLs found in the content
-4. If no URL is found for a job, use the base SITE_URL provided
-5. DO NOT create fake/placeholder URLs like "example.com"
-6. Return empty array [] if no matching jobs are found`
+1. Do NOT invent jobs. Only extract what truly appears in the content.
+2. Return ALL jobs. Use recommendedByAI to mark relevance.
+3. Use EXACT links found in the content; never fabricate URLs.
+4. If no link exists, use SITE_URL.
+5. If no jobs exist, return an empty list.
+`

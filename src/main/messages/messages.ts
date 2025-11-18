@@ -1,6 +1,7 @@
 import path from 'node:path'
 import { app, type BrowserWindow, ipcMain, shell } from 'electron'
 import { v4 as uuidv4 } from 'uuid'
+import { SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT } from '../../shared/consts'
 import { errorCodeToMessage } from '../../shared/errors'
 import { CHANNEL } from '../../shared/messages.types'
 import { POSTING_STATUS } from '../../shared/types'
@@ -427,8 +428,8 @@ typedIpcMain.handle(CHANNEL.DEBUG.AI, async (_event, params) => {
       scrapedContent: params.scrapedContent,
       siteUrl: params.siteUrl,
       siteId: params.siteId,
-      jobToJSONPrompt: storeData.openAiSiteHTMLToJSONJobsPrompt,
       scrapeRunId: 'debug-run',
+      jobToJSONPrompt: SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT,
     })
     logger.info('Debug AI result:', result.jobs)
 

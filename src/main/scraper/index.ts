@@ -1,4 +1,5 @@
 import type { BrowserWindow } from 'electron'
+import { SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT } from '../../shared/consts'
 import { errorCodeToMessage } from '../../shared/errors'
 import queries from '../database/queries'
 import log from '../logger'
@@ -54,8 +55,7 @@ async function processSite({
 
     const promptHash = hashContent(prompt)
 
-    const jobToJSONPrompt = store.get('openAiSiteHTMLToJSONJobsPrompt')
-    const jobToJSONPromptHash = hashContent(jobToJSONPrompt)
+    const jobToJSONPromptHash = hashContent(SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT)
 
     const exists = await queries.hashExists({ siteContentHash, siteId, promptHash, jobToJSONPromptHash })
     log.info(`Hash exists: ${exists}`)
@@ -82,7 +82,7 @@ async function processSite({
       siteUrl,
       apiKey,
       model,
-      jobToJSONPrompt,
+      jobToJSONPrompt: SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT,
       siteId,
       scrapeRunId,
     })
