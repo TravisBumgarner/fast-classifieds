@@ -15,7 +15,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT } from '../../../../shared/consts'
 import { CHANNEL } from '../../../../shared/messages.types'
-import type { JobPostingDTO, PromptDTO, ScrapedContentDTO, StoreSchema } from '../../../../shared/types'
+import type { NewJobPostingDTO, PromptDTO, ScrapedContentDTO, StoreSchema } from '../../../../shared/types'
 import { renderPrompt } from '../../../../shared/utils'
 import { ROUTES } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
@@ -42,7 +42,7 @@ const DebugAI = ({
   const [loadingJobs, setLoadingJobs] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [prompts, setPrompts] = useState<PromptDTO[]>([])
-  const [jobs, setJobs] = useState<JobPostingDTO[]>([])
+  const [jobs, setJobs] = useState<NewJobPostingDTO[]>([])
   const navigate = useNavigate()
   const [storeFromServer, setStoreFromServer] = useState<StoreSchema | null>(null)
 
@@ -195,10 +195,11 @@ const DebugAI = ({
           minHeight: 0,
         }}
       >
-        {jobs.map((job) => (
-          <Box key={job.id} sx={{ mb: SPACING.MEDIUM.PX }}>
+        {jobs.map((job, index) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: It's just for debugging. Don't feel the need to generate fake data on the backend.
+          <Box key={index} sx={{ mb: SPACING.MEDIUM.PX }}>
             <Typography component="pre">
-              {job.title} - {job.siteTitle}
+              {job.title} - {job.location}
             </Typography>
             <Typography component="pre">Recommended By AI: {job.recommendedByAI ? 'Yes' : 'No'}</Typography>
             <Typography component="pre">{job.siteUrl}</Typography>

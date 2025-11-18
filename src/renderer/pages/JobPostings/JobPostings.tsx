@@ -436,7 +436,7 @@ const JobPostings = () => {
                       </Tooltip>
                       <Tooltip title="Open job posting in browser">
                         <span>
-                          <Link url={posting.siteUrl} />
+                          <Link url={posting.jobUrl} />
                         </span>
                       </Tooltip>
                     </TableCell>

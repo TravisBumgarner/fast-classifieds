@@ -248,7 +248,7 @@ export type Invokes = {
     result:
       | {
           success: true
-          jobs: Array<JobPostingDTO>
+          jobs: Array<NewJobPostingDTO>
         }
       | {
           success: false

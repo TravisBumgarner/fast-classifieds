@@ -36,6 +36,7 @@ CREATE TABLE `job_postings` (
 	`scrape_run_id` text NOT NULL,
 	`title` text NOT NULL,
 	`site_url` text NOT NULL,
+	`job_url` text NOT NULL,
 	`site_id` text NOT NULL,
 	`explanation` text NOT NULL,
 	`location` text NOT NULL,

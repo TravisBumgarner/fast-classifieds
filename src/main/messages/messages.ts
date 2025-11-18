@@ -1,16 +1,15 @@
 import path from 'node:path'
 import { app, type BrowserWindow, ipcMain, shell } from 'electron'
-import { v4 as uuidv4 } from 'uuid'
 import { SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT } from '../../shared/consts'
 import { errorCodeToMessage } from '../../shared/errors'
 import { CHANNEL } from '../../shared/messages.types'
-import { JOB_POSTING_STATUS } from '../../shared/types'
 import { db } from '../database/client'
 import queries from '../database/queries'
 import { apiUsage, hashes, jobPostings, prompts, scrapeRuns, scrapeTasks, sites } from '../database/schema'
 import logger from '../logger'
 import * as scraper from '../scraper'
-import { processText } from '../scraper/ai'
+import { buildNewJobPostingDTO } from '../scraper/buildNewJobPostingDTO'
+import { processText } from '../scraper/processText'
 import { scrape } from '../scraper/scrape'
 import store, { getStore } from '../store'
 import { typedIpcMain } from './index'
@@ -431,19 +430,26 @@ typedIpcMain.handle(CHANNEL.DEBUG.AI, async (_event, params) => {
       scrapeRunId: 'debug-run',
       jobToJSONPrompt: SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT,
     })
-    logger.info('Debug AI result:', result.jobs)
+    logger.info('Debug AI result:', result.aiJobs)
+
+    const existingDuplicationDetectionIds = new Set(
+      (await queries.getJobPostings({})).map((j) => j.duplicationDetectionId),
+    )
+
+    const jobs = result.aiJobs.map((job) =>
+      buildNewJobPostingDTO({
+        ...job,
+        siteId: params.siteId,
+        scrapeRunId: 'debug-run',
+        siteUrl: params.siteUrl,
+        existingDuplicationDetectionIds,
+      }),
+    )
 
     return {
       success: true as const,
-      jobs: result.jobs.map((job) => ({
-        ...job,
-        id: uuidv4(),
-        status: JOB_POSTING_STATUS.NEW,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        siteTitle: params.siteUrl, // Just for debugging, not being shown as of now.
-      })),
-      // rawResponse: result.rawResponse,
+      jobs,
+      rawResponse: result.rawResponse,
     }
   } catch (error) {
     logger.error('Error in debug process text:', error)

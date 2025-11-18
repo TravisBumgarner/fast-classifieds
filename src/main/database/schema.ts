@@ -1,6 +1,8 @@
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import {
+  JOB_POSTING_DUPLICATE_STATUS,
   JOB_POSTING_STATUS,
+  type JobPostingDuplicateStatus,
   type JobPostingStatus,
   PROMPT_STATUS,
   type PromptStatus,
@@ -81,6 +83,10 @@ export const scrapeTasks = sqliteTable('scrape_tasks', {
 
 export const jobPostings = sqliteTable('job_postings', {
   recommendedByAI: integer('recommended_by_ai', { mode: 'boolean' }).notNull(),
+  duplicationDetectionId: text('id').primaryKey(), // See duplicateDetection.ts for more details.
+  duplicateStatus: text('duplicate_status', {
+    enum: Object.values(JOB_POSTING_DUPLICATE_STATUS) as [JobPostingDuplicateStatus, ...JobPostingDuplicateStatus[]],
+  }).notNull(),
   id: text('id').primaryKey(),
   scrapeRunId: text('scrape_run_id').notNull(),
   title: text('title').notNull(),

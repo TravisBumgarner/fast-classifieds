@@ -6,6 +6,13 @@ type TimestampsAndID = {
   updatedAt: Date
 }
 
+export const JOB_POSTING_DUPLICATE_STATUS = {
+  UNIQUE: 'unique',
+  SUSPECTED_DUPLICATE: 'suspected_duplicate',
+  CONFIRMED_DUPLICATE: 'confirmed_duplicate',
+} as const
+export type JobPostingDuplicateStatus = (typeof JOB_POSTING_DUPLICATE_STATUS)[keyof typeof JOB_POSTING_DUPLICATE_STATUS]
+
 export const JOB_POSTING_STATUS = {
   NEW: 'new',
   APPLIED: 'applied',
@@ -87,6 +94,8 @@ export type NewJobPostingDTO = {
   status: JobPostingStatus
   scrapeRunId: string
   recommendedByAI: boolean
+  duplicationDetectionId: string
+  duplicateStatus: JobPostingDuplicateStatus
 }
 export type JobPostingDTO = { siteTitle: string } & NewJobPostingDTO & TimestampsAndID
 

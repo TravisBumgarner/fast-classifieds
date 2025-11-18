@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "3ed09026-70c1-4a28-92ff-ee5b34b90c5c",
+  "id": "28853f10-918d-454e-a389-bb545563dc73",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "api_usage": {
@@ -240,6 +240,13 @@
         },
         "site_url": {
           "name": "site_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "job_url": {
+          "name": "job_url",
           "type": "text",
           "primaryKey": false,
           "notNull": true,

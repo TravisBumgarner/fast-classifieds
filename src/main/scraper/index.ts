@@ -5,7 +5,8 @@ import queries from '../database/queries'
 import log from '../logger'
 import store from '../store'
 import { hashContent } from '../utilities'
-import { processText } from './ai'
+import { buildNewJobPostingDTO } from './buildNewJobPostingDTO'
+import { processText } from './processText'
 import { scrape } from './scrape'
 
 // Store active scrape runs in memory
@@ -76,7 +77,7 @@ async function processSite({
     log.info(`New data found for: ${siteUrl}`)
     onProgress?.('processing')
 
-    const { jobs, rawResponse } = await processText({
+    const { aiJobs, rawResponse } = await processText({
       prompt,
       scrapedContent,
       siteUrl,
@@ -86,6 +87,20 @@ async function processSite({
       siteId,
       scrapeRunId,
     })
+
+    const existingDuplicationDetectionIds = new Set(
+      (await queries.getJobPostings({})).map((j) => j.duplicationDetectionId),
+    )
+
+    const jobs = aiJobs.map((job) =>
+      buildNewJobPostingDTO({
+        ...job,
+        siteId,
+        scrapeRunId,
+        siteUrl,
+        existingDuplicationDetectionIds,
+      }),
+    )
 
     await queries.insertApiUsage({
       response: rawResponse,
