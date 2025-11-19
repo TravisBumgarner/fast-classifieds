@@ -152,7 +152,9 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
     const isNoActiveRun = normalized.includes('no active scrape run')
 
     return (
-      <DefaultModal title={isNoActiveSites ? 'No Sites Configured' : isNoActiveRun ? 'No Active Scrape' : 'Scraping Error'}>
+      <DefaultModal
+        title={isNoActiveSites ? 'No Sites Configured' : isNoActiveRun ? 'No Active Scrape' : 'Scraping Error'}
+      >
         <Box sx={{ minWidth: 500 }}>
           <Typography color="error" gutterBottom>
             {error}
