@@ -25,9 +25,10 @@ import DefaultModal from './DefaultModal'
 
 export interface ScrapeProgressModalProps {
   id: typeof MODAL_ID.SCRAPE_PROGRESS_MODAL
+  initialError?: string
 }
 
-const ScrapeProgressModal = (_props: ScrapeProgressModalProps) => {
+const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
   const navigate = useNavigate()
   const [sites, setSites] = useState<SiteProgressDTO[]>([])
   const [isComplete, setIsComplete] = useState(false)
@@ -65,37 +66,33 @@ const ScrapeProgressModal = (_props: ScrapeProgressModalProps) => {
     }
   }, [scrapeRunId])
 
-  const startScraping = useCallback(async () => {
+  const attachToActiveRun = useCallback(async () => {
     try {
-      logger.info('[ScrapeProgressModal] Starting scrape...')
-
-      const result = await ipcMessenger.invoke(CHANNEL.SCRAPER.START, undefined)
-
-      logger.info('[ScrapeProgressModal] Start result:', result)
-
-      if (!result.success) {
-        setError(result.error)
+      logger.info('[ScrapeProgressModal] Attaching to active scrape run...')
+      const result = await ipcMessenger.invoke(CHANNEL.SCRAPER.GET_ACTIVE_RUN, undefined)
+      if (!result.hasActive || !result.scrapeRunId) {
+        // Only set the default error if we didn't get an initial error
+        setError((prev) => prev ?? 'No active scrape run')
         return
       }
-
-      if (!result.scrapeRunId) {
-        setError('Failed to start scraping')
-        return
-      }
-
-      logger.info('[ScrapeProgressModal] Setting scrapeRunId:', result.scrapeRunId)
       setScrapeRunId(result.scrapeRunId)
+      if (result.progress) setSites(result.progress.sites)
     } catch (error) {
-      logger.error('Failed to start scraping:', error)
-      setError(error instanceof Error ? error.message : 'Failed to start scraping')
+      logger.error('Failed to attach to active run:', error)
+      setError(error instanceof Error ? error.message : 'Failed to attach to active run')
     }
   }, [])
 
   useEffect(() => {
+    // If an initial error is passed in (e.g., no sites configured), show it and don't attach.
+    if (props.initialError) {
+      setError(props.initialError)
+      return
+    }
     ;(async () => {
-      await startScraping()
+      await attachToActiveRun()
     })()
-  }, [startScraping])
+  }, [attachToActiveRun, props.initialError])
 
   const handleClose = () => {
     if (isComplete) {
@@ -150,23 +147,31 @@ const ScrapeProgressModal = (_props: ScrapeProgressModalProps) => {
   }
 
   if (error) {
-    const isNoActiveSites = error.includes('No active sites')
+    const normalized = error.toLowerCase()
+    const isNoActiveSites = normalized.includes('no') && normalized.includes('site')
+    const isNoActiveRun = normalized.includes('no active scrape run')
 
     return (
-      <DefaultModal title="Scraping Error">
+      <DefaultModal title={isNoActiveSites ? 'No Sites Configured' : isNoActiveRun ? 'No Active Scrape' : 'Scraping Error'}>
         <Box sx={{ minWidth: 500 }}>
           <Typography color="error" gutterBottom>
             {error}
           </Typography>
           <Stack spacing={SPACING.SMALL.PX} sx={{ mt: SPACING.MEDIUM.PX }}>
-            {isNoActiveSites && (
-              <Button variant="contained" onClick={handleGoToSites} fullWidth>
-                Go to Sites
+            {isNoActiveSites ? (
+              <>
+                <Button variant="contained" onClick={handleGoToSites} fullWidth>
+                  Go to Sites
+                </Button>
+                <Button variant="outlined" onClick={handleClose} fullWidth>
+                  Close
+                </Button>
+              </>
+            ) : (
+              <Button variant="contained" onClick={handleClose} fullWidth>
+                Close
               </Button>
             )}
-            <Button variant={isNoActiveSites ? 'outlined' : 'contained'} onClick={handleClose} fullWidth>
-              Close
-            </Button>
           </Stack>
         </Box>
       </DefaultModal>

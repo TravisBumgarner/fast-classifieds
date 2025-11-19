@@ -349,3 +349,12 @@ export function getProgress(scrapeRunId: string) {
   }
   return { success: true as const, progress }
 }
+
+export function getActiveRun() {
+  for (const [scrapeRunId, progress] of activeRuns.entries()) {
+    if (progress.status === 'pending' || progress.status === 'in_progress') {
+      return { hasActive: true as const, scrapeRunId, progress }
+    }
+  }
+  return { hasActive: false as const }
+}

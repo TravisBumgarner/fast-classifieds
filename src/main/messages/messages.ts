@@ -362,6 +362,16 @@ typedIpcMain.handle(CHANNEL.SCRAPER.GET_PROGRESS, async (_event, params) => {
   }
 })
 
+typedIpcMain.handle(CHANNEL.SCRAPER.GET_ACTIVE_RUN, async () => {
+  try {
+    const result = scraper.getActiveRun()
+    return result
+  } catch (error) {
+    logger.error('Error getting active scrape run:', error)
+    return { hasActive: false as const }
+  }
+})
+
 typedIpcMain.handle(CHANNEL.DEBUG.SCRAPE, async (_event, params) => {
   try {
     const result = await scrape({
