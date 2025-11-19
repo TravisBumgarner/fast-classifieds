@@ -2,12 +2,12 @@ import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack, TextFiel
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
 import { CHANNEL } from '../../../../shared/messages.types'
-import type { JobPostingDTO, JobPostingStatus } from '../../../../shared/types'
+import type { JobPostingDTO, JobPostingDuplicateStatus, JobPostingStatus } from '../../../../shared/types'
 import { QUERY_KEYS } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
 import { activeModalSignal } from '../../../signals'
 import { SPACING } from '../../../styles/consts'
-import { logger } from '../../../utilities'
+import { formatSelectOption, logger } from '../../../utilities'
 import type { MODAL_ID } from '../Modal.consts'
 import DefaultModal from './DefaultModal'
 
@@ -30,6 +30,7 @@ const PostingModal = (props: PostingModalProps) => {
   const [explanation, setExplanation] = useState('')
   const [location, setLocation] = useState('')
   const [status, setStatus] = useState<JobPostingStatus>('new')
+  const [duplicateStatus, setDuplicateStatus] = useState<JobPostingDuplicateStatus>('unique')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const queryClient = useQueryClient()
@@ -51,6 +52,8 @@ const PostingModal = (props: PostingModalProps) => {
         setExplanation(posting.explanation)
         setLocation(posting.location)
         setStatus(posting.status)
+        // Don't allow selecting 'suspected_duplicate' in this editor; default to 'unique' if encountered
+        setDuplicateStatus(posting.duplicateStatus === 'suspected_duplicate' ? 'unique' : posting.duplicateStatus)
       }
     } catch (err) {
       setError('Failed to load posting')
@@ -85,6 +88,7 @@ const PostingModal = (props: PostingModalProps) => {
             explanation,
             location,
             status,
+            duplicateStatus,
           },
         })
         if (result.success) {
@@ -175,7 +179,22 @@ const PostingModal = (props: PostingModalProps) => {
             <Select value={status} onChange={(e) => setStatus(e.target.value as JobPostingStatus)} label="Status">
               {JOB_POSTING_STATUSES.map((s) => (
                 <MenuItem key={s} value={s}>
-                  {s.charAt(0).toUpperCase() + s.slice(1)}
+                  {formatSelectOption(s)}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth disabled={loading} size="small">
+            <InputLabel>Duplicate Status</InputLabel>
+            <Select
+              value={duplicateStatus}
+              label="Duplicate Status"
+              onChange={(e) => setDuplicateStatus(e.target.value as JobPostingDuplicateStatus)}
+            >
+              {(['unique', 'confirmed_duplicate'] as JobPostingDuplicateStatus[]).map((s) => (
+                <MenuItem key={s} value={s}>
+                  {formatSelectOption(s)}
                 </MenuItem>
               ))}
             </Select>

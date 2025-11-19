@@ -15,6 +15,7 @@ import { useEffect } from 'react'
 import { JOB_POSTING_STATUS, type JobPostingStatus, type ScrapeRunDTO } from '../../../../shared/types'
 import Icon from '../../../sharedComponents/Icon'
 import { SPACING } from '../../../styles/consts'
+import { formatSelectOption } from '../../../utilities'
 
 export const DEFAULT_STATUS_FILTERS = ['new', 'applied', 'interview', 'offer'] as JobPostingStatus[]
 
@@ -75,7 +76,7 @@ const Filters = ({
           renderValue={(selected) => {
             if (selected.length === Object.values(JOB_POSTING_STATUS).length) return 'All'
             if (selected.length === 0) return 'None'
-            return selected.map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join(', ')
+            return selected.map((s) => formatSelectOption(s)).join(', ')
           }}
         >
           {Object.values(JOB_POSTING_STATUS).map((status) => (
