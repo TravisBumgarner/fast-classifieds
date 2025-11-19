@@ -1,8 +1,9 @@
-import { and, desc, eq } from 'drizzle-orm'
+import { and, count, desc, eq, inArray } from 'drizzle-orm'
 import type OpenAI from 'openai'
 import { v4 as uuidv4 } from 'uuid'
 import type {
   JobPostingDTO,
+  JobPostingDuplicateStatus,
   NewHashDTO,
   NewJobPostingDTO,
   NewPromptDTO,
@@ -115,6 +116,7 @@ async function updateJobPosting(id: string, data: Partial<NewJobPostingDTO>) {
 async function insertJobPostings(data: NewJobPostingDTO[]) {
   if (data.length === 0) return []
   const dataWithIds = data.map((item) => ({ ...item, id: uuidv4() }))
+  console.log(`Inserting ${JSON.stringify(dataWithIds)} job postings...`)
   return db.insert(jobPostings).values(dataWithIds).returning()
 }
 
@@ -236,7 +238,13 @@ async function updateScrapeRun(
   return db.update(scrapeRuns).set(data).where(eq(scrapeRuns.id, id)).returning()
 }
 
-async function getJobPostings({ siteId }: { siteId?: string }): Promise<JobPostingDTO[]> {
+async function getJobPostings({
+  siteId,
+  duplicateStatusArray,
+}: {
+  siteId?: string
+  duplicateStatusArray?: JobPostingDuplicateStatus[]
+}): Promise<JobPostingDTO[]> {
   const rows = await db
     .select({
       id: jobPostings.id,
@@ -251,16 +259,124 @@ async function getJobPostings({ siteId }: { siteId?: string }): Promise<JobPosti
       scrapeRunId: jobPostings.scrapeRunId,
       siteTitle: sites.siteTitle,
       recommendedByAI: jobPostings.recommendedByAI,
+      jobUrl: jobPostings.jobUrl,
+      duplicationDetectionId: jobPostings.duplicationDetectionId,
+      duplicateStatus: jobPostings.duplicateStatus,
     })
     .from(jobPostings)
     .leftJoin(sites, eq(jobPostings.siteId, sites.id))
-    .where(siteId ? eq(jobPostings.siteId, siteId) : undefined)
+    .where(
+      and(
+        siteId ? eq(jobPostings.siteId, siteId) : undefined,
+        duplicateStatusArray ? inArray(jobPostings.duplicateStatus, duplicateStatusArray) : undefined,
+      ),
+    )
     .orderBy(desc(jobPostings.createdAt))
 
   return rows.map((r) => ({
     ...r,
     siteTitle: r.siteTitle ?? 'Unknown',
   }))
+}
+
+async function getJobPostingsByDuplicationId(duplicationDetectionId: string): Promise<JobPostingDTO[]> {
+  const rows = await db
+    .select({
+      id: jobPostings.id,
+      title: jobPostings.title,
+      siteUrl: jobPostings.siteUrl,
+      siteId: jobPostings.siteId,
+      explanation: jobPostings.explanation,
+      location: jobPostings.location,
+      status: jobPostings.status,
+      createdAt: jobPostings.createdAt,
+      updatedAt: jobPostings.updatedAt,
+      scrapeRunId: jobPostings.scrapeRunId,
+      siteTitle: sites.siteTitle,
+      recommendedByAI: jobPostings.recommendedByAI,
+      jobUrl: jobPostings.jobUrl,
+      duplicationDetectionId: jobPostings.duplicationDetectionId,
+      duplicateStatus: jobPostings.duplicateStatus,
+    })
+    .from(jobPostings)
+    .leftJoin(sites, eq(jobPostings.siteId, sites.id))
+    .where(eq(jobPostings.duplicationDetectionId, duplicationDetectionId))
+    .orderBy(desc(jobPostings.createdAt))
+
+  return rows.map((r) => ({
+    ...r,
+    siteTitle: r.siteTitle ?? 'Unknown',
+  }))
+}
+
+async function getSuspectedDuplicateGroups(): Promise<
+  Array<{
+    duplicationDetectionId: string
+    total: number
+    titleSample: string
+    siteTitleSample: string
+    latestCreatedAt: Date
+  }>
+> {
+  // Find IDs that have at least one suspected duplicate
+  const suspectedRows = await db
+    .select({
+      duplicationDetectionId: jobPostings.duplicationDetectionId,
+      createdAt: jobPostings.createdAt,
+    })
+    .from(jobPostings)
+    .where(eq(jobPostings.duplicateStatus, 'suspected_duplicate'))
+
+  const ids = Array.from(new Set(suspectedRows.map((r) => r.duplicationDetectionId)))
+  if (ids.length === 0) return []
+
+  const allRows = await db
+    .select({
+      duplicationDetectionId: jobPostings.duplicationDetectionId,
+      createdAt: jobPostings.createdAt,
+      title: jobPostings.title,
+      siteTitle: sites.siteTitle,
+    })
+    .from(jobPostings)
+    .leftJoin(sites, eq(jobPostings.siteId, sites.id))
+    .where(inArray(jobPostings.duplicationDetectionId, ids))
+
+  const grouped = new Map<
+    string,
+    { total: number; latestCreatedAt: Date; titleSample: string; siteTitleSample: string }
+  >()
+  for (const row of allRows) {
+    const existing = grouped.get(row.duplicationDetectionId)
+    const createdAt = row.createdAt
+    if (!existing) {
+      grouped.set(row.duplicationDetectionId, {
+        total: 1,
+        latestCreatedAt: createdAt,
+        titleSample: row.title,
+        siteTitleSample: row.siteTitle ?? 'Unknown',
+      })
+    } else {
+      existing.total += 1
+      if (createdAt > existing.latestCreatedAt) {
+        existing.latestCreatedAt = createdAt
+        existing.titleSample = row.title
+        existing.siteTitleSample = row.siteTitle ?? 'Unknown'
+      }
+    }
+  }
+
+  return Array.from(grouped.entries()).map(([duplicationDetectionId, meta]) => ({
+    duplicationDetectionId,
+    ...meta,
+  }))
+}
+
+async function jobPostingsSuspectedDuplicatesCount() {
+  return db
+    .select({ count: count() })
+    .from(jobPostings)
+    .where(eq(jobPostings.duplicateStatus, 'suspected_duplicate'))
+    .all()
 }
 
 async function skipNotRecommendedPostings() {
@@ -301,6 +417,7 @@ export default {
   insertSite,
   updateSite,
   deleteSite,
+  jobPostingsSuspectedDuplicatesCount,
   getAllPrompts,
   getPromptById,
   insertPrompt,
@@ -310,6 +427,8 @@ export default {
   getScrapeTasksByRunId,
   getFailedTasksByRunId,
   getJobPostings,
+  getJobPostingsByDuplicationId,
+  getSuspectedDuplicateGroups,
   nukeDatabase,
   skipNotRecommendedPostings,
 }

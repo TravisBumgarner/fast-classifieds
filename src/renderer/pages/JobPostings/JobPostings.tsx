@@ -23,7 +23,7 @@ import {
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { CHANNEL } from '../../../shared/messages.types'
-import type { PostingStatus } from '../../../shared/types'
+import type { JobPostingStatus } from '../../../shared/types'
 import { PAGINATION, QUERY_KEYS } from '../../consts'
 import ipcMessenger from '../../ipcMessenger'
 import Icon from '../../sharedComponents/Icon'
@@ -40,9 +40,9 @@ import QuickActions from './components/QuickActions'
 type SortField = 'company' | 'title' | 'status' | 'createdAt' | 'location' | 'recommendedByAI'
 type SortDirection = 'asc' | 'desc'
 
-const Postings = () => {
+const JobPostings = () => {
   const [error, setError] = useState<string | null>(null)
-  const [statusFilter, setStatusFilter] = useState<PostingStatus[]>([...DEFAULT_STATUS_FILTERS])
+  const [statusFilter, setStatusFilter] = useState<JobPostingStatus[]>([...DEFAULT_STATUS_FILTERS])
   const [scrapeRunsFilter, setScrapeRunsFilter] = useState<string[]>([])
   const [sortField, setSortField] = useState<SortField>('createdAt')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
@@ -69,7 +69,7 @@ const Postings = () => {
   const { isLoading: isLoadingJobPostings, data: jobPostingsData } = useQuery({
     queryKey: [QUERY_KEYS.POSTINGS],
     queryFn: async () => await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.GET_ALL, undefined),
-    initialData: { postings: [] },
+    initialData: { postings: [], suspectedDuplicatesCount: 0 },
   })
 
   const sortedPostings = [...jobPostingsData.postings].sort((a, b) => {
@@ -168,7 +168,13 @@ const Postings = () => {
     }
   }
 
-  const handleUpdateStatus = async (id: string, newStatus: PostingStatus) => {
+  const handleSelectedDuplicates = () => {
+    activeModalSignal.value = {
+      id: MODAL_ID.DUPLICATE_POSTINGS_MODAL,
+    }
+  }
+
+  const handleUpdateStatus = async (id: string, newStatus: JobPostingStatus) => {
     try {
       const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.UPDATE, { id, data: { status: newStatus } })
       if (result.success) {
@@ -182,7 +188,7 @@ const Postings = () => {
     }
   }
 
-  const getStatusColor = (status: PostingStatus): 'primary' | 'success' | 'error' | 'info' => {
+  const getStatusColor = (status: JobPostingStatus): 'primary' | 'success' | 'error' | 'info' => {
     switch (status) {
       case 'new':
         return 'primary'
@@ -220,6 +226,11 @@ const Postings = () => {
           {selectedPostings.size > 0 && (
             <Button size="small" variant="outlined" onClick={handleOpenSelectedInBrowser}>
               Open Selected ({selectedPostings.size})
+            </Button>
+          )}
+          {jobPostingsData.suspectedDuplicatesCount > 0 && (
+            <Button color="error" size="small" variant="outlined" onClick={handleSelectedDuplicates}>
+              Suspected duplicates found! ({jobPostingsData.suspectedDuplicatesCount})
             </Button>
           )}
         </Stack>
@@ -332,7 +343,7 @@ const Postings = () => {
             <TableBody>
               {filteredPostings.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} align="center">
+                  <TableCell colSpan={9} align="center">
                     <Stack spacing={SPACING.SMALL.PX} alignItems="center" sx={{ py: 4 }}>
                       <Typography variant="body2" color="textSecondary">
                         {jobPostingsData.postings.length === 0
@@ -372,7 +383,7 @@ const Postings = () => {
                         <FormControl size="small" sx={{ minWidth: 120 }}>
                           <Select
                             value={posting.status}
-                            onChange={(e) => handleUpdateStatus(posting.id, e.target.value as PostingStatus)}
+                            onChange={(e) => handleUpdateStatus(posting.id, e.target.value as JobPostingStatus)}
                             renderValue={(value) => (
                               <Chip
                                 label={value.charAt(0).toUpperCase() + value.slice(1)}
@@ -436,7 +447,7 @@ const Postings = () => {
                       </Tooltip>
                       <Tooltip title="Open job posting in browser">
                         <span>
-                          <Link url={posting.siteUrl} />
+                          <Link url={posting.jobUrl} />
                         </span>
                       </Tooltip>
                     </TableCell>
@@ -461,4 +472,4 @@ const Postings = () => {
   )
 }
 
-export default Postings
+export default JobPostings

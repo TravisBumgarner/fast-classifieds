@@ -1,17 +1,18 @@
 import OpenAI from 'openai'
 import { zodTextFormat } from 'openai/helpers/zod'
-import type { NewJobPostingDTO, ScrapedContentDTO } from 'src/shared/types'
 import { z } from 'zod'
+import type { ScrapedContentDTO } from '../../shared/types'
 import { renderPrompt } from '../../shared/utils'
 import log from '../logger'
 
 const aiJobSchema = z.object({
   title: z.string(),
-  siteUrl: z.string(),
+  jobUrl: z.string(),
   explanation: z.string(),
   location: z.string(),
   recommendedByAI: z.boolean(),
 })
+type AiJob = z.infer<typeof aiJobSchema>
 
 // Root must be an object
 const aiJobsSchema = z.object({
@@ -25,8 +26,6 @@ export async function processText({
   model,
   siteUrl,
   jobToJSONPrompt,
-  siteId,
-  scrapeRunId,
 }: {
   prompt: string
   scrapedContent: ScrapedContentDTO
@@ -36,7 +35,7 @@ export async function processText({
   jobToJSONPrompt: string
   siteId: string
   scrapeRunId: string
-}): Promise<{ jobs: NewJobPostingDTO[]; rawResponse: OpenAI.Responses.Response }> {
+}): Promise<{ aiJobs: AiJob[]; rawResponse: OpenAI.Responses.Response }> {
   if (!apiKey) {
     throw new Error('OpenAI API key is not configured. Please set it in Settings.')
   }
@@ -62,16 +61,11 @@ export async function processText({
 
   if (parsedJobs.length === 0) {
     log.info('AI response did not contain any job postings.')
-    return { jobs: [], rawResponse: response }
+    return { aiJobs: [], rawResponse: response }
   }
 
   return {
-    jobs: parsedJobs.map((job) => ({
-      ...job,
-      siteId,
-      status: 'new',
-      scrapeRunId,
-    })),
+    aiJobs: parsedJobs,
     rawResponse: response,
   }
 }

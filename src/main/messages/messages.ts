@@ -1,17 +1,17 @@
 import path from 'node:path'
 import { app, type BrowserWindow, ipcMain, shell } from 'electron'
-import { v4 as uuidv4 } from 'uuid'
 import { SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT } from '../../shared/consts'
 import { errorCodeToMessage } from '../../shared/errors'
 import { CHANNEL } from '../../shared/messages.types'
-import { POSTING_STATUS } from '../../shared/types'
+import { JOB_POSTING_DUPLICATE_STATUS } from '../../shared/types'
 import { db } from '../database/client'
 import queries from '../database/queries'
 import { apiUsage, hashes, jobPostings, prompts, scrapeRuns, scrapeTasks, sites } from '../database/schema'
+import * as scraper from '../jobFinder'
+import { buildNewJobPostingDTO } from '../jobFinder/buildNewJobPostingDTO'
+import { processText } from '../jobFinder/processText'
+import { scrape } from '../jobFinder/scrape'
 import logger from '../logger'
-import * as scraper from '../scraper'
-import { processText } from '../scraper/ai'
-import { scrape } from '../scraper/scrape'
 import store, { getStore } from '../store'
 import { typedIpcMain } from './index'
 
@@ -345,23 +345,6 @@ typedIpcMain.handle(CHANNEL.SCRAPER.START, async () => {
   }
 })
 
-typedIpcMain.handle(CHANNEL.SCRAPER.RETRY, async (_event, params) => {
-  try {
-    const result = await scraper.retryFailedScrapes(mainWindow, params.scrapeRunId)
-    return {
-      type: 'retry_scraping',
-      ...result,
-    }
-  } catch (error) {
-    logger.error('Error retrying scraper:', error)
-    return {
-      type: 'retry_scraping',
-      success: false as const,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    }
-  }
-})
-
 typedIpcMain.handle(CHANNEL.SCRAPER.GET_PROGRESS, async (_event, params) => {
   try {
     const result = scraper.getProgress(params.scrapeRunId)
@@ -385,10 +368,16 @@ typedIpcMain.handle(CHANNEL.DEBUG.SCRAPE, async (_event, params) => {
       siteUrl: params.url,
       selector: params.selector,
     })
-
-    return {
-      success: true as const,
-      scrapedContent: result.scrapedContent,
+    if (result.ok) {
+      return {
+        success: true as const,
+        scrapedContent: result.scrapedContent,
+      }
+    } else {
+      return {
+        success: false as const,
+        error: errorCodeToMessage({ error: result.errorCode, type: 'INTERNAL' }),
+      }
     }
   } catch (error) {
     logger.error('Error in debug scrape:', error)
@@ -431,26 +420,33 @@ typedIpcMain.handle(CHANNEL.DEBUG.AI, async (_event, params) => {
       scrapeRunId: 'debug-run',
       jobToJSONPrompt: SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT,
     })
-    logger.info('Debug AI result:', result.jobs)
+    logger.info('Debug AI result:', result.aiJobs)
+
+    const existingDuplicationDetectionIds = new Set(
+      (await queries.getJobPostings({})).map((j) => j.duplicationDetectionId),
+    )
+
+    const jobs = result.aiJobs.map((job) =>
+      buildNewJobPostingDTO({
+        ...job,
+        siteId: params.siteId,
+        scrapeRunId: 'debug-run',
+        siteUrl: params.siteUrl,
+        existingDuplicationDetectionIds,
+      }),
+    )
 
     return {
       success: true as const,
-      jobs: result.jobs.map((job) => ({
-        ...job,
-        id: uuidv4(),
-        status: POSTING_STATUS.NEW,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        siteTitle: params.siteUrl, // Just for debugging, not being shown as of now.
-      })),
-      // rawResponse: result.rawResponse,
+      jobs,
+      rawResponse: result.rawResponse,
     }
   } catch (error) {
     logger.error('Error in debug process text:', error)
 
     return {
       success: false as const,
-      error: errorCodeToMessage(error),
+      error: errorCodeToMessage({ error, type: 'OPEN_AI' }),
     }
   }
 })
@@ -491,17 +487,40 @@ typedIpcMain.handle(CHANNEL.SCRAPE_RUNS.GET_TASKS, async (_event, params) => {
 // Job postings handlers
 typedIpcMain.handle(CHANNEL.JOB_POSTINGS.GET_ALL, async () => {
   try {
-    const postings = await queries.getJobPostings({})
+    const postings = await queries.getJobPostings({ duplicateStatusArray: [JOB_POSTING_DUPLICATE_STATUS.UNIQUE] })
+    const suspectedDuplicatesCount = await queries.jobPostingsSuspectedDuplicatesCount()
     return {
-      type: 'get_all_job_postings',
       postings,
+      suspectedDuplicatesCount: suspectedDuplicatesCount[0]?.count || 0,
     }
   } catch (error) {
     logger.error('Error getting job postings:', error)
     return {
-      type: 'get_all_job_postings',
+      suspectedDuplicatesCount: 0,
       postings: [],
     }
+  }
+})
+
+// Suspected duplicates list
+typedIpcMain.handle(CHANNEL.JOB_POSTINGS.GET_SUSPECTED_DUPLICATES, async () => {
+  try {
+    const groups = await queries.getSuspectedDuplicateGroups()
+    return { groups }
+  } catch (error) {
+    logger.error('Error getting suspected duplicate groups:', error)
+    return { groups: [] }
+  }
+})
+
+// Duplicate group detail
+typedIpcMain.handle(CHANNEL.JOB_POSTINGS.GET_DUPLICATE_GROUP, async (_event, params) => {
+  try {
+    const postings = await queries.getJobPostingsByDuplicationId(params.duplicationDetectionId)
+    return { postings }
+  } catch (error) {
+    logger.error('Error getting duplicate group:', error)
+    return { postings: [] }
   }
 })
 
@@ -531,7 +550,7 @@ typedIpcMain.handle(CHANNEL.JOB_POSTINGS.UPDATE, async (_event, params) => {
   } catch (error) {
     logger.error('Error updating job posting status:', error)
     return {
-      type: 'update_job_posting_status',
+      type: 'update_JOB_POSTING_STATUS',
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
     }

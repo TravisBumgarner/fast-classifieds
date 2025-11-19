@@ -1,7 +1,7 @@
 import { Box, Button, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
-import type { ScrapedContentDTO } from 'src/shared/types'
 import { CHANNEL } from '../../../../shared/messages.types'
+import type { ScrapedContentDTO } from '../../../../shared/types'
 import { TOOLTIPS } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
 import Icon from '../../../sharedComponents/Icon'

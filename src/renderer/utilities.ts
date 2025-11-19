@@ -31,3 +31,7 @@ export const formatDisplayDate = (dateString: string) => {
     day: 'numeric',
   })
 }
+
+export const formatSelectOption = (option: string) => {
+  return (option.charAt(0).toUpperCase() + option.slice(1)).replace(/_/g, ' ')
+}

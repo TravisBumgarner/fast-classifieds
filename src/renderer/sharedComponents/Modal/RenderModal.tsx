@@ -3,6 +3,7 @@ import type { FC } from 'react'
 import { activeModalSignal } from '../../signals'
 import ChangelogModal, { type ChangelogModalProps } from './components/ChangelogModal'
 import ConfirmationModal, { type ConfirmationModalProps } from './components/ConfirmationModal'
+import DuplicateDetectionModal, { type DuplicateDetectionModalProps } from './components/DuplicateDetectionModal'
 import ImportSitesModal, { type ImportSitesModalProps } from './components/ImportSitesModal'
 import OnboardingModal, { type OnboardingModalProps } from './components/OnboardingModal'
 import PostingModal, { type EditPostingModalProps } from './components/PostingModal'
@@ -22,6 +23,7 @@ export type ActiveModal =
   | ScrapeProgressModalProps
   | ChangelogModalProps
   | EditPostingModalProps
+  | DuplicateDetectionModalProps
 
 export type ModalId = (typeof MODAL_ID)[keyof typeof MODAL_ID]
 
@@ -51,6 +53,8 @@ const RenderModal: FC = () => {
       return <ChangelogModal {...(activeModalSignal.value as ChangelogModalProps)} />
     case MODAL_ID.EDIT_POSTING_MODAL:
       return <PostingModal {...(activeModalSignal.value as EditPostingModalProps)} />
+    case MODAL_ID.DUPLICATE_POSTINGS_MODAL:
+      return <DuplicateDetectionModal {...(activeModalSignal.value as DuplicateDetectionModalProps)} />
     default:
       return null
   }

@@ -1,6 +1,7 @@
 import { JSDOM } from 'jsdom'
-import { launch } from 'puppeteer'
-import type { ScrapedContentDTO } from 'src/shared/types'
+import { type Browser, launch } from 'puppeteer'
+import type { INTERNAL_ERRORS } from 'src/shared/errors'
+import type { ScrapedContentDTO } from '../../shared/types'
 import store from '../store'
 import { hashContent } from '../utilities'
 
@@ -49,35 +50,54 @@ export const scrape = async ({
 }: {
   siteUrl: string
   selector: string
-}): Promise<{ scrapedContent: ScrapedContentDTO; hash: string }> => {
+}): Promise<
+  | { ok: true; scrapedContent: ScrapedContentDTO; hash: string }
+  | { ok: false; errorCode: keyof typeof INTERNAL_ERRORS; message?: string }
+> => {
+  if (!siteUrl) return { ok: false, errorCode: 'NO_URL' }
+  if (!selector) return { ok: false, errorCode: 'NO_SELECTOR' }
+
   const delay = store.get('scrapeDelay')
-  const browser = await launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  })
+
+  let browser: Browser
+  try {
+    browser = await launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    })
+  } catch (e) {
+    return { ok: false, errorCode: 'BROWSER_LAUNCH_FAIL', message: String(e) }
+  }
 
   const page = await browser.newPage()
 
   try {
-    await page.goto(siteUrl, {
-      waitUntil: 'domcontentloaded',
-      timeout: 30_000,
-    })
+    try {
+      await page.goto(siteUrl, {
+        waitUntil: 'domcontentloaded',
+        timeout: 30_000,
+      })
+    } catch (e) {
+      return { ok: false, errorCode: 'NAVIGATION_FAIL', message: String(e) }
+    }
 
-    await page.waitForSelector(selector, { timeout: 10_000 })
-    // Not sure the best solution here.
-    // For some sites, content loads dynamically after selector appears.
-    // Maybe this gets passed in as a param later?
+    try {
+      await page.waitForSelector(selector, { timeout: 10_000 })
+    } catch (e) {
+      return { ok: false, errorCode: 'SELECTOR_NOT_FOUND', message: String(e) }
+    }
+
     await new Promise((r) => setTimeout(r, delay))
 
-    const rawContent = await page.$eval(selector, (el: Element) => el.outerHTML)
+    const rawContent = await page.$eval(selector, (el) => el.outerHTML)
     const scrapedContent = extractTextAndLinks(rawContent, siteUrl)
 
     return {
+      ok: true,
       scrapedContent,
       hash: hashContent(JSON.stringify(scrapedContent)),
     }
   } finally {
-    await browser.close()
+    await browser.close().catch(() => {})
   }
 }

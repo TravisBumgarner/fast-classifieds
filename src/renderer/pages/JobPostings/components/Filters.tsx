@@ -12,11 +12,12 @@ import {
   Tooltip,
 } from '@mui/material'
 import { useEffect } from 'react'
-import { POSTING_STATUS, type PostingStatus, type ScrapeRunDTO } from '../../../../shared/types'
+import { JOB_POSTING_STATUS, type JobPostingStatus, type ScrapeRunDTO } from '../../../../shared/types'
 import Icon from '../../../sharedComponents/Icon'
 import { SPACING } from '../../../styles/consts'
+import { formatSelectOption } from '../../../utilities'
 
-export const DEFAULT_STATUS_FILTERS = ['new', 'applied', 'interview', 'offer'] as PostingStatus[]
+export const DEFAULT_STATUS_FILTERS = ['new', 'applied', 'interview', 'offer'] as JobPostingStatus[]
 
 const Filters = ({
   statusFilter,
@@ -26,8 +27,8 @@ const Filters = ({
   scrapeRunsFilter,
   setScrapeRunsFilter,
 }: {
-  statusFilter: PostingStatus[]
-  setStatusFilter: React.Dispatch<React.SetStateAction<PostingStatus[]>>
+  statusFilter: JobPostingStatus[]
+  setStatusFilter: React.Dispatch<React.SetStateAction<JobPostingStatus[]>>
   setPage: React.Dispatch<React.SetStateAction<number>>
   scrapeRuns: ScrapeRunDTO[]
   scrapeRunsFilter: string[]
@@ -60,25 +61,25 @@ const Filters = ({
     <Stack direction="row" spacing={SPACING.SMALL.PX} alignItems="center">
       <FormControl sx={{ width: 200 }} size="small">
         <InputLabel id="status-filter-label">Status</InputLabel>
-        <Select<PostingStatus[]>
+        <Select<JobPostingStatus[]>
           labelId="status-filter-label"
           multiple
           value={statusFilter}
           onChange={(e) => {
             const value = e.target.value
             setStatusFilter(
-              typeof value === 'string' ? (value.split(',') as PostingStatus[]) : (value as PostingStatus[]),
+              typeof value === 'string' ? (value.split(',') as JobPostingStatus[]) : (value as JobPostingStatus[]),
             )
             setPage(0)
           }}
           input={<OutlinedInput label="Status" />}
           renderValue={(selected) => {
-            if (selected.length === Object.values(POSTING_STATUS).length) return 'All'
+            if (selected.length === Object.values(JOB_POSTING_STATUS).length) return 'All'
             if (selected.length === 0) return 'None'
-            return selected.map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join(', ')
+            return selected.map((s) => formatSelectOption(s)).join(', ')
           }}
         >
-          {Object.values(POSTING_STATUS).map((status) => (
+          {Object.values(JOB_POSTING_STATUS).map((status) => (
             <MenuItem key={status} value={status}>
               <Checkbox checked={statusFilter.includes(status)} size="small" />
               <ListItemText primary={status.charAt(0).toUpperCase() + status.slice(1)} />
@@ -114,9 +115,11 @@ const Filters = ({
           </Select>
         </FormControl>
         <Tooltip title="Clear filters">
-          <IconButton onClick={handleClearAll} size="small" disabled={noneSelected}>
-            <Icon name="filterClear" />
-          </IconButton>
+          <span>
+            <IconButton onClick={handleClearAll} size="small" disabled={noneSelected}>
+              <Icon name="filterClear" />
+            </IconButton>
+          </span>
         </Tooltip>
       </Stack>
     </Stack>

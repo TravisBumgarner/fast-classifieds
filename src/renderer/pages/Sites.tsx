@@ -41,7 +41,7 @@ import { logger } from '../utilities'
 
 type SiteStatus = 'active' | 'inactive'
 
-type PostingStatus = 'new' | 'applied' | 'skipped' | 'interview' | 'rejected' | 'offer'
+type JobPostingStatus = 'new' | 'applied' | 'skipped' | 'interview' | 'rejected' | 'offer'
 
 type SortField = 'siteTitle' | 'status' | 'updatedAt' | 'prompt'
 type SortDirection = 'asc' | 'desc'
@@ -182,7 +182,7 @@ const Sites = () => {
     }
   }
 
-  const handleStatusChange = async (postingId: string, newStatus: PostingStatus, siteId: string) => {
+  const handleStatusChange = async (postingId: string, newStatus: JobPostingStatus, siteId: string) => {
     try {
       const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.UPDATE, {
         id: postingId,
@@ -202,7 +202,7 @@ const Sites = () => {
   }
 
   const statusOptions: {
-    value: PostingStatus
+    value: JobPostingStatus
     label: string
     color: 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'
   }[] = [
@@ -458,7 +458,7 @@ const Sites = () => {
                                             <Select
                                               value={job.status}
                                               onChange={(e) =>
-                                                handleStatusChange(job.id, e.target.value as PostingStatus, site.id)
+                                                handleStatusChange(job.id, e.target.value as JobPostingStatus, site.id)
                                               }
                                               renderValue={(value) => {
                                                 const option = statusOptions.find((opt) => opt.value === value)

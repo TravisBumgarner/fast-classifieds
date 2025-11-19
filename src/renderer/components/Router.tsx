@@ -1,8 +1,8 @@
 import { Route, Routes } from 'react-router-dom'
 import { ROUTES } from '../consts'
 import Debugger from '../pages/Debugger/Debugger'
+import JobPostings from '../pages/JobPostings/JobPostings'
 import NotFound from '../pages/NotFound'
-import Postings from '../pages/Postings/Postings'
 import Prompts from '../pages/Prompts'
 import ScrapeRuns from '../pages/ScrapeRuns'
 import Settings from '../pages/Settings'
@@ -11,7 +11,7 @@ import Sites from '../pages/Sites'
 export default function AppRouter() {
   return (
     <Routes>
-      <Route path={ROUTES.postings.href()} element={<Postings />} />
+      <Route path={ROUTES.postings.href()} element={<JobPostings />} />
       <Route path={ROUTES.settings.href()} element={<Settings />} />
       <Route path={ROUTES.sites.href()} element={<Sites />} />
       <Route path={ROUTES.prompts.href()} element={<Prompts />} />
