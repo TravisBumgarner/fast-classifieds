@@ -418,7 +418,6 @@ export default {
   updateSite,
   deleteSite,
   jobPostingsSuspectedDuplicatesCount,
-  // New duplicate helpers are appended at the bottom export list
   getAllPrompts,
   getPromptById,
   insertPrompt,
