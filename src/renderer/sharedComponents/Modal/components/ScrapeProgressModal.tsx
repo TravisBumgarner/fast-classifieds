@@ -99,7 +99,7 @@ const ScrapeProgressModal = (_props: ScrapeProgressModalProps) => {
 
   const handleClose = () => {
     if (isComplete) {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.POSTINGS] })
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.JOB_POSTINGS] })
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SCRAPE_RUNS] })
     }
     activeModalSignal.value = null

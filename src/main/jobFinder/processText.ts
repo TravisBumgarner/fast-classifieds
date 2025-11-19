@@ -8,7 +8,8 @@ import log from '../logger'
 const aiJobSchema = z.object({
   title: z.string(),
   jobUrl: z.string(),
-  explanation: z.string(),
+  description: z.string(),
+  recommendationExplanation: z.string(),
   location: z.string(),
   recommendedByAI: z.boolean(),
 })

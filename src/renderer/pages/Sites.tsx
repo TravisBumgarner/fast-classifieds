@@ -450,7 +450,7 @@ const Sites = () => {
                                               whiteSpace: 'nowrap',
                                             }}
                                           >
-                                            {job.explanation || '-'}
+                                            {job.description || '-'}
                                           </Typography>
                                         </TableCell>
                                         <TableCell>

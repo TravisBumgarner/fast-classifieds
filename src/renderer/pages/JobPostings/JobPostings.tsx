@@ -46,7 +46,7 @@ const JobPostings = () => {
   const [scrapeRunsFilter, setScrapeRunsFilter] = useState<string[]>([])
   const [sortField, setSortField] = useState<SortField>('createdAt')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
-  const [selectedPostings, setSelectedPostings] = useState<Set<string>>(new Set())
+  const [selectedJobPostings, setSelectedJobPostings] = useState<Set<string>>(new Set())
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(PAGINATION.DEFAULT_ROWS_PER_PAGE)
   const queryClient = useQueryClient()
@@ -67,12 +67,12 @@ const JobPostings = () => {
   })
 
   const { isLoading: isLoadingJobPostings, data: jobPostingsData } = useQuery({
-    queryKey: [QUERY_KEYS.POSTINGS],
+    queryKey: [QUERY_KEYS.JOB_POSTINGS],
     queryFn: async () => await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.GET_ALL, undefined),
     initialData: { postings: [], suspectedDuplicatesCount: 0 },
   })
 
-  const sortedPostings = [...jobPostingsData.postings].sort((a, b) => {
+  const sortedJobPostings = [...jobPostingsData.postings].sort((a, b) => {
     let aVal: string | number | Date
     let bVal: string | number | Date
 
@@ -107,7 +107,7 @@ const JobPostings = () => {
     return 0
   })
 
-  const filteredPostings = sortedPostings.filter((posting) => {
+  const filteredJobPostings = sortedJobPostings.filter((posting) => {
     const truthyChecks = []
 
     if (statusFilter.length === 0) {
@@ -124,7 +124,7 @@ const JobPostings = () => {
     return truthyChecks.every(Boolean)
   })
 
-  const paginatedPostings = filteredPostings.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+  const paginatedJobPostings = filteredJobPostings.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
 
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage)
@@ -135,50 +135,50 @@ const JobPostings = () => {
     setPage(0)
   }
 
-  const handleFindJobs = () => {
+  const handleFindJobPostings = () => {
     activeModalSignal.value = {
       id: MODAL_ID.SCRAPE_PROGRESS_MODAL,
     }
   }
 
   const handleOpenSelectedInBrowser = () => {
-    const postingsToOpen = filteredPostings.filter((posting) => selectedPostings.has(posting.id))
+    const postingsToOpen = filteredJobPostings.filter((posting) => selectedJobPostings.has(posting.id))
     postingsToOpen.forEach((posting) => {
       // @ts-expect-error - shell:openExternal is not in typed IPC but is defined in messages.ts
       window.electron.ipcRenderer.invoke('shell:openExternal', posting.siteUrl)
     })
-    setSelectedPostings(new Set())
+    setSelectedJobPostings(new Set())
   }
 
-  const handleTogglePosting = (id: string) => {
-    const newSelected = new Set(selectedPostings)
+  const handleToggleJobPosting = (id: string) => {
+    const newSelected = new Set(selectedJobPostings)
     if (newSelected.has(id)) {
       newSelected.delete(id)
     } else {
       newSelected.add(id)
     }
-    setSelectedPostings(newSelected)
+    setSelectedJobPostings(newSelected)
   }
 
-  const handleSelectAll = () => {
-    if (selectedPostings.size === filteredPostings.length) {
-      setSelectedPostings(new Set())
+  const handleSelectAllJobPostings = () => {
+    if (selectedJobPostings.size === filteredJobPostings.length) {
+      setSelectedJobPostings(new Set())
     } else {
-      setSelectedPostings(new Set(filteredPostings.map((p) => p.id)))
+      setSelectedJobPostings(new Set(filteredJobPostings.map((p) => p.id)))
     }
   }
 
-  const handleSelectedDuplicates = () => {
+  const handleSelectedDuplicateJobPostings = () => {
     activeModalSignal.value = {
       id: MODAL_ID.DUPLICATE_POSTINGS_MODAL,
     }
   }
 
-  const handleUpdateStatus = async (id: string, newStatus: JobPostingStatus) => {
+  const handleUpdateJobPostingStatus = async (id: string, newStatus: JobPostingStatus) => {
     try {
       const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.UPDATE, { id, data: { status: newStatus } })
       if (result.success) {
-        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.POSTINGS] })
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.JOB_POSTINGS] })
       } else {
         setError('Failed to update job posting status')
       }
@@ -188,7 +188,7 @@ const JobPostings = () => {
     }
   }
 
-  const getStatusColor = (status: JobPostingStatus): 'primary' | 'success' | 'error' | 'info' => {
+  const getJobPostingStatusColor = (status: JobPostingStatus): 'primary' | 'success' | 'error' | 'info' => {
     switch (status) {
       case 'new':
         return 'primary'
@@ -220,16 +220,16 @@ const JobPostings = () => {
         sx={{ marginBottom: SPACING.MEDIUM.PX }}
       >
         <Stack direction="row" spacing={SPACING.SMALL.PX} alignItems="center">
-          <Button size="small" variant="contained" onClick={handleFindJobs}>
+          <Button size="small" variant="contained" onClick={handleFindJobPostings}>
             Find Jobs
           </Button>
-          {selectedPostings.size > 0 && (
+          {selectedJobPostings.size > 0 && (
             <Button size="small" variant="outlined" onClick={handleOpenSelectedInBrowser}>
-              Open Selected ({selectedPostings.size})
+              Open Selected ({selectedJobPostings.size})
             </Button>
           )}
           {jobPostingsData.suspectedDuplicatesCount > 0 && (
-            <Button color="error" size="small" variant="outlined" onClick={handleSelectedDuplicates}>
+            <Button color="error" size="small" variant="outlined" onClick={handleSelectedDuplicateJobPostings}>
               Suspected duplicates found! ({jobPostingsData.suspectedDuplicatesCount})
             </Button>
           )}
@@ -264,9 +264,11 @@ const JobPostings = () => {
               <TableRow>
                 <TableCell padding="checkbox">
                   <Checkbox
-                    indeterminate={selectedPostings.size > 0 && selectedPostings.size < filteredPostings.length}
-                    checked={filteredPostings.length > 0 && selectedPostings.size === filteredPostings.length}
-                    onChange={handleSelectAll}
+                    indeterminate={
+                      selectedJobPostings.size > 0 && selectedJobPostings.size < filteredJobPostings.length
+                    }
+                    checked={filteredJobPostings.length > 0 && selectedJobPostings.size === filteredJobPostings.length}
+                    onChange={handleSelectAllJobPostings}
                   />
                 </TableCell>
                 <TableCell>
@@ -325,7 +327,7 @@ const JobPostings = () => {
                   </TableSortLabel>
                 </TableCell>
 
-                <TableCell>Explanation</TableCell>
+                <TableCell>Description</TableCell>
                 <TableCell>
                   <TableSortLabel
                     active={sortField === 'createdAt'}
@@ -341,7 +343,7 @@ const JobPostings = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredPostings.length === 0 ? (
+              {filteredJobPostings.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} align="center">
                     <Stack spacing={SPACING.SMALL.PX} alignItems="center" sx={{ py: 4 }}>
@@ -367,27 +369,29 @@ const JobPostings = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                paginatedPostings.map((posting) => (
-                  <TableRow key={posting.id} hover>
+                paginatedJobPostings.map((jobPosting) => (
+                  <TableRow key={jobPosting.id} hover>
                     <TableCell padding="checkbox">
                       <Checkbox
-                        checked={selectedPostings.has(posting.id)}
-                        onChange={() => handleTogglePosting(posting.id)}
+                        checked={selectedJobPostings.has(jobPosting.id)}
+                        onChange={() => handleToggleJobPosting(jobPosting.id)}
                       />
                     </TableCell>
-                    <TableCell>{posting.siteTitle || '-'}</TableCell>
-                    <TableCell>{posting.title}</TableCell>
-                    <TableCell>{posting.location || '-'}</TableCell>
+                    <TableCell>{jobPosting.siteTitle || '-'}</TableCell>
+                    <TableCell>{jobPosting.title}</TableCell>
+                    <TableCell>{jobPosting.location || '-'}</TableCell>
                     <TableCell>
                       <Stack direction="row" alignItems="center">
                         <FormControl size="small" sx={{ minWidth: 120 }}>
                           <Select
-                            value={posting.status}
-                            onChange={(e) => handleUpdateStatus(posting.id, e.target.value as JobPostingStatus)}
+                            value={jobPosting.status}
+                            onChange={(e) =>
+                              handleUpdateJobPostingStatus(jobPosting.id, e.target.value as JobPostingStatus)
+                            }
                             renderValue={(value) => (
                               <Chip
                                 label={value.charAt(0).toUpperCase() + value.slice(1)}
-                                color={getStatusColor(value)}
+                                color={getJobPostingStatusColor(value)}
                                 size="small"
                               />
                             )}
@@ -403,7 +407,7 @@ const JobPostings = () => {
                         <Tooltip title="Skip Posting">
                           <IconButton
                             size="small"
-                            onClick={() => handleUpdateStatus(posting.id, 'skipped')}
+                            onClick={() => handleUpdateJobPostingStatus(jobPosting.id, 'skipped')}
                             sx={{ ml: 1 }}
                           >
                             <Icon name="skip" />
@@ -412,33 +416,38 @@ const JobPostings = () => {
                       </Stack>
                     </TableCell>
                     <TableCell>
-                      {posting.recommendedByAI ? (
+                      {jobPosting.recommendedByAI ? (
                         <Chip label="AI Match" color="success" size="small" />
                       ) : (
-                        <Chip label="Not Recommended" color="default" size="small" />
+                        <Chip label="No match" color="default" size="small" />
                       )}
+                      <Tooltip title={jobPosting.recommendationExplanation}>
+                        <span>
+                          <Icon name="info" />
+                        </span>
+                      </Tooltip>
                     </TableCell>
                     <TableCell>
-                      <Tooltip title={posting.explanation || 'No explanation'}>
+                      <Tooltip title={jobPosting.description || 'No description'}>
                         <Typography
                           variant="body2"
                           sx={{
                             maxWidth: 275,
                           }}
                         >
-                          {`${posting.explanation?.slice(0, 75)}...` || '-'}
+                          {`${jobPosting.description?.slice(0, 75)}...` || '-'}
                         </Typography>
                       </Tooltip>
                     </TableCell>
-                    <TableCell>{new Date(posting.createdAt).toLocaleDateString()}</TableCell>
+                    <TableCell>{new Date(jobPosting.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell align="right">
                       <Tooltip title="Edit Posting">
                         <IconButton
                           size="small"
                           onClick={() => {
                             activeModalSignal.value = {
-                              id: MODAL_ID.EDIT_POSTING_MODAL,
-                              postingId: posting.id,
+                              id: MODAL_ID.EDIT_JOB_POSTING_MODAL,
+                              jobPostingId: jobPosting.id,
                             }
                           }}
                         >
@@ -447,7 +456,7 @@ const JobPostings = () => {
                       </Tooltip>
                       <Tooltip title="Open job posting in browser">
                         <span>
-                          <Link url={posting.jobUrl} />
+                          <Link url={jobPosting.jobUrl} />
                         </span>
                       </Tooltip>
                     </TableCell>
@@ -460,7 +469,7 @@ const JobPostings = () => {
         <TablePagination
           rowsPerPageOptions={PAGINATION.ROWS_PER_PAGE_OPTIONS}
           component="div"
-          count={filteredPostings.length}
+          count={filteredJobPostings.length}
           rowsPerPage={rowsPerPage}
           page={page}
           sx={{ flexShrink: 0 }}

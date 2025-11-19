@@ -5,8 +5,8 @@ import ChangelogModal, { type ChangelogModalProps } from './components/Changelog
 import ConfirmationModal, { type ConfirmationModalProps } from './components/ConfirmationModal'
 import DuplicateDetectionModal, { type DuplicateDetectionModalProps } from './components/DuplicateDetectionModal'
 import ImportSitesModal, { type ImportSitesModalProps } from './components/ImportSitesModal'
+import JobPostingModal, { type EditJobPostingModalProps } from './components/JobPostingModal'
 import OnboardingModal, { type OnboardingModalProps } from './components/OnboardingModal'
-import PostingModal, { type EditPostingModalProps } from './components/PostingModal'
 import PromptModal, { type AddPromptModalProps, type EditPromptModalProps } from './components/PromptModal'
 import ScrapeProgressModal, { type ScrapeProgressModalProps } from './components/ScrapeProgressModal'
 import SiteModal, { type AddSiteModalProps, type EditSiteModalProps } from './components/SiteModal'
@@ -22,7 +22,7 @@ export type ActiveModal =
   | OnboardingModalProps
   | ScrapeProgressModalProps
   | ChangelogModalProps
-  | EditPostingModalProps
+  | EditJobPostingModalProps
   | DuplicateDetectionModalProps
 
 export type ModalId = (typeof MODAL_ID)[keyof typeof MODAL_ID]
@@ -51,8 +51,8 @@ const RenderModal: FC = () => {
       return <ScrapeProgressModal {...(activeModalSignal.value as ScrapeProgressModalProps)} />
     case MODAL_ID.CHANGELOG_MODAL:
       return <ChangelogModal {...(activeModalSignal.value as ChangelogModalProps)} />
-    case MODAL_ID.EDIT_POSTING_MODAL:
-      return <PostingModal {...(activeModalSignal.value as EditPostingModalProps)} />
+    case MODAL_ID.EDIT_JOB_POSTING_MODAL:
+      return <JobPostingModal {...(activeModalSignal.value as EditJobPostingModalProps)} />
     case MODAL_ID.DUPLICATE_POSTINGS_MODAL:
       return <DuplicateDetectionModal {...(activeModalSignal.value as DuplicateDetectionModalProps)} />
     default:

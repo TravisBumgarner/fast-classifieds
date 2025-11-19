@@ -516,7 +516,7 @@ typedIpcMain.handle(CHANNEL.JOB_POSTINGS.GET_SUSPECTED_DUPLICATES, async () => {
 // Duplicate group detail
 typedIpcMain.handle(CHANNEL.JOB_POSTINGS.GET_DUPLICATE_GROUP, async (_event, params) => {
   try {
-    const postings = await queries.getJobPostingsByDuplicationId(params.duplicationDetectionId)
+    const postings = await queries.getJobPostings({ duplicationDetectionId: params.duplicationDetectionId })
     return { postings }
   } catch (error) {
     logger.error('Error getting duplicate group:', error)

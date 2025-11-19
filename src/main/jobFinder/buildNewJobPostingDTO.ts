@@ -4,7 +4,8 @@ import { generateDuplicationDetectionId } from './duplicateDetection'
 export const buildNewJobPostingDTO = (job: {
   title: string
   jobUrl: string
-  explanation: string
+  recommendationExplanation: string
+  description: string
   location: string
   recommendedByAI: boolean
   siteId: string

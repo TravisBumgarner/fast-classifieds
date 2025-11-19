@@ -77,7 +77,7 @@ const PostingCard = ({ posting, title }: { posting?: JobPostingDTO; title: strin
           )
         }
       />
-      <FieldRow label="Explanation" value={posting.explanation} />
+      <FieldRow label="Description" value={posting.description} />
       <FieldRow label="Created" value={new Date(posting.createdAt).toLocaleString()} />
     </Stack>
   )
@@ -213,7 +213,7 @@ const DuplicateDetectionModal = (_props: DuplicateDetectionModalProps) => {
   }
 
   const handleClose = () => {
-    queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.POSTINGS] })
+    queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.JOB_POSTINGS] })
   }
 
   return (

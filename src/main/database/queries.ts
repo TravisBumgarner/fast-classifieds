@@ -241,9 +241,11 @@ async function updateScrapeRun(
 async function getJobPostings({
   siteId,
   duplicateStatusArray,
+  duplicationDetectionId,
 }: {
   siteId?: string
   duplicateStatusArray?: JobPostingDuplicateStatus[]
+  duplicationDetectionId?: string
 }): Promise<JobPostingDTO[]> {
   const rows = await db
     .select({
@@ -251,7 +253,8 @@ async function getJobPostings({
       title: jobPostings.title,
       siteUrl: jobPostings.siteUrl,
       siteId: jobPostings.siteId,
-      explanation: jobPostings.explanation,
+      description: jobPostings.description,
+      recommendationExplanation: jobPostings.recommendationExplanation,
       location: jobPostings.location,
       status: jobPostings.status,
       createdAt: jobPostings.createdAt,
@@ -269,38 +272,9 @@ async function getJobPostings({
       and(
         siteId ? eq(jobPostings.siteId, siteId) : undefined,
         duplicateStatusArray ? inArray(jobPostings.duplicateStatus, duplicateStatusArray) : undefined,
+        duplicationDetectionId ? eq(jobPostings.duplicationDetectionId, duplicationDetectionId) : undefined,
       ),
     )
-    .orderBy(desc(jobPostings.createdAt))
-
-  return rows.map((r) => ({
-    ...r,
-    siteTitle: r.siteTitle ?? 'Unknown',
-  }))
-}
-
-async function getJobPostingsByDuplicationId(duplicationDetectionId: string): Promise<JobPostingDTO[]> {
-  const rows = await db
-    .select({
-      id: jobPostings.id,
-      title: jobPostings.title,
-      siteUrl: jobPostings.siteUrl,
-      siteId: jobPostings.siteId,
-      explanation: jobPostings.explanation,
-      location: jobPostings.location,
-      status: jobPostings.status,
-      createdAt: jobPostings.createdAt,
-      updatedAt: jobPostings.updatedAt,
-      scrapeRunId: jobPostings.scrapeRunId,
-      siteTitle: sites.siteTitle,
-      recommendedByAI: jobPostings.recommendedByAI,
-      jobUrl: jobPostings.jobUrl,
-      duplicationDetectionId: jobPostings.duplicationDetectionId,
-      duplicateStatus: jobPostings.duplicateStatus,
-    })
-    .from(jobPostings)
-    .leftJoin(sites, eq(jobPostings.siteId, sites.id))
-    .where(eq(jobPostings.duplicationDetectionId, duplicationDetectionId))
     .orderBy(desc(jobPostings.createdAt))
 
   return rows.map((r) => ({
@@ -427,7 +401,6 @@ export default {
   getScrapeTasksByRunId,
   getFailedTasksByRunId,
   getJobPostings,
-  getJobPostingsByDuplicationId,
   getSuspectedDuplicateGroups,
   nukeDatabase,
   skipNotRecommendedPostings,
