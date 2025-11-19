@@ -89,7 +89,8 @@ export type NewJobPostingDTO = {
   siteUrl: string
   jobUrl: string
   siteId: string
-  explanation: string
+  recommendationExplanation: string
+  description: string
   location: string
   status: JobPostingStatus
   scrapeRunId: string

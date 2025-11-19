@@ -11,23 +11,23 @@ import { formatSelectOption, logger } from '../../../utilities'
 import type { MODAL_ID } from '../Modal.consts'
 import DefaultModal from './DefaultModal'
 
-export interface EditPostingModalProps {
-  id: typeof MODAL_ID.EDIT_POSTING_MODAL
-  postingId: string
+export interface EditJobPostingModalProps {
+  id: typeof MODAL_ID.EDIT_JOB_POSTING_MODAL
+  jobPostingId: string
 }
 
-type PostingModalProps = EditPostingModalProps
+type JobPostingModalProps = EditJobPostingModalProps
 
 const JOB_POSTING_STATUSES: JobPostingStatus[] = ['new', 'applied', 'skipped', 'interview', 'rejected', 'offer']
 
-const PostingModal = (props: PostingModalProps) => {
-  const isEditMode = props.id === 'EDIT_POSTING_MODAL'
-  const postingId = isEditMode ? (props as EditPostingModalProps).postingId : undefined
+const JobPostingModal = (props: JobPostingModalProps) => {
+  const isEditMode = props.id === 'EDIT_JOB_POSTING_MODAL'
+  const jobPostingId = isEditMode ? (props as EditJobPostingModalProps).jobPostingId : undefined
 
   const [siteTitle, setSiteTitle] = useState('')
   const [title, setTitle] = useState('')
   const [siteUrl, setSiteUrl] = useState('')
-  const [explanation, setExplanation] = useState('')
+  const [description, setDescription] = useState('')
   const [location, setLocation] = useState('')
   const [status, setStatus] = useState<JobPostingStatus>('new')
   const [duplicateStatus, setDuplicateStatus] = useState<JobPostingDuplicateStatus>('unique')
@@ -39,17 +39,17 @@ const PostingModal = (props: PostingModalProps) => {
     activeModalSignal.value = null
   }
 
-  const loadPosting = useCallback(async () => {
-    if (!postingId) return
+  const loadJobPosting = useCallback(async () => {
+    if (!jobPostingId) return
     try {
       setLoading(true)
       const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.GET_ALL, undefined)
-      const posting = result.postings.find((p: JobPostingDTO) => p.id === postingId)
+      const posting = result.postings.find((p: JobPostingDTO) => p.id === jobPostingId)
       if (posting) {
         setSiteTitle(posting.siteTitle)
         setTitle(posting.title)
         setSiteUrl(posting.siteUrl)
-        setExplanation(posting.explanation)
+        setDescription(posting.description)
         setLocation(posting.location)
         setStatus(posting.status)
         // Don't allow selecting 'suspected_duplicate' in this editor; default to 'unique' if encountered
@@ -61,13 +61,13 @@ const PostingModal = (props: PostingModalProps) => {
     } finally {
       setLoading(false)
     }
-  }, [postingId])
+  }, [jobPostingId])
 
   useEffect(() => {
-    if (isEditMode && postingId) {
-      loadPosting()
+    if (isEditMode && jobPostingId) {
+      loadJobPosting()
     }
-  }, [isEditMode, postingId, loadPosting])
+  }, [isEditMode, jobPostingId, loadJobPosting])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -79,20 +79,20 @@ const PostingModal = (props: PostingModalProps) => {
         setLoading(false)
         return
       }
-      if (isEditMode && postingId) {
+      if (isEditMode && jobPostingId) {
         const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.UPDATE, {
-          id: postingId,
+          id: jobPostingId,
           data: {
             title,
             siteUrl,
-            explanation,
+            description,
             location,
             status,
             duplicateStatus,
           },
         })
         if (result.success) {
-          queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.POSTINGS] })
+          queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.JOB_POSTINGS] })
           activeModalSignal.value = null
         } else {
           setError(result.error || 'Failed to update posting')
@@ -164,9 +164,9 @@ const PostingModal = (props: PostingModalProps) => {
 
           <TextField
             size="small"
-            label="Explanation"
-            value={explanation}
-            onChange={(e) => setExplanation(e.target.value)}
+            label="Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
             fullWidth
             multiline
             minRows={3}
@@ -214,4 +214,4 @@ const PostingModal = (props: PostingModalProps) => {
   )
 }
 
-export default PostingModal
+export default JobPostingModal

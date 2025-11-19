@@ -27,9 +27,6 @@ CREATE TABLE `hashes` (
 	`created_at` integer NOT NULL
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `hashes_site_content_hash_unique` ON `hashes` (`site_content_hash`);--> statement-breakpoint
-CREATE UNIQUE INDEX `hashes_prompt_hash_unique` ON `hashes` (`prompt_hash`);--> statement-breakpoint
-CREATE UNIQUE INDEX `hashes_job_to_json_prompt_hash_unique` ON `hashes` (`job_to_json_prompt_hash`);--> statement-breakpoint
 CREATE TABLE `job_postings` (
 	`recommended_by_ai` integer NOT NULL,
 	`duplication_detection_id` text NOT NULL,
@@ -40,7 +37,8 @@ CREATE TABLE `job_postings` (
 	`site_url` text NOT NULL,
 	`job_url` text NOT NULL,
 	`site_id` text NOT NULL,
-	`explanation` text NOT NULL,
+	`recommendation_explanation` text NOT NULL,
+	`description` text NOT NULL,
 	`location` text NOT NULL,
 	`status` text DEFAULT 'new' NOT NULL,
 	`created_at` integer NOT NULL,

@@ -35,9 +35,9 @@ export const apiUsage = sqliteTable('api_usage', {
 
 export const hashes = sqliteTable('hashes', {
   id: text('id').primaryKey(),
-  siteContentHash: text('site_content_hash').notNull().unique(),
-  promptHash: text('prompt_hash').notNull().unique(),
-  jobToJSONPromptHash: text('job_to_json_prompt_hash').notNull().unique(),
+  siteContentHash: text('site_content_hash').notNull(),
+  promptHash: text('prompt_hash').notNull(),
+  jobToJSONPromptHash: text('job_to_json_prompt_hash').notNull(),
   siteId: text('site_id').notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
@@ -93,7 +93,8 @@ export const jobPostings = sqliteTable('job_postings', {
   siteUrl: text('site_url').notNull(),
   jobUrl: text('job_url').notNull(),
   siteId: text('site_id').notNull(),
-  explanation: text('explanation').notNull(),
+  recommendationExplanation: text('recommendation_explanation').notNull(),
+  description: text('description').notNull(),
   location: text('location').notNull(),
   status: text('status', {
     enum: Object.values(JOB_POSTING_STATUS) as [JobPostingStatus, ...JobPostingStatus[]],

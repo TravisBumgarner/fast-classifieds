@@ -32,7 +32,7 @@ export const ROUTES = {
 } as const
 
 export const QUERY_KEYS = {
-  POSTINGS: 'postings',
+  JOB_POSTINGS: 'jobPostings',
   PROMPTS: 'prompts',
   SCRAPE_RUNS: 'scrapeRuns',
   SITES: 'sites',

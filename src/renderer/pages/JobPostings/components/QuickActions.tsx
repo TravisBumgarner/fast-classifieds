@@ -28,7 +28,7 @@ const QuickActions = () => {
       body: "Are you sure you want to skip all job postings marked as 'Not Recommended'? This action cannot be undone.",
       confirmationCallback: async () => {
         await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.SKIP_NOT_RECOMMENDED_POSTINGS)
-        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.POSTINGS] })
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.JOB_POSTINGS] })
       },
     }
     handleMenuClose()
