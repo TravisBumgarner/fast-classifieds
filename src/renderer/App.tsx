@@ -1,10 +1,12 @@
 import { Box } from '@mui/material'
 import * as Sentry from '@sentry/electron/renderer'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
+import React from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import ErrorBoundary from './components/ErrorBoundary'
 import Navigation from './components/Navigation'
 import Router from './components/Router'
+import { QUERY_KEYS } from './consts'
 import useShowChangelog from './hooks/useShowChangelog'
 import useShowOnboarding from './hooks/useShowOnboarding'
 import RenderModal from './sharedComponents/Modal'
@@ -20,6 +22,17 @@ const queryClient = new QueryClient()
 function App() {
   useShowChangelog()
   useShowOnboarding()
+  const queryClient = useQueryClient()
+
+  // Invalidate job postings on scrape completion globally
+  React.useEffect(() => {
+    const unsub = window.electron.ipcRenderer.on('scraper:complete', () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.JOB_POSTINGS] })
+    })
+    return () => {
+      unsub()
+    }
+  }, [queryClient])
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>

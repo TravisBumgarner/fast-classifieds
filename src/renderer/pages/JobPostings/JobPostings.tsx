@@ -21,7 +21,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { CHANNEL } from '../../../shared/messages.types'
 import type { JobPostingStatus } from '../../../shared/types'
 import { PAGINATION, QUERY_KEYS } from '../../consts'
@@ -49,6 +49,7 @@ const JobPostings = () => {
   const [selectedJobPostings, setSelectedJobPostings] = useState<Set<string>>(new Set())
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(PAGINATION.DEFAULT_ROWS_PER_PAGE)
+  const [isScraping, setIsScraping] = useState(false)
   const queryClient = useQueryClient()
 
   const handleSort = (field: SortField) => {
@@ -135,11 +136,43 @@ const JobPostings = () => {
     setPage(0)
   }
 
-  const handleFindJobPostings = () => {
-    activeModalSignal.value = {
-      id: MODAL_ID.SCRAPE_PROGRESS_MODAL,
+  const handleFindJobPostings = async () => {
+    try {
+      const active = await ipcMessenger.invoke(CHANNEL.SCRAPER.GET_ACTIVE_RUN, undefined)
+      if (active?.hasActive) {
+        setIsScraping(true)
+        activeModalSignal.value = { id: MODAL_ID.SCRAPE_PROGRESS_MODAL }
+      } else {
+        const result = await ipcMessenger.invoke(CHANNEL.SCRAPER.START, undefined)
+        if (result.success) {
+          setIsScraping(true)
+          activeModalSignal.value = { id: MODAL_ID.SCRAPE_PROGRESS_MODAL }
+        } else {
+          // Show error inside progress modal for consistent UX
+          activeModalSignal.value = {
+            id: MODAL_ID.SCRAPE_PROGRESS_MODAL,
+            initialError: result.error || 'No sites available to scrape',
+          }
+        }
+      }
+    } catch (err) {
+      // Fallback to modal error display
+      activeModalSignal.value = {
+        id: MODAL_ID.SCRAPE_PROGRESS_MODAL,
+        initialError: 'Failed to start scraping',
+      }
+      logger.error(err)
     }
   }
+
+  useEffect(() => {
+    const unsub = window.electron.ipcRenderer.on('scraper:complete', () => {
+      setIsScraping(false)
+    })
+    return () => {
+      unsub()
+    }
+  }, [])
 
   const handleOpenSelectedInBrowser = () => {
     const postingsToOpen = filteredJobPostings.filter((posting) => selectedJobPostings.has(posting.id))
@@ -221,7 +254,7 @@ const JobPostings = () => {
       >
         <Stack direction="row" spacing={SPACING.SMALL.PX} alignItems="center">
           <Button size="small" variant="contained" onClick={handleFindJobPostings}>
-            Find Jobs
+            {isScraping ? 'Finding jobs…' : 'Find Jobs'}
           </Button>
           {selectedJobPostings.size > 0 && (
             <Button size="small" variant="outlined" onClick={handleOpenSelectedInBrowser}>

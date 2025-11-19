@@ -45,6 +45,7 @@ export const CHANNEL = {
   SCRAPER: {
     START: 'scraper:start',
     GET_PROGRESS: 'scraper:get-progress',
+    GET_ACTIVE_RUN: 'scraper:get-active-run',
   },
   DEBUG: {
     SCRAPE: 'debug:scrape',
@@ -229,6 +230,26 @@ export type Invokes = {
         }>
       }
       error?: string
+    }
+  }
+  [CHANNEL.SCRAPER.GET_ACTIVE_RUN]: {
+    args: undefined
+    result: {
+      hasActive: boolean
+      scrapeRunId?: string
+      progress?: {
+        status: ScraperProgress
+        totalSites: number
+        completedSites: number
+        sites: Array<{
+          siteId: string
+          siteTitle: string
+          siteUrl: string
+          status: ScraperSiteProgress
+          newJobsFound?: number
+          errorMessage?: string
+        }>
+      }
     }
   }
   [CHANNEL.DEBUG.SCRAPE]: {
