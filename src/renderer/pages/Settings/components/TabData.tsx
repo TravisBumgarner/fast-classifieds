@@ -15,8 +15,8 @@ import {
 import { useEffect, useState } from 'react'
 import { CHANNEL } from '../../../../shared/messages.types'
 import ipcMessenger from '../../../ipcMessenger'
+import logger from '../../../logger'
 import { SPACING } from '../../../styles/consts'
-import { logger } from '../../../utilities'
 
 const TabData = () => {
   const [backupDirectory, setBackupDirectory] = useState<string>('')

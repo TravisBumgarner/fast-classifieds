@@ -21,11 +21,11 @@ import { CHANNEL } from '../../shared/messages.types'
 import type { ScrapeRunDTO, ScrapeTaskDTO, SiteDTO } from '../../shared/types'
 import { PAGINATION } from '../consts'
 import ipcMessenger from '../ipcMessenger'
+import logger from '../logger'
 import Icon from '../sharedComponents/Icon'
 import Message from '../sharedComponents/Message'
 import PageWrapper from '../sharedComponents/PageWrapper'
 import { SPACING } from '../styles/consts'
-import { logger } from '../utilities'
 
 type Status = 'hash_exists' | 'new_data' | 'error'
 

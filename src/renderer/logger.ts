@@ -1,8 +1,9 @@
-import * as Sentry from '@sentry/electron/main'
-import electronLog from 'electron-log/main'
+// rendererLogger.ts
 
-const isProd = !process.defaultApp
-electronLog.initialize()
+import * as Sentry from '@sentry/electron/renderer'
+import log from 'electron-log/renderer'
+
+const isBundled = import.meta.env.PROD
 
 function toMessage(args: unknown[]): string {
   return args
@@ -21,34 +22,42 @@ function toMessage(args: unknown[]): string {
 }
 
 function sendToSentry(level: 'info' | 'warning' | 'error', args: unknown[]) {
-  if (!isProd) return
+  if (!isBundled) return
+
   if (level === 'error' && args[0] instanceof Error) {
     Sentry.captureException(args[0] as Error)
+
     if (args.length > 1) {
       Sentry.captureMessage(toMessage(args.slice(1)), 'info')
     }
-  } else {
-    Sentry.captureMessage(toMessage(args), level)
+    return
   }
+
+  Sentry.captureMessage(toMessage(args), level)
 }
 
 function write(level: 'info' | 'warn' | 'error', args: unknown[]) {
+  // Always log inside renderer via electron-log
   switch (level) {
     case 'info':
-      electronLog.info('[main]', ...args)
+      log.info('[renderer]', ...args)
       break
     case 'warn':
-      electronLog.warn('[main]', ...args)
+      log.warn('[renderer]', ...args)
       break
     case 'error':
-      electronLog.error('[main]', ...args)
+      log.error('[renderer]', ...args)
       break
   }
 
-  if (!isProd) {
-    const consoleFn = level === 'warn' ? console.warn : level === 'error' ? console.error : console.log
-    consoleFn(...args)
-  } else {
+  // Always console-log when NOT bundled (dev)
+  if (!isBundled) {
+    const fn = level === 'warn' ? console.warn : level === 'error' ? console.error : console.log
+    fn(...args)
+  }
+
+  // Send to Sentry only in production
+  if (isBundled) {
     const sentryLevel = level === 'warn' ? 'warning' : level
     sendToSentry(sentryLevel as 'info' | 'warning' | 'error', args)
   }

@@ -29,6 +29,11 @@ export const ROUTES = {
     label: 'Debug',
     target: '_self',
   },
+  feedback: {
+    href: () => '/feedback',
+    label: 'Feedback',
+    target: '_self',
+  },
 } as const
 
 export const QUERY_KEYS = {

@@ -14,7 +14,15 @@ import { ROUTES } from '../consts'
 import Icon from '../sharedComponents/Icon'
 import { SPACING } from '../styles/consts'
 
-const NAV_ROUTES: Array<keyof typeof ROUTES> = ['postings', 'prompts', 'sites', 'scrapeRuns', 'settings', 'debugger']
+const NAV_ROUTES: Array<keyof typeof ROUTES> = [
+  'postings',
+  'prompts',
+  'sites',
+  'scrapeRuns',
+  'settings',
+  'debugger',
+  'feedback',
+]
 
 const Navigation = () => {
   const location = useLocation()
