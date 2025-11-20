@@ -8,6 +8,32 @@ export interface ChangelogEntry {
 }
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.4.0',
+    date: '2025-11-19',
+    changes: [
+      {
+        category: 'Improved',
+        description: 'Job postings now show location, description, and if recommended by AI and why',
+      },
+      {
+        category: 'Improved',
+        description: 'Job postings can be edited for when AI does not extract the correct details',
+      },
+      {
+        category: 'New',
+        description: 'Duplicate detection for when AI finds the same job twice',
+      },
+      {
+        category: 'Improved',
+        description: 'Debugger data is now easier to read',
+      },
+      {
+        category: 'Improved',
+        description: 'Debugger site content can be searched',
+      },
+    ],
+  },
+  {
     version: '1.3.0',
     date: '2025-11-14',
     changes: [

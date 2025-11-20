@@ -140,6 +140,18 @@
         padding: 20px;
         color: #888;
       }
+
+      .job-extra td {
+        background: #fafafa;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .job-description,
+      .job-skills {
+        margin-bottom: 8px;
+        font-size: 0.95em;
+      }
+
     </style>
   </head>
   <body>
@@ -167,97 +179,167 @@
         </p>
       </section>
 
-      <section id="job-listings">
-        <h2>Job Postings!</h2>
-        <table class="jobs-table">
-          <thead>
-            <tr>
-              <th>Position</th>
-              <th>Department</th>
-              <th>Location</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody class="job-list">
-            <tr class="job-row" data-job-id="1">
-              <td class="job-title">Senior Software Engineer</td>
-              <td><span class="department-tag">Engineering</span></td>
-              <td class="location">San Francisco, CA</td>
-              <td>
-                <a href="/jobs/senior-software-engineer" class="job-link"
-                  >View Details</a
-                >
-              </td>
-            </tr>
-            <tr class="job-row" data-job-id="2">
-              <td class="job-title">Product Manager</td>
-              <td><span class="department-tag">Product</span></td>
-              <td class="location">New York, NY</td>
-              <td>
-                <a href="/jobs/product-manager" class="job-link"
-                  >View Details</a
-                >
-              </td>
-            </tr>
-            <tr class="job-row" data-job-id="3">
-              <td class="job-title">UX Designer</td>
-              <td><span class="department-tag">Design</span></td>
-              <td class="location">Remote</td>
-              <td>
-                <a href="/jobs/ux-designer" class="job-link">View Details</a>
-              </td>
-            </tr>
-            <tr class="job-row" data-job-id="4">
-              <td class="job-title">DevOps Engineer</td>
-              <td><span class="department-tag">Engineering</span></td>
-              <td class="location">Austin, TX</td>
-              <td>
-                <a href="/jobs/devops-engineer" class="job-link"
-                  >View Details</a
-                >
-              </td>
-            </tr>
-            <tr class="job-row" data-job-id="5">
-              <td class="job-title">Data Scientist</td>
-              <td><span class="department-tag">Data</span></td>
-              <td class="location">Seattle, WA</td>
-              <td>
-                <a href="/jobs/data-scientist" class="job-link">View Details</a>
-              </td>
-            </tr>
-            <tr class="job-row" data-job-id="6">
-              <td class="job-title">Marketing Manager</td>
-              <td><span class="department-tag">Marketing</span></td>
-              <td class="location">Los Angeles, CA</td>
-              <td>
-                <a href="/jobs/marketing-manager" class="job-link"
-                  >View Details</a
-                >
-              </td>
-            </tr>
-            <tr class="job-row" data-job-id="7">
-              <td class="job-title">Frontend Developer</td>
-              <td><span class="department-tag">Engineering</span></td>
-              <td class="location">Remote</td>
-              <td>
-                <a href="/jobs/frontend-developer" class="job-link"
-                  >View Details</a
-                >
-              </td>
-            </tr>
-            <tr class="job-row" data-job-id="8">
-              <td class="job-title">Customer Success Manager</td>
-              <td><span class="department-tag">Customer Success</span></td>
-              <td class="location">Boston, MA</td>
-              <td>
-                <a href="/jobs/customer-success-manager" class="job-link"
-                  >View Details</a
-                >
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
+     <section id="job-listings">
+  <h2>Job Postings!</h2>
+  <table class="jobs-table">
+    <thead>
+      <tr>
+        <th>Position</th>
+        <th>Department</th>
+        <th>Location</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody class="job-list">
+
+      <!-- 1 -->
+      <tr class="job-row" data-job-id="1">
+        <td class="job-title">Senior Software Engineer</td>
+        <td><span class="department-tag">Engineering</span></td>
+        <td class="location">San Francisco, CA</td>
+        <td><a href="/jobs/senior-software-engineer" class="job-link">View Details</a></td>
+      </tr>
+      <tr class="job-extra">
+        <td colspan="4">
+          <div class="job-description">
+            Lead development of complex systems while mentoring junior engineers. Work across the stack to deliver scalable, high-impact features.
+          </div>
+          <div class="job-skills">
+            <strong>Required skills:</strong> TypeScript, React, Node.js, system design, CI/CD, cloud infrastructure (AWS or GCP).
+          </div>
+        </td>
+      </tr>
+
+      <!-- 2 -->
+      <tr class="job-row" data-job-id="2">
+        <td class="job-title">Product Manager</td>
+        <td><span class="department-tag">Product</span></td>
+        <td class="location">New York, NY</td>
+        <td><a href="/jobs/product-manager" class="job-link">View Details</a></td>
+      </tr>
+      <tr class="job-extra">
+        <td colspan="4">
+          <div class="job-description">
+            Define product strategy and work with engineering, design, and stakeholders to deliver user-focused solutions. Own roadmap planning and feature prioritization.
+          </div>
+          <div class="job-skills">
+            <strong>Required skills:</strong> Product discovery, roadmap planning, analytics tools, UX fundamentals, cross-functional communication.
+          </div>
+        </td>
+      </tr>
+
+      <!-- 3 -->
+      <tr class="job-row" data-job-id="3">
+        <td class="job-title">UX Designer</td>
+        <td><span class="department-tag">Design</span></td>
+        <td class="location">Remote</td>
+        <td><a href="/jobs/ux-designer" class="job-link">View Details</a></td>
+      </tr>
+      <tr class="job-extra">
+        <td colspan="4">
+          <div class="job-description">
+            Craft intuitive user experiences through research, prototyping, and iterative testing. Collaborate closely with product and engineering to refine interactions.
+          </div>
+          <div class="job-skills">
+            <strong>Required skills:</strong> Figma, user research, interaction design, prototyping, usability testing.
+          </div>
+        </td>
+      </tr>
+
+      <!-- 4 -->
+      <tr class="job-row" data-job-id="4">
+        <td class="job-title">DevOps Engineer</td>
+        <td><span class="department-tag">Engineering</span></td>
+        <td class="location">Austin, TX</td>
+        <td><a href="/jobs/devops-engineer" class="job-link">View Details</a></td>
+      </tr>
+      <tr class="job-extra">
+        <td colspan="4">
+          <div class="job-description">
+            Improve and maintain core infrastructure powering Acme’s global platform. Automate deployments, monitor systems, and ensure reliability at scale.
+          </div>
+          <div class="job-skills">
+            <strong>Required skills:</strong> Kubernetes, Docker, CI/CD pipelines, Terraform, observability tools, Linux administration.
+          </div>
+        </td>
+      </tr>
+
+      <!-- 5 -->
+      <tr class="job-row" data-job-id="5">
+        <td class="job-title">Data Scientist</td>
+        <td><span class="department-tag">Data</span></td>
+        <td class="location">Seattle, WA</td>
+        <td><a href="/jobs/data-scientist" class="job-link">View Details</a></td>
+      </tr>
+      <tr class="job-extra">
+        <td colspan="4">
+          <div class="job-description">
+            Analyze large datasets to uncover insights and guide product decisions. Develop predictive models and collaborate with engineering to deploy them.
+          </div>
+          <div class="job-skills">
+            <strong>Required skills:</strong> Python, SQL, machine learning, statistical modeling, data visualization, experiment design.
+          </div>
+        </td>
+      </tr>
+
+      <!-- 6 -->
+      <tr class="job-row" data-job-id="6">
+        <td class="job-title">Marketing Manager</td>
+        <td><span class="department-tag">Marketing</span></td>
+        <td class="location">Los Angeles, CA</td>
+        <td><a href="/jobs/marketing-manager" class="job-link">View Details</a></td>
+      </tr>
+      <tr class="job-extra">
+        <td colspan="4">
+          <div class="job-description">
+            Shape Acme’s brand messaging and lead campaigns across multiple channels. Use data-driven insights to optimize engagement and growth.
+          </div>
+          <div class="job-skills">
+            <strong>Required skills:</strong> Campaign strategy, content creation, analytics tools, SEO/SEM, social media management.
+          </div>
+        </td>
+      </tr>
+
+      <!-- 7 -->
+      <tr class="job-row" data-job-id="7">
+        <td class="job-title">Frontend Developer</td>
+        <td><span class="department-tag">Engineering</span></td>
+        <td class="location">Remote</td>
+        <td><a href="/jobs/frontend-developer" class="job-link">View Details</a></td>
+      </tr>
+      <tr class="job-extra">
+        <td colspan="4">
+          <div class="job-description">
+            Build responsive, accessible user interfaces that power Acme’s core products. Collaborate with designers to implement pixel-perfect experiences.
+          </div>
+          <div class="job-skills">
+            <strong>Required skills:</strong> React, TypeScript, modern CSS, accessibility fundamentals, performance optimization.
+          </div>
+        </td>
+      </tr>
+
+      <!-- 8 -->
+      <tr class="job-row" data-job-id="8">
+        <td class="job-title">Customer Success Manager</td>
+        <td><span class="department-tag">Customer Success</span></td>
+        <td class="location">Boston, MA</td>
+        <td><a href="/jobs/customer-success-manager" class="job-link">View Details</a></td>
+      </tr>
+      <tr class="job-extra">
+        <td colspan="4">
+          <div class="job-description">
+            Support customers throughout their lifecycle and ensure strong adoption of Acme products. Build long-term relationships that drive success and retention.
+          </div>
+          <div class="job-skills">
+            <strong>Required skills:</strong> Communication, problem solving, CRM tools, onboarding processes, customer advocacy.
+          </div>
+        </td>
+      </tr>
+
+    </tbody>
+  </table>
+</section>
+
 
       <footer>
         <p>&copy; 2025 Acme Corporation. All rights reserved.</p>
