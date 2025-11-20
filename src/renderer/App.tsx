@@ -9,6 +9,7 @@ import Router from './components/Router'
 import { QUERY_KEYS } from './consts'
 import useShowChangelog from './hooks/useShowChangelog'
 import useShowOnboarding from './hooks/useShowOnboarding'
+import logger from './logger'
 import RenderModal from './sharedComponents/Modal'
 import { SPACING } from './styles/consts'
 import AppThemeProvider from './styles/Theme'
@@ -23,6 +24,8 @@ function App() {
   useShowChangelog()
   useShowOnboarding()
   const queryClient = useQueryClient()
+
+  logger.info('App rendered')
 
   // Invalidate job postings on scrape completion globally
   React.useEffect(() => {

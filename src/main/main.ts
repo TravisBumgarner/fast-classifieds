@@ -1,10 +1,11 @@
 import path from 'node:path'
 import * as Sentry from '@sentry/electron/main'
 import { app, BrowserWindow, type BrowserWindowConstructorOptions, screen } from 'electron'
-import log from 'electron-log/main'
+
 import started from 'electron-squirrel-startup'
 import { updateElectronApp } from 'update-electron-app'
 import { migrateProduction } from './database/client'
+import logger from './logger'
 import { setMainWindow } from './messages/messages'
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string
@@ -14,14 +15,12 @@ Sentry.init({
   dsn: 'https://aa9b99c0da19f5f16cde7295bcae0fa4@o196886.ingest.us.sentry.io/4510360742133760',
 })
 
-log.initialize()
-
 updateElectronApp({
   logger: {
-    log: log.log,
-    info: log.info,
-    warn: log.warn,
-    error: log.error,
+    log: logger.info,
+    info: logger.info,
+    warn: logger.warn,
+    error: logger.error,
   },
 })
 

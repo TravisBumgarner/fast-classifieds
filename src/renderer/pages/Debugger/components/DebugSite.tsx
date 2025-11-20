@@ -4,10 +4,10 @@ import { CHANNEL } from '../../../../shared/messages.types'
 import type { ScrapedContentDTO } from '../../../../shared/types'
 import { TOOLTIPS } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
+import logger from '../../../logger'
 import Icon from '../../../sharedComponents/Icon'
 import Message from '../../../sharedComponents/Message'
 import { SPACING } from '../../../styles/consts'
-import { logger } from '../../../utilities'
 
 const DebugSite = ({
   url,
