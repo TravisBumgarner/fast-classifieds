@@ -23,6 +23,7 @@ export const CHANNEL = {
     CREATE: 'sites:create',
     UPDATE: 'sites:update',
     DELETE: 'sites:delete',
+    IMPORT_BULK: 'sites:import-bulk',
   },
   STORE: {
     GET: 'store:get',
@@ -98,6 +99,11 @@ export type FromMain = {
     totalNewJobs: number
     successfulSites: number
     failedSites: number
+  }
+  'sites:import-progress': {
+    total: number
+    processed: number
+    last?: { url: string; success: boolean | null; error?: string }
   }
 }
 
@@ -175,6 +181,14 @@ export type Invokes = {
   [CHANNEL.SITES.CREATE]: {
     args: NewSiteDTO
     result: { success: true; id: string } | { success: false; error: string }
+  }
+  [CHANNEL.SITES.IMPORT_BULK]: {
+    args: { promptId: string; urls: string[] }
+    result: {
+      success: boolean
+      created: Array<{ url: string; title: string; id: string }>
+      failed: Array<{ url: string; error: string }>
+    }
   }
   [CHANNEL.SITES.UPDATE]: {
     args: UpdateSiteDTO

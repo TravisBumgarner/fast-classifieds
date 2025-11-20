@@ -207,6 +207,100 @@ typedIpcMain.handle(CHANNEL.SITES.CREATE, async (_event, params) => {
   }
 })
 
+// Bulk site import: fetch titles server-side to avoid renderer CSP/CORS limits
+typedIpcMain.handle(CHANNEL.SITES.IMPORT_BULK, async (_event, params) => {
+  const created: Array<{ url: string; title: string; id: string }> = []
+  const failed: Array<{ url: string; error: string }> = []
+  const TIMEOUT_MS = 15000
+
+  async function fetchTitle(url: string): Promise<string> {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS)
+    try {
+      const res = await fetch(url, {
+        redirect: 'follow',
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Fast-Classifieds Bulk Import)',
+          Accept: 'text/html,application/xhtml+xml',
+        },
+      })
+      clearTimeout(timeout)
+      if (!res.ok) throw new Error(`Status ${res.status}`)
+      const html = await res.text()
+      const match = html.match(/<title>([^<]*)<\/title>/i)
+      if (match?.[1]) return match[1].trim()
+      return new URL(url).hostname
+    } catch (error) {
+      clearTimeout(timeout)
+      if (error instanceof Error && error.name === 'AbortError') {
+        logger.info('Fetch timeout for', url)
+      }
+      try {
+        return new URL(url).hostname
+      } catch {
+        return 'Untitled Site'
+      }
+    }
+  }
+
+  for (const rawUrl of params.urls) {
+    const url = rawUrl.trim()
+    if (!url) continue
+    try {
+      // Validate URL format
+      let parsed: URL
+      try {
+        parsed = new URL(url)
+      } catch {
+        throw new Error('Invalid URL')
+      }
+
+      // Emit in-flight progress before network request
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('sites:import-progress', {
+          total: params.urls.length,
+          processed: created.length + failed.length,
+          last: { url: parsed.toString(), success: null },
+        })
+      }
+
+      const title = await fetchTitle(parsed.toString())
+      const insertResult = await queries.insertSite({
+        siteTitle: title,
+        siteUrl: parsed.toString(),
+        promptId: params.promptId,
+        selector: 'body',
+        status: 'active',
+      })
+      created.push({ url: parsed.toString(), title, id: insertResult[0]?.id })
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('sites:import-progress', {
+          total: params.urls.length,
+          processed: created.length + failed.length,
+          last: { url: parsed.toString(), success: true },
+        })
+      }
+    } catch (error) {
+      logger.error('Bulk import error for', url, error)
+      failed.push({ url, error: error instanceof Error ? error.message : 'Unknown error' })
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('sites:import-progress', {
+          total: params.urls.length,
+          processed: created.length + failed.length,
+          last: { url, success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+        })
+      }
+    }
+  }
+
+  return {
+    success: failed.length === 0,
+    created,
+    failed,
+  }
+})
+
 typedIpcMain.handle(CHANNEL.SITES.UPDATE, async (_event, params) => {
   try {
     const { id, ...updateData } = params

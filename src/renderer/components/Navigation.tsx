@@ -9,7 +9,6 @@ import Toolbar from '@mui/material/Toolbar'
 import { useState } from 'react'
 import { Link as RouterLink, useLocation } from 'react-router-dom'
 
-import Logo from '../assets/icon.png'
 import { ROUTES } from '../consts'
 import Icon from '../sharedComponents/Icon'
 import { SPACING } from '../styles/consts'
@@ -53,7 +52,9 @@ const Navigation = () => {
               display: 'flex',
             }}
           >
-            <img src={Logo} alt="Fast Classifieds Logo" style={{ height: '100%', aspectRatio: '1 / 1' }} />
+            <Typography variant="h1" sx={{ fontWeight: 'bold' }}>
+              Fast Classifieds
+            </Typography>
             <Typography variant="body1" sx={{ fontWeight: 'bold', ml: 0.5 }}>
               <sup>Alpha</sup>
             </Typography>

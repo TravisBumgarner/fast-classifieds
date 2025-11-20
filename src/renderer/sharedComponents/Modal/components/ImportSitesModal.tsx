@@ -4,6 +4,7 @@ import {
   CircularProgress,
   FormControl,
   InputLabel,
+  LinearProgress,
   MenuItem,
   Select,
   Stack,
@@ -32,6 +33,10 @@ const ImportSitesModal = (_props: ImportSitesModalProps) => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [failedDetails, setFailedDetails] = useState<Array<{ url: string; error: string }>>([])
+  const [showFailures, setShowFailures] = useState(false)
+  const [progressTotal, setProgressTotal] = useState<number | null>(null)
+  const [progressProcessed, setProgressProcessed] = useState(0)
   const [prompts, setPrompts] = useState<PromptDTO[]>([])
   const queryClient = useQueryClient()
 
@@ -52,21 +57,18 @@ const ImportSitesModal = (_props: ImportSitesModalProps) => {
     loadPrompts()
   }, [loadPrompts])
 
-  const fetchPageTitle = async (url: string): Promise<string> => {
-    try {
-      const response = await fetch(url, { mode: 'no-cors' })
-      const html = await response.text()
-      const match = html.match(/<title>([^<]*)<\/title>/)
-      return match ? match[1].trim() : new URL(url).hostname
-    } catch {
-      // Fallback to hostname if fetch fails
-      try {
-        return new URL(url).hostname
-      } catch {
-        return 'Untitled Site'
-      }
+  useEffect(() => {
+    if (!loading) return
+    const unsubscribe = window.electron.ipcRenderer.on('sites:import-progress', (data) => {
+      if (typeof data.total === 'number') setProgressTotal(data.total)
+      setProgressProcessed(data.processed)
+    })
+    return () => {
+      unsubscribe()
     }
-  }
+  }, [loading])
+
+  // Title fetching now handled in main process (bulk import IPC)
 
   const handleCloseModal = () => {
     activeModalSignal.value = null
@@ -75,6 +77,9 @@ const ImportSitesModal = (_props: ImportSitesModalProps) => {
   const handleImport = async () => {
     setError(null)
     setSuccess(null)
+    setFailedDetails([])
+    setProgressTotal(null)
+    setProgressProcessed(0)
     setLoading(true)
 
     try {
@@ -114,33 +119,15 @@ const ImportSitesModal = (_props: ImportSitesModalProps) => {
         return
       }
 
-      // Fetch titles and create sites
-      let successCount = 0
-      let failCount = 0
+      // Bulk import via main process
+      const result = await ipcMessenger.invoke(CHANNEL.SITES.IMPORT_BULK, {
+        promptId: selectedPrompt.id,
+        urls: validUrls,
+      })
 
-      for (const url of validUrls) {
-        try {
-          const title = await fetchPageTitle(url)
-
-          const result = await ipcMessenger.invoke(CHANNEL.SITES.CREATE, {
-            siteTitle: title,
-            siteUrl: url,
-            promptId: selectedPrompt.id,
-            selector: 'body',
-            status: 'active',
-          })
-
-          if (result.success) {
-            successCount++
-          } else {
-            failCount++
-            logger.error(`Failed to create site for ${url}:`, result.error)
-          }
-        } catch (err) {
-          failCount++
-          logger.error(`Error importing ${url}:`, err)
-        }
-      }
+      const successCount = result.created.length
+      const failCount = result.failed.length
+      setFailedDetails(result.failed)
 
       if (successCount > 0) {
         setSuccess(
@@ -152,13 +139,25 @@ const ImportSitesModal = (_props: ImportSitesModalProps) => {
         activeModalSignal.value = null
         queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SITES] })
       } else {
-        setError(`Failed to import all ${failCount} sites`)
+        setError(
+          failCount > 0 ? `Failed to import all ${failCount} site${failCount > 1 ? 's' : ''}` : 'No sites imported',
+        )
       }
     } catch (err) {
       setError('An error occurred during import')
       logger.error(err)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleCopyFailures = async () => {
+    try {
+      const text = failedDetails.map((f) => `${f.url} \t${f.error}`).join('\n')
+      await navigator.clipboard.writeText(text)
+      setSuccess((prev) => (prev ? prev + ' (Failure list copied)' : 'Failure list copied'))
+    } catch (err) {
+      logger.error('Failed to copy failures', err)
     }
   }
 
@@ -182,6 +181,49 @@ const ImportSitesModal = (_props: ImportSitesModalProps) => {
             <Typography color="success.main" variant="body2">
               {success}
             </Typography>
+          )}
+
+          {failedDetails.length > 0 && (
+            <Stack spacing={SPACING.SMALL.PX}>
+              <Button size="small" variant="text" onClick={() => setShowFailures((s) => !s)}>
+                {showFailures ? 'Hide Failed URLs' : `Show Failed (${failedDetails.length})`}
+              </Button>
+              {showFailures && (
+                <Box
+                  sx={{
+                    maxHeight: 160,
+                    overflowY: 'auto',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    borderRadius: 1,
+                    p: 1,
+                    bgcolor: 'background.paper',
+                  }}
+                >
+                  <Stack spacing={0.5}>
+                    {failedDetails.map((f) => (
+                      <Typography key={f.url} variant="caption" color="error">
+                        {f.url} – {f.error}
+                      </Typography>
+                    ))}
+                  </Stack>
+                  <Stack direction="row" justifyContent="flex-end" mt={1}>
+                    <Button size="small" variant="outlined" onClick={handleCopyFailures}>
+                      Copy Failed List
+                    </Button>
+                  </Stack>
+                </Box>
+              )}
+            </Stack>
+          )}
+
+          {loading && progressTotal && progressTotal > 0 && (
+            <Stack spacing={SPACING.SMALL.PX}>
+              <LinearProgress variant="determinate" value={(progressProcessed / progressTotal) * 100} />
+              <Typography variant="caption" color="textSecondary">
+                Imported {progressProcessed} / {progressTotal}
+              </Typography>
+            </Stack>
           )}
 
           <FormControl fullWidth required disabled={loading} size="small">
