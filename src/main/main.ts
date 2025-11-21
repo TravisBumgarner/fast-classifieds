@@ -8,6 +8,7 @@ import { migrateProduction } from './database/client'
 import logger from './logger'
 import { setMainWindow } from './messages/shared'
 import './messages'
+import { backfill } from './database/backfill'
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string
 declare const MAIN_WINDOW_VITE_NAME: string
@@ -69,7 +70,11 @@ const createWindow = () => {
 }
 
 app.on('ready', () => {
-  migrateProduction()
+  if (app.isPackaged) {
+    migrateProduction()
+  } else {
+    backfill()
+  }
   createWindow()
 })
 

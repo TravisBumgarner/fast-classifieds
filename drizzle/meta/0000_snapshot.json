@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "97cf3854-6671-4d8c-9d31-007dc6c27948",
+  "id": "8d713004-7e82-462c-856f-23b3c1af1d6a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "api_usage": {
@@ -188,9 +188,9 @@
     "job_postings": {
       "name": "job_postings",
       "columns": {
-        "recommended_by_ai": {
-          "name": "recommended_by_ai",
-          "type": "integer",
+        "ai_recommendation_status": {
+          "name": "ai_recommendation_status",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false

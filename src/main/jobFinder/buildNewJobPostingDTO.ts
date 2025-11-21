@@ -1,4 +1,9 @@
-import { JOB_POSTING_DUPLICATE_STATUS, JOB_POSTING_STATUS, type NewJobPostingDTO } from '../../shared/types'
+import {
+  type AIRecommendationStatus,
+  JOB_POSTING_DUPLICATE_STATUS,
+  JOB_POSTING_STATUS,
+  type NewJobPostingDTO,
+} from '../../shared/types'
 import { generateDuplicationDetectionId } from './duplicateDetection'
 
 export const buildNewJobPostingDTO = (job: {
@@ -7,7 +12,7 @@ export const buildNewJobPostingDTO = (job: {
   recommendationExplanation: string
   description: string
   location: string
-  recommendedByAI: boolean
+  aiRecommendationStatus: AIRecommendationStatus
   siteId: string
   scrapeRunId: string
   siteUrl: string

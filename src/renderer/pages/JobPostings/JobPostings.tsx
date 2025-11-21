@@ -22,7 +22,11 @@ import {
 } from '@mui/material'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
-import type { JobPostingStatus } from '../../../shared/types'
+import {
+  AI_RECOMMENDATION_STATUS,
+  type JobPostingStatus,
+  type AIRecommendationStatus as TypeAIRecommendationStatus,
+} from '../../../shared/types'
 import { CHANNEL_INVOKES_FROM_MAIN } from '../../../shared/types/messages.fromMain'
 import { CHANNEL_INVOKES } from '../../../shared/types/messages.invokes'
 import { PAGINATION, QUERY_KEYS } from '../../consts'
@@ -38,8 +42,38 @@ import { SPACING } from '../../styles/consts'
 import Filters, { DEFAULT_STATUS_FILTERS } from './components/Filters'
 import QuickActions from './components/QuickActions'
 
-type SortField = 'company' | 'title' | 'status' | 'createdAt' | 'location' | 'recommendedByAI'
+type SortField = 'company' | 'title' | 'status' | 'createdAt' | 'location' | 'aiRecommendationStatus'
 type SortDirection = 'asc' | 'desc'
+
+const AIRecommendationStatus = ({ status, id }: { status: TypeAIRecommendationStatus; id: string }) => {
+  const markAsHumanOverride = async () => {
+    await ipcMessenger.invoke(CHANNEL_INVOKES.JOB_POSTINGS.UPDATE, {
+      id,
+      data: { aiRecommendationStatus: AI_RECOMMENDATION_STATUS.HUMAN_OVERRIDE },
+    })
+  }
+
+  if (status === AI_RECOMMENDATION_STATUS.RECOMMENDED) {
+    return <Chip label="AI Match" color="success" size="small" />
+  }
+
+  if (status === AI_RECOMMENDATION_STATUS.NOT_RECOMMENDED) {
+    return (
+      <Box>
+        <Chip label="No match" color="default" size="small" />
+        <Tooltip title="Mark as human approved">
+          <IconButton onClick={markAsHumanOverride}>
+            <Icon name="check" />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    )
+  }
+
+  if (status === AI_RECOMMENDATION_STATUS.HUMAN_OVERRIDE) {
+    return <Chip label="User Match" color="info" size="small" />
+  }
+}
 
 const JobPostings = () => {
   const [error, setError] = useState<string | null>(null)
@@ -355,9 +389,9 @@ const JobPostings = () => {
                     </span>
                   </Tooltip>
                   <TableSortLabel
-                    active={sortField === 'recommendedByAI'}
-                    direction={sortField === 'recommendedByAI' ? sortDirection : 'asc'}
-                    onClick={() => handleSort('recommendedByAI' as SortField)}
+                    active={sortField === 'aiRecommendationStatus'}
+                    direction={sortField === 'aiRecommendationStatus' ? sortDirection : 'asc'}
+                    onClick={() => handleSort('aiRecommendationStatus' as SortField)}
                   >
                     Recommended{' '}
                   </TableSortLabel>
@@ -452,11 +486,7 @@ const JobPostings = () => {
                       </Stack>
                     </TableCell>
                     <TableCell>
-                      {jobPosting.recommendedByAI ? (
-                        <Chip label="AI Match" color="success" size="small" />
-                      ) : (
-                        <Chip label="No match" color="default" size="small" />
-                      )}
+                      <AIRecommendationStatus id={jobPosting.id} status={jobPosting.aiRecommendationStatus} />
                       <Tooltip title={jobPosting.recommendationExplanation}>
                         <span>
                           <Icon name="info" />

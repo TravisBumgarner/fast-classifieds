@@ -12,7 +12,7 @@ import DebugAI from './components/DebugAI'
 import DebugSite from './components/DebugSite'
 
 const Debugger = () => {
-  const [url, setUrl] = useState('http://localhost:3000')
+  const [url, setUrl] = useState('http://acmeco.fake')
   const [selector, setSelector] = useState('body')
   const [siteTitle, setSiteTitle] = useState('local')
   const [scrapedContent, setScrapedContent] = useState<ScrapedContentDTO>([])

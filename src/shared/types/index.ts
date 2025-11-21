@@ -6,6 +6,13 @@ type TimestampsAndID = {
   updatedAt: Date
 }
 
+export const AI_RECOMMENDATION_STATUS = {
+  RECOMMENDED: 'recommended',
+  NOT_RECOMMENDED: 'not_recommended',
+  HUMAN_OVERRIDE: 'human_override',
+} as const
+export type AIRecommendationStatus = (typeof AI_RECOMMENDATION_STATUS)[keyof typeof AI_RECOMMENDATION_STATUS]
+
 export const JOB_POSTING_DUPLICATE_STATUS = {
   UNIQUE: 'unique',
   SUSPECTED_DUPLICATE: 'suspected_duplicate',
@@ -94,7 +101,7 @@ export type NewJobPostingDTO = {
   location: string
   status: JobPostingStatus
   scrapeRunId: string
-  recommendedByAI: boolean
+  aiRecommendationStatus: AIRecommendationStatus
   duplicationDetectionId: string
   duplicateStatus: JobPostingDuplicateStatus
 }

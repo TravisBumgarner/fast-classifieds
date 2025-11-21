@@ -5,6 +5,7 @@ import { drizzle } from 'drizzle-orm/better-sqlite3'
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator'
 import { app } from 'electron'
 import log from '../logger'
+import { backfill } from './backfill'
 
 // Use userData directory for the database in production, current directory in dev
 const dbPath = app.isPackaged ? path.join(app.getPath('userData'), 'data.sqlite') : './data.sqlite'

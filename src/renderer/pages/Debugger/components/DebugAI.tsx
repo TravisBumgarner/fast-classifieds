@@ -201,7 +201,7 @@ const DebugAI = ({
             <Typography component="pre">
               {job.title} - {job.location}
             </Typography>
-            <Typography component="pre">Recommended By AI: {job.recommendedByAI ? 'Yes' : 'No'}</Typography>
+            <Typography component="pre">Recommended By AI: {job.aiRecommendationStatus}</Typography>
             <Typography component="pre">{job.siteUrl}</Typography>
           </Box>
         ))}
