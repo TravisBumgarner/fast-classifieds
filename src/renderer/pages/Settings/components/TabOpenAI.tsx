@@ -81,7 +81,9 @@ const TabOpenAI = ({
                   }}
                   onClick={(e) => {
                     e.preventDefault()
-                    window.electron.shell.openExternal('https://platform.openai.com/settings/organization/api-keys')
+                    ipcMessenger.invoke(CHANNEL.UTILS.OPEN_URL, {
+                      url: 'https://platform.openai.com/settings/organization/api-keys',
+                    })
                   }}
                 >
                   Get your API key from OpenAI
@@ -118,7 +120,7 @@ const TabOpenAI = ({
                   }}
                   onClick={(e) => {
                     e.preventDefault()
-                    window.electron.shell.openExternal('https://platform.openai.com/docs/pricing')
+                    ipcMessenger.invoke(CHANNEL.UTILS.OPEN_URL, { url: 'https://platform.openai.com/docs/pricing' })
                   }}
                 >
                   View available models

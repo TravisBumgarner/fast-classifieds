@@ -278,9 +278,9 @@ const SiteModal = (props: SiteModalProps) => {
                         style={{ textDecoration: 'underline', marginLeft: 4 }}
                         onClick={(e) => {
                           e.preventDefault()
-                          window.electron.shell.openExternal(
-                            'https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be',
-                          )
+                          window.electron.ipcRenderer.invoke(CHANNEL.UTILS.OPEN_URL, {
+                            url: 'https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be',
+                          })
                         }}
                       >
                         Watch tutorial

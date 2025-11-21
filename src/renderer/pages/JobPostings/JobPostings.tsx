@@ -177,8 +177,7 @@ const JobPostings = () => {
   const handleOpenSelectedInBrowser = () => {
     const postingsToOpen = filteredJobPostings.filter((posting) => selectedJobPostings.has(posting.id))
     postingsToOpen.forEach((posting) => {
-      // @ts-expect-error - shell:openExternal is not in typed IPC but is defined in messages.ts
-      window.electron.ipcRenderer.invoke('shell:openExternal', posting.siteUrl)
+      ipcMessenger.invoke(CHANNEL.UTILS.OPEN_URL, { url: posting.siteUrl })
     })
     setSelectedJobPostings(new Set())
   }

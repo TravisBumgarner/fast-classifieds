@@ -44,7 +44,7 @@ const PostingCard = ({ posting, title }: { posting?: JobPostingDTO; title: strin
   }
 
   const openJob = () => {
-    if (posting.jobUrl) window.electron.shell.openExternal(posting.jobUrl)
+    if (posting.jobUrl) ipcMessenger.invoke(CHANNEL.UTILS.OPEN_URL, { url: posting.jobUrl })
   }
 
   return (

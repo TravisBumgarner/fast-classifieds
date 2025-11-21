@@ -63,6 +63,9 @@ export const CHANNEL = {
     GET_SUSPECTED_DUPLICATES: 'job-postings:get-suspected-duplicates',
     GET_DUPLICATE_GROUP: 'job-postings:get-duplicate-group',
   },
+  UTILS: {
+    OPEN_URL: 'utils:open-url',
+  },
 } as const
 
 export type FromRenderer = {
@@ -320,6 +323,12 @@ export type Invokes = {
     args: {
       id: string
       data: Partial<NewJobPostingDTO>
+    }
+    result: { success: true } | { success: false; error: string }
+  }
+  [CHANNEL.UTILS.OPEN_URL]: {
+    args: {
+      url: string
     }
     result: { success: true } | { success: false; error: string }
   }

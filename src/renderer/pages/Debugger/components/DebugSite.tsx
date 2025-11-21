@@ -183,7 +183,9 @@ const DebugSite = ({
             }}
             onClick={(e) => {
               e.preventDefault()
-              window.electron.shell.openExternal('https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be')
+              ipcMessenger.invoke(CHANNEL.UTILS.OPEN_URL, {
+                url: 'https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be',
+              })
             }}
           >
             Watch the tutorial

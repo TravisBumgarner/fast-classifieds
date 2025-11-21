@@ -29,9 +29,6 @@ const electronHandler = {
       return ipcRenderer.invoke(channel, args)
     },
   },
-  shell: {
-    openExternal: (url: string) => ipcRenderer.invoke('shell:openExternal', url),
-  },
 }
 
 contextBridge.exposeInMainWorld('electron', electronHandler)

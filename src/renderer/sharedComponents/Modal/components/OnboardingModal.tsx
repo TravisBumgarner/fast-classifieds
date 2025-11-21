@@ -91,7 +91,9 @@ const OnboardingModal = () => {
             }}
             onClick={(e) => {
               e.preventDefault()
-              window.electron.shell.openExternal('https://www.youtube.com/watch?v=FQKY70r2288&feature=youtu.be')
+              ipcMessenger.invoke(CHANNEL.UTILS.OPEN_URL, {
+                url: 'https://www.youtube.com/watch?v=FQKY70r2288&feature=youtu.be',
+              })
             }}
           >
             Watch the tutorial

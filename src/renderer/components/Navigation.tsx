@@ -8,9 +8,10 @@ import MenuItem from '@mui/material/MenuItem'
 import Toolbar from '@mui/material/Toolbar'
 import { useState } from 'react'
 import { Link as RouterLink, useLocation } from 'react-router-dom'
-
+import { CHANNEL } from 'src/shared/messages.types'
 import Logo from '../assets/icon.png'
 import { ROUTES } from '../consts'
+import ipcMessenger from '../ipcMessenger'
 import Icon from '../sharedComponents/Icon'
 import { SPACING } from '../styles/consts'
 
@@ -39,8 +40,7 @@ const Navigation = () => {
 
   const handleExternalLink = (url: string) => {
     handleMenuClose()
-    // @ts-expect-error - shell:openExternal is not in typed IPC but is defined in messages.ts
-    window.electron.ipcRenderer.invoke('shell:openExternal', url)
+    ipcMessenger.invoke(CHANNEL.UTILS.OPEN_URL, { url })
   }
 
   return (
