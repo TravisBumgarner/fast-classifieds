@@ -90,79 +90,87 @@ const ScrapeRunTasks = ({ scrapeRunId, isExpanded }: { scrapeRunId: string; isEx
   })
 
   return (
-    <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-      <Box sx={{ margin: 2 }}>
-        <Typography variant="h6" gutterBottom component="div">
-          Site Scan Details
-        </Typography>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell>
-                <TableSortLabel
-                  active={taskSortField === 'siteUrl'}
-                  direction={taskSortField === 'siteUrl' ? taskSortDirection : 'asc'}
-                  onClick={() => handleTaskSort('siteUrl')}
-                >
-                  Company
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={taskSortField === 'status'}
-                  direction={taskSortField === 'status' ? taskSortDirection : 'asc'}
-                  onClick={() => handleTaskSort('status')}
-                >
-                  Status
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={taskSortField === 'newPostingsFound'}
-                  direction={taskSortField === 'newPostingsFound' ? taskSortDirection : 'asc'}
-                  onClick={() => handleTaskSort('newPostingsFound')}
-                >
-                  New Postings
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>Error Message</TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={taskSortField === 'completedAt'}
-                  direction={taskSortField === 'completedAt' ? taskSortDirection : 'asc'}
-                  onClick={() => handleTaskSort('completedAt')}
-                >
-                  Completed At
-                </TableSortLabel>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {sortedTasks.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} align="center">
-                  <Typography variant="body2" color="textSecondary">
-                    No task details available
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            ) : (
-              sortedTasks.map((task) => (
-                <TableRow key={task.id}>
-                  <TableCell>{getSiteTitle(task.siteId)}</TableCell>
+    <TableRow>
+      <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={9}>
+        <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+          <Box sx={{ margin: 2 }}>
+            <Typography variant="h6" gutterBottom component="div">
+              Site Scan Details
+            </Typography>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
                   <TableCell>
-                    <Chip label={formatSelectOption(task.status)} color={getStatusColor(task.status)} size="small" />
+                    <TableSortLabel
+                      active={taskSortField === 'siteUrl'}
+                      direction={taskSortField === 'siteUrl' ? taskSortDirection : 'asc'}
+                      onClick={() => handleTaskSort('siteUrl')}
+                    >
+                      Company
+                    </TableSortLabel>
                   </TableCell>
-                  <TableCell>{task.newPostingsFound}</TableCell>
-                  <TableCell>{task.errorMessage || '-'}</TableCell>
-                  <TableCell>{task.completedAt ? new Date(task.completedAt).toLocaleString() : '-'}</TableCell>
+                  <TableCell>
+                    <TableSortLabel
+                      active={taskSortField === 'status'}
+                      direction={taskSortField === 'status' ? taskSortDirection : 'asc'}
+                      onClick={() => handleTaskSort('status')}
+                    >
+                      Status
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell>
+                    <TableSortLabel
+                      active={taskSortField === 'newPostingsFound'}
+                      direction={taskSortField === 'newPostingsFound' ? taskSortDirection : 'asc'}
+                      onClick={() => handleTaskSort('newPostingsFound')}
+                    >
+                      New Postings
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell>Error Message</TableCell>
+                  <TableCell>
+                    <TableSortLabel
+                      active={taskSortField === 'completedAt'}
+                      direction={taskSortField === 'completedAt' ? taskSortDirection : 'asc'}
+                      onClick={() => handleTaskSort('completedAt')}
+                    >
+                      Completed At
+                    </TableSortLabel>
+                  </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </Box>
-    </Collapse>
+              </TableHead>
+              <TableBody>
+                {sortedTasks.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} align="center">
+                      <Typography variant="body2" color="textSecondary">
+                        No task details available
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  sortedTasks.map((task) => (
+                    <TableRow key={task.id}>
+                      <TableCell>{getSiteTitle(task.siteId)}</TableCell>
+                      <TableCell>
+                        <Chip
+                          label={formatSelectOption(task.status)}
+                          color={getStatusColor(task.status)}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>{task.newPostingsFound}</TableCell>
+                      <TableCell>{task.errorMessage || '-'}</TableCell>
+                      <TableCell>{task.completedAt ? new Date(task.completedAt).toLocaleString() : '-'}</TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </Box>
+        </Collapse>
+      </TableCell>
+    </TableRow>
   )
 }
 

@@ -1,7 +1,5 @@
 import {
   Box,
-  Chip,
-  IconButton,
   Paper,
   Stack,
   Table,
@@ -12,7 +10,6 @@ import {
   TablePagination,
   TableRow,
   TableSortLabel,
-  Tooltip,
   Typography,
 } from '@mui/material'
 import { Fragment, useCallback, useEffect, useState } from 'react'
@@ -21,11 +18,10 @@ import { CHANNEL_INVOKES } from '../../../shared/types/messages.invokes'
 import { PAGINATION } from '../../consts'
 import ipcMessenger from '../../ipcMessenger'
 import logger from '../../logger'
-import Icon from '../../sharedComponents/Icon'
 import Message from '../../sharedComponents/Message'
 import PageWrapper from '../../sharedComponents/PageWrapper'
 import { SPACING } from '../../styles/consts'
-import { formatSelectOption } from '../../utilities'
+import ScrapeRun from './components/ScrapeRun'
 import ScrapeRunDetails from './components/ScrapeRunTasks'
 
 type RunSortField = 'createdAt' | 'status' | 'totalSites' | 'successfulSites' | 'failedSites'
@@ -199,45 +195,14 @@ const ScrapeRuns = () => {
                 </TableRow>
               ) : (
                 paginatedRuns.map((scrapeRun) => {
-                  const isExpanded = expandedRunId === scrapeRun.id
-
-                  const duration =
-                    scrapeRun.completedAt && scrapeRun.createdAt
-                      ? Math.round(
-                          (new Date(scrapeRun.completedAt).getTime() - new Date(scrapeRun.createdAt).getTime()) / 1000,
-                        )
-                      : null
-
                   return (
                     <Fragment key={scrapeRun.id}>
-                      <TableRow hover>
-                        <TableCell>
-                          <Tooltip title={isExpanded ? 'Collapse details' : 'Expand details'}>
-                            <IconButton size="small" onClick={() => setExpandedRunId(isExpanded ? null : scrapeRun.id)}>
-                              <Icon name={isExpanded ? 'down' : 'right'} />
-                            </IconButton>
-                          </Tooltip>
-                        </TableCell>
-                        <TableCell>{new Date(scrapeRun.createdAt).toLocaleString()}</TableCell>
-                        <TableCell>
-                          <Chip
-                            label={formatSelectOption(scrapeRun.status)}
-                            // color={getStatusColor(run.status)}
-                            size="small"
-                          />
-                        </TableCell>
-                        <TableCell>{scrapeRun.totalSites}</TableCell>
-                        <TableCell>{scrapeRun.successfulSites}</TableCell>
-                        <TableCell>{scrapeRun.failedSites}</TableCell>
-                        <TableCell>{duration !== null ? `${duration}s` : 'In progress...'}</TableCell>
-                        <TableCell>{scrapeRun.comments || '-'}</TableCell>
-                      </TableRow>
-
-                      <TableRow>
-                        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={9}>
-                          <ScrapeRunDetails scrapeRunId={scrapeRun.id} isExpanded={isExpanded} />
-                        </TableCell>
-                      </TableRow>
+                      <ScrapeRun
+                        scrapeRun={scrapeRun}
+                        isExpanded={expandedRunId === scrapeRun.id}
+                        setExpandedRunId={setExpandedRunId}
+                      />
+                      <ScrapeRunDetails scrapeRunId={scrapeRun.id} isExpanded={expandedRunId === scrapeRun.id} />
                     </Fragment>
                   )
                 })
