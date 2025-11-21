@@ -13,7 +13,7 @@ import {
 } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
-import { CHANNEL } from '../../../../shared/messages.types'
+import { CHANNEL_INVOKES } from '../../../../shared/types/messages.invokes'
 import { QUERY_KEYS } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
 import logger from '../../../logger'
@@ -46,7 +46,7 @@ const PromptModal = (props: PromptModalProps) => {
   const loadPrompt = useCallback(async (id: string) => {
     try {
       setLoading(true)
-      const result = await ipcMessenger.invoke(CHANNEL.PROMPTS.GET_BY_ID, {
+      const result = await ipcMessenger.invoke(CHANNEL_INVOKES.PROMPTS.GET_BY_ID, {
         id,
       })
       if (result.prompt) {
@@ -89,7 +89,7 @@ const PromptModal = (props: PromptModalProps) => {
       setLoading(true)
 
       if (isEdit && 'promptId' in props) {
-        const result = await ipcMessenger.invoke(CHANNEL.PROMPTS.UPDATE, {
+        const result = await ipcMessenger.invoke(CHANNEL_INVOKES.PROMPTS.UPDATE, {
           id: props.promptId,
           title,
           content,
@@ -101,7 +101,7 @@ const PromptModal = (props: PromptModalProps) => {
           return
         }
       } else {
-        const result = await ipcMessenger.invoke(CHANNEL.PROMPTS.CREATE, {
+        const result = await ipcMessenger.invoke(CHANNEL_INVOKES.PROMPTS.CREATE, {
           title,
           content,
           status,

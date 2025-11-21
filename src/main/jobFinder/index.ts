@@ -1,8 +1,10 @@
 import type { BrowserWindow } from 'electron'
 import { SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT } from '../../shared/consts'
 import { errorCodeToMessage } from '../../shared/errors'
+import { CHANNEL_INVOKES_FROM_MAIN } from '../../shared/types/messages.fromMain'
 import queries from '../database/queries'
 import log from '../logger'
+import { typedIpcMain } from '../messages/ipcMain'
 import store from '../store'
 import { hashContent } from '../utilities'
 import { buildNewJobPostingDTO } from './buildNewJobPostingDTO'
@@ -223,7 +225,7 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
     // Send initial progress to renderer
     if (mainWindow && !mainWindow.isDestroyed()) {
       log.info('[Scraper] Sending initial progress for runId:', scrapeRunId)
-      mainWindow.webContents.send('scraper:progress', {
+      typedIpcMain.send(CHANNEL_INVOKES_FROM_MAIN.SCRAPE.PROGRESS, {
         scrapeRunId,
         progress,
       })
@@ -249,7 +251,7 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
         // Send progress update to renderer
         if (mainWindow && !mainWindow.isDestroyed()) {
           log.info('[Scraper] Sending progress update for site', i, 'runId:', scrapeRunId)
-          mainWindow.webContents.send('scraper:progress', {
+          typedIpcMain.send(CHANNEL_INVOKES_FROM_MAIN.SCRAPE.PROGRESS, {
             scrapeRunId,
             progress: activeRuns.get(scrapeRunId),
           })
@@ -270,7 +272,7 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
               currentProgress.sites[i].status = status
               activeRuns.set(scrapeRunId, currentProgress)
               if (mainWindow && !mainWindow.isDestroyed()) {
-                mainWindow.webContents.send('scraper:progress', {
+                typedIpcMain.send(CHANNEL_INVOKES_FROM_MAIN.SCRAPE.PROGRESS, {
                   scrapeRunId,
                   progress: currentProgress,
                 })
@@ -322,7 +324,7 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
 
       // Send completion event
       if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send('scraper:complete', {
+        typedIpcMain.send(CHANNEL_INVOKES_FROM_MAIN.SCRAPE.COMPLETE, {
           scrapeRunId,
           totalNewJobs,
           successfulSites,

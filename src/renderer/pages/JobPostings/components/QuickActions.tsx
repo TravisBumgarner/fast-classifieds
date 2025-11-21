@@ -1,7 +1,7 @@
 import { Button, ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { CHANNEL } from '../../../../shared/messages.types'
+import { CHANNEL_INVOKES } from '../../../../shared/types/messages.invokes'
 import { QUERY_KEYS } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
 import Icon from '../../../sharedComponents/Icon'
@@ -27,7 +27,7 @@ const QuickActions = () => {
       title: "Skip all 'Not Recommended' listings?",
       body: "Are you sure you want to skip all job postings marked as 'Not Recommended'? This action cannot be undone.",
       confirmationCallback: async () => {
-        await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.SKIP_NOT_RECOMMENDED_POSTINGS)
+        await ipcMessenger.invoke(CHANNEL_INVOKES.JOB_POSTINGS.SKIP_NOT_RECOMMENDED_POSTINGS)
         queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.JOB_POSTINGS] })
       },
     }

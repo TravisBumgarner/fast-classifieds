@@ -1,6 +1,6 @@
 import { useSignalEffect, useSignals } from '@preact/signals-react/runtime'
 import { CURRENT_VERSION } from '../../shared/changelog'
-import { CHANNEL } from '../../shared/messages.types'
+import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
 import ipcMessenger from '../ipcMessenger'
 import { MODAL_ID } from '../sharedComponents/Modal/Modal.consts'
 import { activeModalSignal, onboardingCompletedSignal } from '../signals'
@@ -12,7 +12,7 @@ const useShowChangelog = () => {
 
     if (!onboardingCompletedSignal.value) return
 
-    ipcMessenger.invoke(CHANNEL.STORE.GET, undefined).then(({ changelogLastSeenVersion }) => {
+    ipcMessenger.invoke(CHANNEL_INVOKES.STORE.GET, undefined).then(({ changelogLastSeenVersion }) => {
       if (changelogLastSeenVersion !== CURRENT_VERSION) {
         // Show changelog modal after a short delay to let the app render
         activeModalSignal.value = {
@@ -20,7 +20,7 @@ const useShowChangelog = () => {
           showLatestOnly: true,
         }
         // Update the last seen version
-        ipcMessenger.invoke(CHANNEL.STORE.SET, {
+        ipcMessenger.invoke(CHANNEL_INVOKES.STORE.SET, {
           changelogLastSeenVersion: CURRENT_VERSION,
         })
       }

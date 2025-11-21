@@ -1,6 +1,6 @@
 import { Alert, Box, Button, Stack, TextField, Tooltip, Typography } from '@mui/material'
 import { useState } from 'react'
-import { CHANNEL } from '../../../../shared/messages.types'
+import { CHANNEL_INVOKES } from '../../../../shared/types/messages.invokes'
 import ipcMessenger from '../../../ipcMessenger'
 import Icon from '../../../sharedComponents/Icon'
 import { SPACING } from '../../../styles/consts'
@@ -22,7 +22,7 @@ const TabJobFinder = ({
 
   const handleSubmit = async () => {
     try {
-      await ipcMessenger.invoke(CHANNEL.STORE.SET, {
+      await ipcMessenger.invoke(CHANNEL_INVOKES.STORE.SET, {
         scrapeDelay,
       })
       setScrapeMessage({

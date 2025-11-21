@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Frontend Developer - Acme Corp</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+          Cantarell, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: #f5f5f5;
+      }
+
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px 20px;
+        text-align: center;
+        margin-bottom: 40px;
+        border-radius: 8px;
+      }
+
+      .back-link {
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 20px;
+        display: inline-block;
+        padding: 8px 16px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 4px;
+        transition: all 0.3s;
+      }
+
+      .back-link:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.6);
+      }
+
+      h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        font-weight: 700;
+      }
+
+      h2 {
+        font-size: 1.8em;
+        margin: 30px 0 15px;
+        color: #667eea;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 8px;
+      }
+
+      h3 {
+        font-size: 1.3em;
+        margin: 25px 0 10px;
+        color: #555;
+      }
+
+      .job-meta {
+        background: white;
+        padding: 25px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+      }
+
+      .meta-item {
+        text-align: center;
+        padding: 15px;
+        background: #f8f9ff;
+        border-radius: 6px;
+      }
+
+      .meta-label {
+        font-weight: 600;
+        color: #667eea;
+        margin-bottom: 5px;
+      }
+
+      .meta-value {
+        font-size: 1.1em;
+        color: #333;
+      }
+
+      .content-section {
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      ul {
+        padding-left: 20px;
+        margin: 15px 0;
+      }
+
+      li {
+        margin-bottom: 8px;
+      }
+
+      .requirements-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-top: 20px;
+      }
+
+      .skills-list {
+        list-style: none;
+        padding: 0;
+      }
+
+      .skills-list li {
+        background: #e8eaf6;
+        color: #667eea;
+        padding: 8px 15px;
+        margin: 8px 0;
+        border-radius: 20px;
+        display: inline-block;
+        margin-right: 10px;
+        font-weight: 500;
+      }
+
+      .apply-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 8px;
+        text-align: center;
+        margin-top: 40px;
+      }
+
+      .apply-btn {
+        background: white;
+        color: #667eea;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 25px;
+        font-size: 1.1em;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .apply-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      }
+
+      .department-tag {
+        background: #e8eaf6;
+        color: #667eea;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 0.9em;
+        font-weight: 500;
+      }
+
+      footer {
+        text-align: center;
+        margin-top: 60px;
+        padding: 20px;
+        color: #888;
+      }
+
+      .highlight-box {
+        background: #f0f7ff;
+        border-left: 4px solid #667eea;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 0 8px 8px 0;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <a href="../index.html" class="back-link">← Back to All Jobs</a>
+        <h1>Frontend Developer</h1>
+        <p><span class="department-tag">Engineering</span> • Remote</p>
+      </header>
+
+      <div class="job-meta">
+        <div class="meta-item">
+          <div class="meta-label">Department</div>
+          <div class="meta-value">Engineering</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Location</div>
+          <div class="meta-value">Remote</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Employment Type</div>
+          <div class="meta-value">Full-time</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Experience Level</div>
+          <div class="meta-value">Mid-level</div>
+        </div>
+      </div>
+
+      <section class="content-section">
+        <h2>Job Description</h2>
+        <p>
+          We're looking for a talented Frontend Developer to join our growing engineering team. You'll be responsible for building responsive, accessible user interfaces that power Acme's core products and serve millions of users worldwide. This role offers the opportunity to work with cutting-edge technologies and collaborate closely with our design and product teams.
+        </p>
+        
+        <div class="highlight-box">
+          <strong>What makes this role exciting:</strong> You'll be working on products that directly impact user experience and have the freedom to influence technical decisions and architectural choices.
+        </div>
+
+        <h3>Key Responsibilities</h3>
+        <ul>
+          <li>Build and maintain responsive web applications using React and TypeScript</li>
+          <li>Collaborate with designers to implement pixel-perfect, accessible user interfaces</li>
+          <li>Optimize application performance and ensure cross-browser compatibility</li>
+          <li>Write clean, maintainable code with comprehensive testing</li>
+          <li>Participate in code reviews and contribute to engineering best practices</li>
+          <li>Work closely with backend engineers to integrate APIs and services</li>
+          <li>Stay up-to-date with frontend technologies and share knowledge with the team</li>
+        </ul>
+      </section>
+
+      <section class="content-section">
+        <h2>Requirements & Qualifications</h2>
+        
+        <div class="requirements-grid">
+          <div>
+            <h3>Required Skills</h3>
+            <ul class="skills-list">
+              <li>React</li>
+              <li>TypeScript</li>
+              <li>Modern CSS</li>
+              <li>HTML5</li>
+              <li>JavaScript ES6+</li>
+              <li>Git</li>
+              <li>Responsive Design</li>
+              <li>Web Accessibility</li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3>Nice to Have</h3>
+            <ul class="skills-list">
+              <li>Next.js</li>
+              <li>GraphQL</li>
+              <li>Testing (Jest, Cypress)</li>
+              <li>Webpack/Vite</li>
+              <li>CSS-in-JS</li>
+              <li>Performance Optimization</li>
+              <li>Design Systems</li>
+              <li>Node.js</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>Experience Requirements</h3>
+        <ul>
+          <li>3+ years of professional frontend development experience</li>
+          <li>Strong portfolio demonstrating modern web application development</li>
+          <li>Experience with component-based architecture and state management</li>
+          <li>Familiarity with agile development processes</li>
+          <li>Understanding of web performance optimization techniques</li>
+          <li>Experience working in collaborative, cross-functional teams</li>
+        </ul>
+      </section>
+
+      <section class="content-section">
+        <h2>What We Offer</h2>
+        <ul>
+          <li><strong>Competitive Salary:</strong> $90,000 - $130,000 based on experience</li>
+          <li><strong>Equity Package:</strong> Stock options with high growth potential</li>
+          <li><strong>Health & Wellness:</strong> Comprehensive health, dental, and vision insurance</li>
+          <li><strong>Work-Life Balance:</strong> Flexible hours and unlimited PTO policy</li>
+          <li><strong>Remote First:</strong> Work from anywhere with occasional team gatherings</li>
+          <li><strong>Learning & Development:</strong> $2,000 annual budget for courses, conferences, and books</li>
+          <li><strong>Equipment:</strong> Top-tier laptop and home office setup budget</li>
+          <li><strong>Team Culture:</strong> Collaborative environment with smart, passionate colleagues</li>
+        </ul>
+      </section>
+
+      <section class="content-section">
+        <h2>Our Engineering Culture</h2>
+        <p>
+          At Acme, we believe great software comes from great teams. Our engineering culture emphasizes:
+        </p>
+        <ul>
+          <li><strong>Code Quality:</strong> We value clean, well-tested code and thorough code reviews</li>
+          <li><strong>Continuous Learning:</strong> Regular tech talks, hackathons, and knowledge sharing</li>
+          <li><strong>Innovation:</strong> 20% time for exploring new technologies and side projects</li>
+          <li><strong>Collaboration:</strong> Cross-functional teams working toward shared goals</li>
+          <li><strong>Impact:</strong> Your work directly affects millions of users worldwide</li>
+        </ul>
+        
+        <div class="highlight-box">
+          <strong>Fun fact:</strong> Our frontend team has contributed to several open-source projects and regularly speaks at conferences. We'd love for you to be part of that community involvement!
+        </div>
+      </section>
+
+      <section class="apply-section">
+        <h2>Ready to Join Us?</h2>
+        <p>
+          We're excited to hear from passionate frontend developers who want to make a real impact. 
+          If you're ready to work on challenging problems with a supportive team, we'd love to chat!
+        </p>
+        <a href="mailto:careers@acmecorp.com?subject=Frontend Developer Application" class="apply-btn">
+          Apply Now
+        </a>
+        <p style="margin-top: 15px; font-size: 0.9em;">
+          Please include your resume, portfolio, and a brief note about what excites you about this role.
+        </p>
+      </section>
+
+      <footer>
+        <p>&copy; 2025 Acme Corporation. All rights reserved.</p>
+      </footer>
+    </div>
+  </body>
+</html>

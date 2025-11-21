@@ -17,8 +17,8 @@ import {
   Typography,
 } from '@mui/material'
 import { Fragment, useCallback, useEffect, useState } from 'react'
-import { CHANNEL } from '../../shared/messages.types'
 import type { ScrapeRunDTO, ScrapeTaskDTO, SiteDTO } from '../../shared/types'
+import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
 import { PAGINATION } from '../consts'
 import ipcMessenger from '../ipcMessenger'
 import logger from '../logger'
@@ -119,7 +119,7 @@ const ScrapeRuns = () => {
     try {
       setLoading(true)
       setError(null)
-      const result = await ipcMessenger.invoke(CHANNEL.SCRAPE_RUNS.GET_ALL, undefined)
+      const result = await ipcMessenger.invoke(CHANNEL_INVOKES.SCRAPE_RUNS.GET_ALL, undefined)
       setRuns(result.runs)
     } catch (err) {
       setError('Failed to load scrape runs')
@@ -131,7 +131,7 @@ const ScrapeRuns = () => {
 
   const loadSites = useCallback(async () => {
     try {
-      const result = await ipcMessenger.invoke(CHANNEL.SITES.GET_ALL, undefined)
+      const result = await ipcMessenger.invoke(CHANNEL_INVOKES.SITES.GET_ALL, undefined)
       setSites(result.sites)
     } catch (err) {
       logger.error('Failed to load sites:', err)
@@ -146,7 +146,7 @@ const ScrapeRuns = () => {
     }
 
     try {
-      const result = await ipcMessenger.invoke(CHANNEL.SCRAPE_RUNS.GET_TASKS, {
+      const result = await ipcMessenger.invoke(CHANNEL_INVOKES.SCRAPE_RUNS.GET_TASKS, {
         scrapeRunId: runId,
       })
       setTasks((prev) => ({ ...prev, [runId]: result.tasks }))

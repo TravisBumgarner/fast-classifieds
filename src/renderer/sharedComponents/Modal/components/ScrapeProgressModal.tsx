@@ -14,7 +14,9 @@ import {
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CHANNEL, type SiteProgressDTO } from '../../../../shared/messages.types'
+import type { SiteProgressDTO } from '../../../../shared/types'
+import { CHANNEL_INVOKES_FROM_MAIN } from '../../../../shared/types/messages.fromMain'
+import { CHANNEL_INVOKES } from '../../../../shared/types/messages.invokes'
 import { QUERY_KEYS, ROUTES } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
 import logger from '../../../logger'
@@ -43,7 +45,12 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
     logger.info('[ScrapeProgressModal] Setting up listeners for runId:', scrapeRunId)
 
     // Listen for progress updates
-    const unsubscribeProgress = window.electron.ipcRenderer.on('scraper:progress', (data) => {
+    const unsubscribeProgress = window.electron.ipcRenderer.on(CHANNEL_INVOKES_FROM_MAIN.SCRAPE.PROGRESS, (data) => {
+      if (!data.progress) {
+        logger.warn('[ScrapeProgressModal] Received progress update with no progress data:', data)
+        return
+      }
+
       logger.info('[ScrapeProgressModal] Received progress update:', data)
       if (data.scrapeRunId === scrapeRunId) {
         logger.info('[ScrapeProgressModal] Updating sites:', data.progress.sites)
@@ -51,7 +58,7 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
       }
     })
 
-    const unsubscribeComplete = window.electron.ipcRenderer.on('scraper:complete', (data) => {
+    const unsubscribeComplete = window.electron.ipcRenderer.on(CHANNEL_INVOKES_FROM_MAIN.SCRAPE.COMPLETE, (data) => {
       logger.info('[ScrapeProgressModal] Received complete event:', data)
       if (data.scrapeRunId === scrapeRunId) {
         setTotalNewJobs(data.totalNewJobs)
@@ -69,7 +76,7 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
   const attachToActiveRun = useCallback(async () => {
     try {
       logger.info('[ScrapeProgressModal] Attaching to active scrape run...')
-      const result = await ipcMessenger.invoke(CHANNEL.SCRAPER.GET_ACTIVE_RUN, undefined)
+      const result = await ipcMessenger.invoke(CHANNEL_INVOKES.SCRAPER.GET_ACTIVE_RUN, undefined)
       if (!result.hasActive || !result.scrapeRunId) {
         // Only set the default error if we didn't get an initial error
         setError((prev) => prev ?? 'No active scrape run')

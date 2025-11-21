@@ -8,14 +8,16 @@ import type {
   PromptDTO,
   ScrapedContentDTO,
   ScrapeRunDTO,
+  ScraperProgress,
+  ScraperSiteProgress,
   ScrapeTaskDTO,
   SiteDTO,
   StoreSchema,
   UpdatePromptDTO,
   UpdateSiteDTO,
-} from '../shared/types'
+} from '.'
 
-export const CHANNEL = {
+export const CHANNEL_INVOKES = {
   SITES: {
     GET_ALL: 'sites:get-all',
     GET_ALL_WITH_JOB_COUNTS: 'sites:get-all-with-job-counts',
@@ -63,58 +65,25 @@ export const CHANNEL = {
     GET_SUSPECTED_DUPLICATES: 'job-postings:get-suspected-duplicates',
     GET_DUPLICATE_GROUP: 'job-postings:get-duplicate-group',
   },
+  UTILS: {
+    OPEN_URL: 'utils:open-url',
+  },
 } as const
 
-export type FromRenderer = {
-  'does-not-exist': { id: string }
-}
-
-export type ScraperProgress = 'pending' | 'in_progress' | 'completed' | 'failed'
-
-export type ScraperSiteProgress = 'pending' | 'scraping' | 'processing' | 'complete' | 'error'
-
-export type SiteProgressDTO = {
-  siteId: string
-  siteUrl: string
-  siteTitle: string
-  status: ScraperSiteProgress
-  newJobsFound?: number
-  errorMessage?: string
-}
-
-export type FromMain = {
-  'does-not-exist': { ok: boolean; id: string }
-  'scraper:progress': {
-    scrapeRunId: string
-    progress: {
-      status: ScraperProgress
-      totalSites: number
-      completedSites: number
-      sites: Array<SiteProgressDTO>
-    }
-  }
-  'scraper:complete': {
-    scrapeRunId: string
-    totalNewJobs: number
-    successfulSites: number
-    failedSites: number
-  }
-}
-
 export type Invokes = {
-  [CHANNEL.STORE.GET]: {
+  [CHANNEL_INVOKES.STORE.GET]: {
     args: undefined
     result: StoreSchema
   }
-  [CHANNEL.STORE.SET]: {
+  [CHANNEL_INVOKES.STORE.SET]: {
     args: Partial<StoreSchema>
     result: { success: boolean }
   }
-  [CHANNEL.APP.GET_BACKUP_DIRECTORY]: {
+  [CHANNEL_INVOKES.APP.GET_BACKUP_DIRECTORY]: {
     args: undefined
     result: { backupDirectory: string }
   }
-  [CHANNEL.APP.EXPORT_ALL_DATA]: {
+  [CHANNEL_INVOKES.APP.EXPORT_ALL_DATA]: {
     args: undefined
     result: {
       success: boolean
@@ -128,7 +97,7 @@ export type Invokes = {
       error?: string
     }
   }
-  [CHANNEL.APP.RESTORE_ALL_DATA]: {
+  [CHANNEL_INVOKES.APP.RESTORE_ALL_DATA]: {
     args: {
       data: {
         sites: Array<SiteDTO>
@@ -142,77 +111,77 @@ export type Invokes = {
     }
     result: { success: boolean; error?: string }
   }
-  [CHANNEL.APP.NUKE_DATABASE]: {
+  [CHANNEL_INVOKES.APP.NUKE_DATABASE]: {
     args: undefined
     result: { success: boolean; error?: string }
   }
-  [CHANNEL.APP.CLEAR_LOCAL_STORAGE]: {
+  [CHANNEL_INVOKES.APP.CLEAR_LOCAL_STORAGE]: {
     args: undefined
     result: { success: boolean; error?: string }
   }
-  [CHANNEL.SITES.GET_ALL]: {
+  [CHANNEL_INVOKES.SITES.GET_ALL]: {
     args: undefined
     result: {
       sites: Array<SiteDTO>
     }
   }
-  [CHANNEL.SITES.GET_ALL_WITH_JOB_COUNTS]: {
+  [CHANNEL_INVOKES.SITES.GET_ALL_WITH_JOB_COUNTS]: {
     args: undefined
     result: {
       sites: Array<SiteDTO & { totalJobs: number; promptTitle: string }>
     }
   }
-  [CHANNEL.SITES.GET_BY_ID]: {
+  [CHANNEL_INVOKES.SITES.GET_BY_ID]: {
     args: { id: string }
     result: {
       site: SiteDTO | null
     }
   }
-  [CHANNEL.JOB_POSTINGS.SKIP_NOT_RECOMMENDED_POSTINGS]: {
+  [CHANNEL_INVOKES.JOB_POSTINGS.SKIP_NOT_RECOMMENDED_POSTINGS]: {
     args: undefined
     result: { success: true } | { success: false; error: string }
   }
-  [CHANNEL.SITES.CREATE]: {
+  [CHANNEL_INVOKES.SITES.CREATE]: {
     args: NewSiteDTO
     result: { success: true; id: string } | { success: false; error: string }
   }
-  [CHANNEL.SITES.UPDATE]: {
+  [CHANNEL_INVOKES.SITES.UPDATE]: {
     args: UpdateSiteDTO
     result: { success: true } | { success: false; error: string }
   }
-  [CHANNEL.SITES.DELETE]: {
+  [CHANNEL_INVOKES.SITES.DELETE]: {
     args: { id: string }
     result: { success: true } | { success: false; error: string }
   }
-  [CHANNEL.PROMPTS.GET_ALL]: {
+  [CHANNEL_INVOKES.PROMPTS.GET_ALL]: {
     args: undefined
     result: {
       prompts: Array<PromptDTO>
     }
   }
-  [CHANNEL.PROMPTS.GET_BY_ID]: {
+  [CHANNEL_INVOKES.PROMPTS.GET_BY_ID]: {
     args: { id: string }
     result: {
       prompt: PromptDTO | null
     }
   }
-  [CHANNEL.PROMPTS.CREATE]: {
+  [CHANNEL_INVOKES.PROMPTS.CREATE]: {
     args: NewPromptDTO
     result: { success: true; id: string } | { success: false; error: string }
   }
-  [CHANNEL.PROMPTS.UPDATE]: {
+  [CHANNEL_INVOKES.PROMPTS.UPDATE]: {
     args: UpdatePromptDTO
     result: { success: true } | { success: false; error: string }
   }
-  [CHANNEL.PROMPTS.DELETE]: {
+  [CHANNEL_INVOKES.PROMPTS.DELETE]: {
     args: { id: string }
     result: { success: true } | { success: false; error: string }
   }
-  [CHANNEL.SCRAPER.START]: {
+  [CHANNEL_INVOKES.SCRAPER.START]: {
     args: undefined
     result: { success: true; scrapeRunId: string } | { success: false; error: string }
   }
-  [CHANNEL.SCRAPER.GET_PROGRESS]: {
+  [CHANNEL_INVOKES.SCRAPER.GET_PROGRESS]: {
     args: { scrapeRunId: string }
     result: {
       success: boolean
@@ -232,7 +201,7 @@ export type Invokes = {
       error?: string
     }
   }
-  [CHANNEL.SCRAPER.GET_ACTIVE_RUN]: {
+  [CHANNEL_INVOKES.SCRAPER.GET_ACTIVE_RUN]: {
     args: undefined
     result: {
       hasActive: boolean
@@ -252,11 +221,11 @@ export type Invokes = {
       }
     }
   }
-  [CHANNEL.DEBUG.SCRAPE]: {
+  [CHANNEL_INVOKES.DEBUG.SCRAPE]: {
     args: { url: string; selector: string }
     result: { success: true; scrapedContent: ScrapedContentDTO } | { success: false; error: string }
   }
-  [CHANNEL.DEBUG.AI]: {
+  [CHANNEL_INVOKES.DEBUG.AI]: {
     args: {
       prompt: string
       scrapedContent: ScrapedContentDTO
@@ -273,32 +242,32 @@ export type Invokes = {
           error: string
         }
   }
-  [CHANNEL.SCRAPE_RUNS.GET_ALL]: {
+  [CHANNEL_INVOKES.SCRAPE_RUNS.GET_ALL]: {
     args: undefined
     result: {
       runs: Array<ScrapeRunDTO>
     }
   }
-  [CHANNEL.SCRAPE_RUNS.GET_TASKS]: {
+  [CHANNEL_INVOKES.SCRAPE_RUNS.GET_TASKS]: {
     args: { scrapeRunId: string }
     result: {
       tasks: Array<ScrapeTaskDTO>
     }
   }
-  [CHANNEL.JOB_POSTINGS.GET_ALL]: {
+  [CHANNEL_INVOKES.JOB_POSTINGS.GET_ALL]: {
     args: undefined
     result: {
       postings: Array<JobPostingDTO>
       suspectedDuplicatesCount: number
     }
   }
-  [CHANNEL.JOB_POSTINGS.GET_BY_SITE_ID]: {
+  [CHANNEL_INVOKES.JOB_POSTINGS.GET_BY_SITE_ID]: {
     args: { siteId: string }
     result: {
       postings: Array<JobPostingDTO>
     }
   }
-  [CHANNEL.JOB_POSTINGS.GET_SUSPECTED_DUPLICATES]: {
+  [CHANNEL_INVOKES.JOB_POSTINGS.GET_SUSPECTED_DUPLICATES]: {
     args: undefined
     result: {
       groups: Array<{
@@ -310,16 +279,22 @@ export type Invokes = {
       }>
     }
   }
-  [CHANNEL.JOB_POSTINGS.GET_DUPLICATE_GROUP]: {
+  [CHANNEL_INVOKES.JOB_POSTINGS.GET_DUPLICATE_GROUP]: {
     args: { duplicationDetectionId: string }
     result: {
       postings: Array<JobPostingDTO>
     }
   }
-  [CHANNEL.JOB_POSTINGS.UPDATE]: {
+  [CHANNEL_INVOKES.JOB_POSTINGS.UPDATE]: {
     args: {
       id: string
       data: Partial<NewJobPostingDTO>
+    }
+    result: { success: true } | { success: false; error: string }
+  }
+  [CHANNEL_INVOKES.UTILS.OPEN_URL]: {
+    args: {
+      url: string
     }
     result: { success: true } | { success: false; error: string }
   }

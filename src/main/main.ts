@@ -6,7 +6,8 @@ import started from 'electron-squirrel-startup'
 import { updateElectronApp } from 'update-electron-app'
 import { migrateProduction } from './database/client'
 import logger from './logger'
-import { setMainWindow } from './messages/messages'
+import { setMainWindow } from './messages/shared'
+import './messages'
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string
 declare const MAIN_WINDOW_VITE_NAME: string

@@ -1,8 +1,8 @@
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
-import { CHANNEL } from '../../../../shared/messages.types'
 import type { JobPostingDTO, JobPostingDuplicateStatus, JobPostingStatus } from '../../../../shared/types'
+import { CHANNEL_INVOKES } from '../../../../shared/types/messages.invokes'
 import { QUERY_KEYS } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
 import logger from '../../../logger'
@@ -44,7 +44,7 @@ const JobPostingModal = (props: JobPostingModalProps) => {
     if (!jobPostingId) return
     try {
       setLoading(true)
-      const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.GET_ALL, undefined)
+      const result = await ipcMessenger.invoke(CHANNEL_INVOKES.JOB_POSTINGS.GET_ALL, undefined)
       const posting = result.postings.find((p: JobPostingDTO) => p.id === jobPostingId)
       if (posting) {
         setSiteTitle(posting.siteTitle)
@@ -81,7 +81,7 @@ const JobPostingModal = (props: JobPostingModalProps) => {
         return
       }
       if (isEditMode && jobPostingId) {
-        const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.UPDATE, {
+        const result = await ipcMessenger.invoke(CHANNEL_INVOKES.JOB_POSTINGS.UPDATE, {
           id: jobPostingId,
           data: {
             title,
@@ -99,7 +99,7 @@ const JobPostingModal = (props: JobPostingModalProps) => {
           setError(result.error || 'Failed to update posting')
         }
       } else {
-        // No CREATE channel for postings in current API, so just close for now
+        // No CREATE CHANNEL_INVOKES for postings in current API, so just close for now
         setError('Adding new postings is not supported via modal.')
       }
     } catch (err) {

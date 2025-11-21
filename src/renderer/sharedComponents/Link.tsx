@@ -1,10 +1,11 @@
 import { IconButton } from '@mui/material'
+import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
+import ipcMessenger from '../ipcMessenger'
 import Icon from './Icon'
 
 const Link = ({ url }: { url: string }) => {
   const handleClick = () => {
-    // @ts-expect-error - shell:openExternal is not in typed IPC but is defined in messages.ts
-    window.electron.ipcRenderer.invoke('shell:openExternal', url)
+    ipcMessenger.invoke(CHANNEL_INVOKES.UTILS.OPEN_URL, { url })
   }
 
   return (

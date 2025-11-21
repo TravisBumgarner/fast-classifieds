@@ -26,8 +26,8 @@ import {
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Fragment, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CHANNEL } from '../../shared/messages.types'
 import type { JobPostingDTO, SiteDTO } from '../../shared/types'
+import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
 import { PAGINATION, QUERY_KEYS, ROUTES } from '../consts'
 import ipcMessenger from '../ipcMessenger'
 import logger from '../logger'
@@ -70,7 +70,7 @@ const Sites = () => {
 
   const { isLoading: isLoadingSites, data: sitesData } = useQuery({
     queryKey: [QUERY_KEYS.SITES],
-    queryFn: async () => await ipcMessenger.invoke(CHANNEL.SITES.GET_ALL_WITH_JOB_COUNTS, undefined),
+    queryFn: async () => await ipcMessenger.invoke(CHANNEL_INVOKES.SITES.GET_ALL_WITH_JOB_COUNTS, undefined),
     initialData: { sites: [] },
   })
 
@@ -147,7 +147,7 @@ const Sites = () => {
       showCancel: true,
       confirmationCallback: async () => {
         try {
-          const result = await ipcMessenger.invoke(CHANNEL.SITES.DELETE, { id })
+          const result = await ipcMessenger.invoke(CHANNEL_INVOKES.SITES.DELETE, { id })
           if (result.success) {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SITES] })
           } else {
@@ -171,7 +171,7 @@ const Sites = () => {
       if (!siteJobs[siteId]) {
         setLoadingJobs((prev) => ({ ...prev, [siteId]: true }))
         try {
-          const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.GET_BY_SITE_ID, { siteId })
+          const result = await ipcMessenger.invoke(CHANNEL_INVOKES.JOB_POSTINGS.GET_BY_SITE_ID, { siteId })
           setSiteJobs((prev) => ({ ...prev, [siteId]: result.postings }))
         } catch (err) {
           logger.error('Failed to load jobs for site:', err)
@@ -184,13 +184,13 @@ const Sites = () => {
 
   const handleStatusChange = async (postingId: string, newStatus: JobPostingStatus, siteId: string) => {
     try {
-      const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.UPDATE, {
+      const result = await ipcMessenger.invoke(CHANNEL_INVOKES.JOB_POSTINGS.UPDATE, {
         id: postingId,
         data: { status: newStatus },
       })
       if (result.success) {
         // Reload jobs for this site
-        const jobsResult = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.GET_BY_SITE_ID, { siteId })
+        const jobsResult = await ipcMessenger.invoke(CHANNEL_INVOKES.JOB_POSTINGS.GET_BY_SITE_ID, { siteId })
         setSiteJobs((prev) => ({ ...prev, [siteId]: jobsResult.postings }))
       } else {
         setError('Failed to update posting status')

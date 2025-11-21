@@ -16,8 +16,8 @@ import {
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CHANNEL } from '../../../../shared/messages.types'
 import type { PromptDTO } from '../../../../shared/types'
+import { CHANNEL_INVOKES } from '../../../../shared/types/messages.invokes'
 import { QUERY_KEYS, ROUTES } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
 import logger from '../../../logger'
@@ -71,7 +71,7 @@ const SiteModal = (props: SiteModalProps) => {
 
   const loadPrompts = useCallback(async () => {
     try {
-      const result = await ipcMessenger.invoke(CHANNEL.PROMPTS.GET_ALL, undefined)
+      const result = await ipcMessenger.invoke(CHANNEL_INVOKES.PROMPTS.GET_ALL, undefined)
       const activePrompts = result.prompts.filter((p) => p.status === 'active')
       setPrompts(activePrompts)
     } catch (err) {
@@ -88,7 +88,7 @@ const SiteModal = (props: SiteModalProps) => {
 
     try {
       setLoading(true)
-      const result = await ipcMessenger.invoke(CHANNEL.SITES.GET_BY_ID, { id: siteId })
+      const result = await ipcMessenger.invoke(CHANNEL_INVOKES.SITES.GET_BY_ID, { id: siteId })
       if (result.site) {
         setSiteTitle(result.site.siteTitle)
         setSiteUrl(result.site.siteUrl)
@@ -132,7 +132,7 @@ const SiteModal = (props: SiteModalProps) => {
       }
 
       if (isEditMode && siteId) {
-        const result = await ipcMessenger.invoke(CHANNEL.SITES.UPDATE, {
+        const result = await ipcMessenger.invoke(CHANNEL_INVOKES.SITES.UPDATE, {
           id: siteId,
           siteTitle,
           siteUrl,
@@ -147,7 +147,7 @@ const SiteModal = (props: SiteModalProps) => {
           setError(result.error || 'Failed to update site')
         }
       } else {
-        const result = await ipcMessenger.invoke(CHANNEL.SITES.CREATE, {
+        const result = await ipcMessenger.invoke(CHANNEL_INVOKES.SITES.CREATE, {
           siteTitle,
           siteUrl,
           promptId: selectedPrompt.id,
@@ -278,9 +278,9 @@ const SiteModal = (props: SiteModalProps) => {
                         style={{ textDecoration: 'underline', marginLeft: 4 }}
                         onClick={(e) => {
                           e.preventDefault()
-                          window.electron.shell.openExternal(
-                            'https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be',
-                          )
+                          window.electron.ipcRenderer.invoke(CHANNEL_INVOKES.UTILS.OPEN_URL, {
+                            url: 'https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be',
+                          })
                         }}
                       >
                         Watch tutorial

@@ -1,8 +1,8 @@
 import { Alert, Box, Button, Divider, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { CHANNEL } from '../../../shared/messages.types'
 import type { ScrapedContentDTO } from '../../../shared/types'
+import { CHANNEL_INVOKES } from '../../../shared/types/messages.invokes'
 import { ROUTES } from '../../consts'
 import ipcMessenger from '../../ipcMessenger'
 import logger from '../../logger'
@@ -28,7 +28,7 @@ const Debugger = () => {
     if (siteId) {
       // Load site data by siteId and populate fields
       ipcMessenger
-        .invoke(CHANNEL.SITES.GET_BY_ID, { id: siteId })
+        .invoke(CHANNEL_INVOKES.SITES.GET_BY_ID, { id: siteId })
         .then(({ site }) => {
           if (site) {
             setUrl(site.siteUrl)
@@ -66,7 +66,7 @@ const Debugger = () => {
       setLoading(true)
       const title = siteTitle || new URL(url).hostname
 
-      const result = await ipcMessenger.invoke(CHANNEL.SITES.UPDATE, {
+      const result = await ipcMessenger.invoke(CHANNEL_INVOKES.SITES.UPDATE, {
         id: siteId,
         siteTitle: title,
         siteUrl: url,
@@ -104,7 +104,7 @@ const Debugger = () => {
       setLoading(true)
       const title = siteTitle || new URL(url).hostname
 
-      const result = await ipcMessenger.invoke(CHANNEL.SITES.CREATE, {
+      const result = await ipcMessenger.invoke(CHANNEL_INVOKES.SITES.CREATE, {
         siteTitle: title,
         siteUrl: url,
         selector,

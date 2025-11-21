@@ -160,3 +160,16 @@ export type ScrapedContentDTO = {
 }[]
 
 export type ScrapeRunDTO = NewScrapeRunDTO & TimestampsAndID
+
+export type ScraperProgress = 'pending' | 'in_progress' | 'completed' | 'failed'
+
+export type ScraperSiteProgress = 'pending' | 'scraping' | 'processing' | 'complete' | 'error'
+
+export type SiteProgressDTO = {
+  siteId: string
+  siteUrl: string
+  siteTitle: string
+  status: ScraperSiteProgress
+  newJobsFound?: number
+  errorMessage?: string
+}

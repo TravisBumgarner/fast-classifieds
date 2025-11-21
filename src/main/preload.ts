@@ -1,5 +1,7 @@
 import { contextBridge, type IpcRendererEvent, ipcRenderer } from 'electron'
-import type { FromMain, FromRenderer, Invokes } from '../shared/messages.types'
+import type { FromMain } from '../shared/types/messages.fromMain'
+import type { FromRenderer } from '../shared/types/messages.fromRenderer'
+import type { Invokes } from '../shared/types/messages.invokes'
 
 const electronHandler = {
   ipcRenderer: {
@@ -28,9 +30,6 @@ const electronHandler = {
     ): Promise<Invokes[T]['result']> {
       return ipcRenderer.invoke(channel, args)
     },
-  },
-  shell: {
-    openExternal: (url: string) => ipcRenderer.invoke('shell:openExternal', url),
   },
 }
 

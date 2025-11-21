@@ -22,8 +22,8 @@ import {
 } from '@mui/material'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { CHANNEL } from '../../shared/messages.types'
 import type { PromptDTO, PromptStatus } from '../../shared/types'
+import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
 import { PAGINATION, QUERY_KEYS } from '../consts'
 import ipcMessenger from '../ipcMessenger'
 import logger from '../logger'
@@ -58,7 +58,7 @@ const Prompts = () => {
 
   const { isLoading: isLoadingPrompts, data: promptsData } = useQuery({
     queryKey: [QUERY_KEYS.PROMPTS],
-    queryFn: async () => await ipcMessenger.invoke(CHANNEL.PROMPTS.GET_ALL, undefined),
+    queryFn: async () => await ipcMessenger.invoke(CHANNEL_INVOKES.PROMPTS.GET_ALL, undefined),
     initialData: { prompts: [] },
   })
 
@@ -123,7 +123,7 @@ const Prompts = () => {
       showCancel: true,
       confirmationCallback: async () => {
         try {
-          const result = await ipcMessenger.invoke(CHANNEL.PROMPTS.DELETE, {
+          const result = await ipcMessenger.invoke(CHANNEL_INVOKES.PROMPTS.DELETE, {
             id,
           })
           if (result.success) {

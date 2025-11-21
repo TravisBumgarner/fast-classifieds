@@ -1,8 +1,8 @@
 import { Box, Button, Chip, CircularProgress, Divider, Stack, Typography } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
-import { CHANNEL } from '../../../../shared/messages.types'
 import type { JobPostingDTO, JobPostingDuplicateStatus } from '../../../../shared/types'
+import { CHANNEL_INVOKES } from '../../../../shared/types/messages.invokes'
 import { QUERY_KEYS } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
 import { SPACING } from '../../../styles/consts'
@@ -44,7 +44,7 @@ const PostingCard = ({ posting, title }: { posting?: JobPostingDTO; title: strin
   }
 
   const openJob = () => {
-    if (posting.jobUrl) window.electron.shell.openExternal(posting.jobUrl)
+    if (posting.jobUrl) ipcMessenger.invoke(CHANNEL_INVOKES.UTILS.OPEN_URL, { url: posting.jobUrl })
   }
 
   return (
@@ -98,7 +98,7 @@ const DuplicateDetectionModal = (_props: DuplicateDetectionModalProps) => {
     const load = async () => {
       try {
         setLoading(true)
-        const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.GET_SUSPECTED_DUPLICATES, undefined)
+        const result = await ipcMessenger.invoke(CHANNEL_INVOKES.JOB_POSTINGS.GET_SUSPECTED_DUPLICATES, undefined)
         if (!mounted) return
         setGroups(result.groups)
         if (result.groups.length > 0) setSelectedGroupId(result.groups[0].duplicationDetectionId)
@@ -122,7 +122,7 @@ const DuplicateDetectionModal = (_props: DuplicateDetectionModalProps) => {
         return
       }
       try {
-        const res = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.GET_DUPLICATE_GROUP, {
+        const res = await ipcMessenger.invoke(CHANNEL_INVOKES.JOB_POSTINGS.GET_DUPLICATE_GROUP, {
           duplicationDetectionId: selectedGroupId,
         })
         if (!mounted) return
@@ -152,7 +152,7 @@ const DuplicateDetectionModal = (_props: DuplicateDetectionModalProps) => {
   }, [postings])
 
   const reloadGroupsAndSelection = async (currentSelected?: string | null) => {
-    const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.GET_SUSPECTED_DUPLICATES, undefined)
+    const result = await ipcMessenger.invoke(CHANNEL_INVOKES.JOB_POSTINGS.GET_SUSPECTED_DUPLICATES, undefined)
     setGroups(result.groups)
     const stillExists = result.groups.some((g: GroupSummary) => g.duplicationDetectionId === (currentSelected ?? ''))
     const newSelected: string | null =
@@ -163,7 +163,7 @@ const DuplicateDetectionModal = (_props: DuplicateDetectionModalProps) => {
           : null
     setSelectedGroupId(newSelected)
     if (newSelected) {
-      const res = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.GET_DUPLICATE_GROUP, {
+      const res = await ipcMessenger.invoke(CHANNEL_INVOKES.JOB_POSTINGS.GET_DUPLICATE_GROUP, {
         duplicationDetectionId: newSelected,
       })
       setPostings(res.postings)
@@ -176,7 +176,7 @@ const DuplicateDetectionModal = (_props: DuplicateDetectionModalProps) => {
     if (!suspectedPosting) return
     try {
       setUpdating(true)
-      await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.UPDATE, {
+      await ipcMessenger.invoke(CHANNEL_INVOKES.JOB_POSTINGS.UPDATE, {
         id: suspectedPosting.id,
         data: { duplicateStatus: status },
       })
@@ -193,12 +193,12 @@ const DuplicateDetectionModal = (_props: DuplicateDetectionModalProps) => {
     try {
       setBulkUpdating(true)
       for (const g of groups) {
-        const res = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.GET_DUPLICATE_GROUP, {
+        const res = await ipcMessenger.invoke(CHANNEL_INVOKES.JOB_POSTINGS.GET_DUPLICATE_GROUP, {
           duplicationDetectionId: g.duplicationDetectionId,
         })
         const suspected = (res.postings as JobPostingDTO[]).filter((p) => p.duplicateStatus === 'suspected_duplicate')
         for (const p of suspected) {
-          await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.UPDATE, {
+          await ipcMessenger.invoke(CHANNEL_INVOKES.JOB_POSTINGS.UPDATE, {
             id: p.id,
             data: { duplicateStatus: 'confirmed_duplicate' },
           })

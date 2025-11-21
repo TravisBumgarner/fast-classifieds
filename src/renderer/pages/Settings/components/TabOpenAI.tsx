@@ -1,6 +1,6 @@
 import { Alert, Box, Button, Stack, TextField, Tooltip, Typography } from '@mui/material'
 import { useState } from 'react'
-import { CHANNEL } from '../../../../shared/messages.types'
+import { CHANNEL_INVOKES } from '../../../../shared/types/messages.invokes'
 import ipcMessenger from '../../../ipcMessenger'
 import Icon from '../../../sharedComponents/Icon'
 import { SPACING } from '../../../styles/consts'
@@ -25,7 +25,7 @@ const TabOpenAI = ({
 
   const handleSaveApiSettings = async () => {
     try {
-      await ipcMessenger.invoke(CHANNEL.STORE.SET, {
+      await ipcMessenger.invoke(CHANNEL_INVOKES.STORE.SET, {
         openaiApiKey: apiKey,
         openaiModel: model,
       })
@@ -81,7 +81,9 @@ const TabOpenAI = ({
                   }}
                   onClick={(e) => {
                     e.preventDefault()
-                    window.electron.shell.openExternal('https://platform.openai.com/settings/organization/api-keys')
+                    ipcMessenger.invoke(CHANNEL_INVOKES.UTILS.OPEN_URL, {
+                      url: 'https://platform.openai.com/settings/organization/api-keys',
+                    })
                   }}
                 >
                   Get your API key from OpenAI
@@ -118,7 +120,9 @@ const TabOpenAI = ({
                   }}
                   onClick={(e) => {
                     e.preventDefault()
-                    window.electron.shell.openExternal('https://platform.openai.com/docs/pricing')
+                    ipcMessenger.invoke(CHANNEL_INVOKES.UTILS.OPEN_URL, {
+                      url: 'https://platform.openai.com/docs/pricing',
+                    })
                   }}
                 >
                   View available models
