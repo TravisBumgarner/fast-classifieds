@@ -28,7 +28,7 @@ CREATE TABLE `hashes` (
 );
 --> statement-breakpoint
 CREATE TABLE `job_postings` (
-	`recommended_by_ai` integer NOT NULL,
+	`ai_recommendation_status` text NOT NULL,
 	`duplication_detection_id` text NOT NULL,
 	`duplicate_status` text NOT NULL,
 	`id` text PRIMARY KEY NOT NULL,

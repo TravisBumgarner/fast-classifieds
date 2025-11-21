@@ -1,7 +1,7 @@
 import OpenAI from 'openai'
 import { zodTextFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
-import type { ScrapedContentDTO } from '../../shared/types'
+import { AI_RECOMMENDATION_STATUS, type ScrapedContentDTO } from '../../shared/types'
 import { renderPrompt } from '../../shared/utils'
 import log from '../logger'
 
@@ -11,7 +11,7 @@ const aiJobSchema = z.object({
   description: z.string(),
   recommendationExplanation: z.string(),
   location: z.string(),
-  recommendedByAI: z.boolean(),
+  aiRecommendationStatus: z.enum([AI_RECOMMENDATION_STATUS.RECOMMENDED, AI_RECOMMENDATION_STATUS.NOT_RECOMMENDED]),
 })
 type AiJob = z.infer<typeof aiJobSchema>
 

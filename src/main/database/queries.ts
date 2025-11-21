@@ -1,17 +1,18 @@
 import { and, count, desc, eq, inArray } from 'drizzle-orm'
 import type OpenAI from 'openai'
 import { v4 as uuidv4 } from 'uuid'
-import type {
-  JobPostingDTO,
-  JobPostingDuplicateStatus,
-  NewHashDTO,
-  NewJobPostingDTO,
-  NewPromptDTO,
-  NewScrapeRunDTO,
-  NewScrapeTaskDTO,
-  NewSiteDTO,
-  Status,
-  UpdateSiteDTO,
+import {
+  AI_RECOMMENDATION_STATUS,
+  type JobPostingDTO,
+  type JobPostingDuplicateStatus,
+  type NewHashDTO,
+  type NewJobPostingDTO,
+  type NewPromptDTO,
+  type NewScrapeRunDTO,
+  type NewScrapeTaskDTO,
+  type NewSiteDTO,
+  type Status,
+  type UpdateSiteDTO,
 } from '../../shared/types'
 import { db } from './client'
 import { apiUsage, hashes, jobPostings, prompts, scrapeRuns, scrapeTasks, sites } from './schema'
@@ -261,7 +262,7 @@ async function getJobPostings({
       updatedAt: jobPostings.updatedAt,
       scrapeRunId: jobPostings.scrapeRunId,
       siteTitle: sites.siteTitle,
-      recommendedByAI: jobPostings.recommendedByAI,
+      aiRecommendationStatus: jobPostings.aiRecommendationStatus,
       jobUrl: jobPostings.jobUrl,
       duplicationDetectionId: jobPostings.duplicationDetectionId,
       duplicateStatus: jobPostings.duplicateStatus,
@@ -357,7 +358,7 @@ async function skipNotRecommendedPostings() {
   return db
     .update(jobPostings)
     .set({ status: 'skipped', updatedAt: new Date() })
-    .where(eq(jobPostings.recommendedByAI, false))
+    .where(eq(jobPostings.aiRecommendationStatus, AI_RECOMMENDATION_STATUS.NOT_RECOMMENDED))
     .returning()
 }
 
