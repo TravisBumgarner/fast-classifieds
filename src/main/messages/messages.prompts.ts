@@ -1,9 +1,9 @@
-import { CHANNEL } from '../../shared/messages.types'
+import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
 import queries from '../database/queries'
 import logger from '../logger'
 import { typedIpcMain } from './ipcMain'
 
-typedIpcMain.handle(CHANNEL.PROMPTS.GET_ALL, async () => {
+typedIpcMain.handle(CHANNEL_INVOKES.PROMPTS.GET_ALL, async () => {
   try {
     const prompts = await queries.getAllPrompts()
     return {
@@ -19,7 +19,7 @@ typedIpcMain.handle(CHANNEL.PROMPTS.GET_ALL, async () => {
   }
 })
 
-typedIpcMain.handle(CHANNEL.PROMPTS.GET_BY_ID, async (_event, params) => {
+typedIpcMain.handle(CHANNEL_INVOKES.PROMPTS.GET_BY_ID, async (_event, params) => {
   try {
     const prompt = await queries.getPromptById(params.id)
     return {
@@ -35,7 +35,7 @@ typedIpcMain.handle(CHANNEL.PROMPTS.GET_BY_ID, async (_event, params) => {
   }
 })
 
-typedIpcMain.handle(CHANNEL.PROMPTS.CREATE, async (_event, params) => {
+typedIpcMain.handle(CHANNEL_INVOKES.PROMPTS.CREATE, async (_event, params) => {
   try {
     const result = await queries.insertPrompt(params)
     return {
@@ -53,7 +53,7 @@ typedIpcMain.handle(CHANNEL.PROMPTS.CREATE, async (_event, params) => {
   }
 })
 
-typedIpcMain.handle(CHANNEL.PROMPTS.UPDATE, async (_event, params) => {
+typedIpcMain.handle(CHANNEL_INVOKES.PROMPTS.UPDATE, async (_event, params) => {
   try {
     const { id, ...updateData } = params
     await queries.updatePrompt(id, updateData)
@@ -71,7 +71,7 @@ typedIpcMain.handle(CHANNEL.PROMPTS.UPDATE, async (_event, params) => {
   }
 })
 
-typedIpcMain.handle(CHANNEL.PROMPTS.DELETE, async (_event, params) => {
+typedIpcMain.handle(CHANNEL_INVOKES.PROMPTS.DELETE, async (_event, params) => {
   try {
     await queries.deletePrompt(params.id)
     return {

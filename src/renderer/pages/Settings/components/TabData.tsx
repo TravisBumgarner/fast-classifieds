@@ -13,7 +13,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
-import { CHANNEL } from '../../../../shared/messages.types'
+import { CHANNEL_INVOKES } from '../../../../shared/types/messages.invokes'
 import ipcMessenger from '../../../ipcMessenger'
 import logger from '../../../logger'
 import { SPACING } from '../../../styles/consts'
@@ -39,7 +39,7 @@ const TabData = () => {
     setIsExporting(true)
     setDataMessage(null)
     try {
-      const result = await ipcMessenger.invoke(CHANNEL.APP.EXPORT_ALL_DATA, undefined)
+      const result = await ipcMessenger.invoke(CHANNEL_INVOKES.APP.EXPORT_ALL_DATA, undefined)
 
       if (result.success && result.data) {
         // Create and download JSON file
@@ -117,7 +117,7 @@ const TabData = () => {
         throw new Error('Invalid backup file')
       }
 
-      const result = await ipcMessenger.invoke(CHANNEL.APP.RESTORE_ALL_DATA, {
+      const result = await ipcMessenger.invoke(CHANNEL_INVOKES.APP.RESTORE_ALL_DATA, {
         data,
       })
 
@@ -168,7 +168,7 @@ const TabData = () => {
     setNukeConfirmationText('')
 
     try {
-      const result = await ipcMessenger.invoke(CHANNEL.APP.NUKE_DATABASE, undefined)
+      const result = await ipcMessenger.invoke(CHANNEL_INVOKES.APP.NUKE_DATABASE, undefined)
 
       if (result.success) {
         setDataMessage({
@@ -214,7 +214,7 @@ const TabData = () => {
   }
 
   const handleClearLocalStorage = () => {
-    ipcMessenger.invoke(CHANNEL.APP.CLEAR_LOCAL_STORAGE, undefined)
+    ipcMessenger.invoke(CHANNEL_INVOKES.APP.CLEAR_LOCAL_STORAGE, undefined)
     setDataMessage({
       type: 'success',
       text: 'Local storage cleared successfully',
@@ -224,7 +224,7 @@ const TabData = () => {
   useEffect(() => {
     const getBackupDirectory = async () => {
       try {
-        const result = await ipcMessenger.invoke(CHANNEL.APP.GET_BACKUP_DIRECTORY, undefined)
+        const result = await ipcMessenger.invoke(CHANNEL_INVOKES.APP.GET_BACKUP_DIRECTORY, undefined)
         setBackupDirectory(result.backupDirectory)
       } catch (error) {
         logger.error('Error getting backup directory:', error)

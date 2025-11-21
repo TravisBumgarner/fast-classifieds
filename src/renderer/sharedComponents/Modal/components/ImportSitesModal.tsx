@@ -12,8 +12,8 @@ import {
 } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
-import { CHANNEL } from '../../../../shared/messages.types'
 import type { PromptDTO } from '../../../../shared/types'
+import { CHANNEL_INVOKES } from '../../../../shared/types/messages.invokes'
 import { QUERY_KEYS } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
 import logger from '../../../logger'
@@ -37,7 +37,7 @@ const ImportSitesModal = (_props: ImportSitesModalProps) => {
 
   const loadPrompts = useCallback(async () => {
     try {
-      const result = await ipcMessenger.invoke(CHANNEL.PROMPTS.GET_ALL, undefined)
+      const result = await ipcMessenger.invoke(CHANNEL_INVOKES.PROMPTS.GET_ALL, undefined)
       setPrompts(result.prompts)
       // Auto-select first prompt if available
       if (result.prompts.length > 0) {
@@ -122,7 +122,7 @@ const ImportSitesModal = (_props: ImportSitesModalProps) => {
         try {
           const title = await fetchPageTitle(url)
 
-          const result = await ipcMessenger.invoke(CHANNEL.SITES.CREATE, {
+          const result = await ipcMessenger.invoke(CHANNEL_INVOKES.SITES.CREATE, {
             siteTitle: title,
             siteUrl: url,
             promptId: selectedPrompt.id,

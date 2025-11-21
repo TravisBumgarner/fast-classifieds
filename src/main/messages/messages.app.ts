@@ -1,13 +1,13 @@
 import path from 'node:path'
 import { app } from 'electron'
-import { CHANNEL } from '../../shared/messages.types'
+import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
 import { db } from '../database/client'
 import queries from '../database/queries'
 import { apiUsage, hashes, jobPostings, prompts, scrapeRuns, scrapeTasks, sites } from '../database/schema'
 import store from '../store'
 import { typedIpcMain } from './ipcMain'
 
-typedIpcMain.handle(CHANNEL.APP.GET_BACKUP_DIRECTORY, async () => {
+typedIpcMain.handle(CHANNEL_INVOKES.APP.GET_BACKUP_DIRECTORY, async () => {
   const backupDirectory = path.join(app.getPath('userData'), 'db_backups')
   return {
     type: 'get_backup_directory',
@@ -15,7 +15,7 @@ typedIpcMain.handle(CHANNEL.APP.GET_BACKUP_DIRECTORY, async () => {
   }
 })
 
-typedIpcMain.handle(CHANNEL.APP.EXPORT_ALL_DATA, async () => {
+typedIpcMain.handle(CHANNEL_INVOKES.APP.EXPORT_ALL_DATA, async () => {
   const sites = await queries.getAllSites()
   const prompts = await queries.getAllPrompts()
   const jobPostings = await queries.getJobPostings({})
@@ -47,7 +47,7 @@ typedIpcMain.handle(CHANNEL.APP.EXPORT_ALL_DATA, async () => {
   }
 })
 
-typedIpcMain.handle(CHANNEL.APP.RESTORE_ALL_DATA, async (_event, params) => {
+typedIpcMain.handle(CHANNEL_INVOKES.APP.RESTORE_ALL_DATA, async (_event, params) => {
   try {
     await db.delete(sites).run()
     await db.delete(prompts).run()
@@ -88,7 +88,7 @@ typedIpcMain.handle(CHANNEL.APP.RESTORE_ALL_DATA, async (_event, params) => {
   }
 })
 
-typedIpcMain.handle(CHANNEL.APP.CLEAR_LOCAL_STORAGE, async () => {
+typedIpcMain.handle(CHANNEL_INVOKES.APP.CLEAR_LOCAL_STORAGE, async () => {
   store.clear()
 
   return {
@@ -97,7 +97,7 @@ typedIpcMain.handle(CHANNEL.APP.CLEAR_LOCAL_STORAGE, async () => {
   }
 })
 
-typedIpcMain.handle(CHANNEL.APP.NUKE_DATABASE, async () => {
+typedIpcMain.handle(CHANNEL_INVOKES.APP.NUKE_DATABASE, async () => {
   try {
     await queries.nukeDatabase()
     return {

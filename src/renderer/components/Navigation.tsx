@@ -8,7 +8,7 @@ import MenuItem from '@mui/material/MenuItem'
 import Toolbar from '@mui/material/Toolbar'
 import { useState } from 'react'
 import { Link as RouterLink, useLocation } from 'react-router-dom'
-import { CHANNEL } from 'src/shared/messages.types'
+import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
 import Logo from '../assets/icon.png'
 import { ROUTES } from '../consts'
 import ipcMessenger from '../ipcMessenger'
@@ -40,7 +40,7 @@ const Navigation = () => {
 
   const handleExternalLink = (url: string) => {
     handleMenuClose()
-    ipcMessenger.invoke(CHANNEL.UTILS.OPEN_URL, { url })
+    ipcMessenger.invoke(CHANNEL_INVOKES.UTILS.OPEN_URL, { url })
   }
 
   return (

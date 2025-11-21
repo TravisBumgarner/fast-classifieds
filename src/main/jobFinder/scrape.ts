@@ -1,6 +1,6 @@
 import { JSDOM } from 'jsdom'
 import { type Browser, launch } from 'puppeteer'
-import type { INTERNAL_ERRORS } from 'src/shared/errors'
+import type { INTERNAL_ERRORS } from '../../shared/errors'
 import type { ScrapedContentDTO } from '../../shared/types'
 import store from '../store'
 import { hashContent } from '../utilities'

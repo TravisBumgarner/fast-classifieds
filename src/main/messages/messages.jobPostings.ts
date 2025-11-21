@@ -1,10 +1,10 @@
-import { CHANNEL } from '../../shared/messages.types'
 import { JOB_POSTING_DUPLICATE_STATUS } from '../../shared/types'
+import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
 import queries from '../database/queries'
 import logger from '../logger'
 import { typedIpcMain } from './ipcMain'
 
-typedIpcMain.handle(CHANNEL.JOB_POSTINGS.SKIP_NOT_RECOMMENDED_POSTINGS, async () => {
+typedIpcMain.handle(CHANNEL_INVOKES.JOB_POSTINGS.SKIP_NOT_RECOMMENDED_POSTINGS, async () => {
   try {
     const result = await queries.skipNotRecommendedPostings()
     return {
@@ -23,7 +23,7 @@ typedIpcMain.handle(CHANNEL.JOB_POSTINGS.SKIP_NOT_RECOMMENDED_POSTINGS, async ()
 })
 
 // Job postings handlers
-typedIpcMain.handle(CHANNEL.JOB_POSTINGS.GET_ALL, async () => {
+typedIpcMain.handle(CHANNEL_INVOKES.JOB_POSTINGS.GET_ALL, async () => {
   try {
     const postings = await queries.getJobPostings({ duplicateStatusArray: [JOB_POSTING_DUPLICATE_STATUS.UNIQUE] })
     const suspectedDuplicatesCount = await queries.jobPostingsSuspectedDuplicatesCount()
@@ -40,7 +40,7 @@ typedIpcMain.handle(CHANNEL.JOB_POSTINGS.GET_ALL, async () => {
   }
 })
 
-typedIpcMain.handle(CHANNEL.JOB_POSTINGS.GET_SUSPECTED_DUPLICATES, async () => {
+typedIpcMain.handle(CHANNEL_INVOKES.JOB_POSTINGS.GET_SUSPECTED_DUPLICATES, async () => {
   try {
     const groups = await queries.getSuspectedDuplicateGroups()
     return { groups }
@@ -50,7 +50,7 @@ typedIpcMain.handle(CHANNEL.JOB_POSTINGS.GET_SUSPECTED_DUPLICATES, async () => {
   }
 })
 
-typedIpcMain.handle(CHANNEL.JOB_POSTINGS.GET_DUPLICATE_GROUP, async (_event, params) => {
+typedIpcMain.handle(CHANNEL_INVOKES.JOB_POSTINGS.GET_DUPLICATE_GROUP, async (_event, params) => {
   try {
     const postings = await queries.getJobPostings({ duplicationDetectionId: params.duplicationDetectionId })
     return { postings }
@@ -60,7 +60,7 @@ typedIpcMain.handle(CHANNEL.JOB_POSTINGS.GET_DUPLICATE_GROUP, async (_event, par
   }
 })
 
-typedIpcMain.handle(CHANNEL.JOB_POSTINGS.GET_BY_SITE_ID, async (_event, params) => {
+typedIpcMain.handle(CHANNEL_INVOKES.JOB_POSTINGS.GET_BY_SITE_ID, async (_event, params) => {
   try {
     const postings = await queries.getJobPostings({ siteId: params.siteId })
     return {
@@ -76,7 +76,7 @@ typedIpcMain.handle(CHANNEL.JOB_POSTINGS.GET_BY_SITE_ID, async (_event, params) 
   }
 })
 
-typedIpcMain.handle(CHANNEL.JOB_POSTINGS.UPDATE, async (_event, params) => {
+typedIpcMain.handle(CHANNEL_INVOKES.JOB_POSTINGS.UPDATE, async (_event, params) => {
   try {
     await queries.updateJobPosting(params.id, params.data)
     return {

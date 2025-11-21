@@ -1,10 +1,10 @@
-import { CHANNEL } from '../../shared/messages.types'
+import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
 import * as scraper from '../jobFinder'
 import logger from '../logger'
 import { typedIpcMain } from './ipcMain'
 import { getMainWindow } from './shared'
 
-typedIpcMain.handle(CHANNEL.SCRAPER.START, async () => {
+typedIpcMain.handle(CHANNEL_INVOKES.SCRAPER.START, async () => {
   const mainWindow = getMainWindow()
   try {
     const result = await scraper.startScraping(mainWindow)
@@ -22,7 +22,7 @@ typedIpcMain.handle(CHANNEL.SCRAPER.START, async () => {
   }
 })
 
-typedIpcMain.handle(CHANNEL.SCRAPER.GET_PROGRESS, async (_event, params) => {
+typedIpcMain.handle(CHANNEL_INVOKES.SCRAPER.GET_PROGRESS, async (_event, params) => {
   try {
     const result = scraper.getProgress(params.scrapeRunId)
     return {
@@ -39,7 +39,7 @@ typedIpcMain.handle(CHANNEL.SCRAPER.GET_PROGRESS, async (_event, params) => {
   }
 })
 
-typedIpcMain.handle(CHANNEL.SCRAPER.GET_ACTIVE_RUN, async () => {
+typedIpcMain.handle(CHANNEL_INVOKES.SCRAPER.GET_ACTIVE_RUN, async () => {
   try {
     const result = scraper.getActiveRun()
     return result

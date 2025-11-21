@@ -1,6 +1,6 @@
 import { Box, Button, Stack, Step, StepContent, StepLabel, Stepper, Typography } from '@mui/material'
 import { useState } from 'react'
-import { CHANNEL } from '../../../../shared/messages.types'
+import { CHANNEL_INVOKES } from '../../../../shared/types/messages.invokes'
 import ipcMessenger from '../../../ipcMessenger'
 import { activeModalSignal, onboardingCompletedSignal } from '../../../signals'
 import { SPACING } from '../../../styles/consts'
@@ -72,7 +72,7 @@ const OnboardingModal = () => {
   const handleClose = () => {
     activeModalSignal.value = null
     onboardingCompletedSignal.value = true
-    ipcMessenger.invoke(CHANNEL.STORE.SET, { onboardingCompleted: true })
+    ipcMessenger.invoke(CHANNEL_INVOKES.STORE.SET, { onboardingCompleted: true })
   }
 
   return (
@@ -91,7 +91,7 @@ const OnboardingModal = () => {
             }}
             onClick={(e) => {
               e.preventDefault()
-              ipcMessenger.invoke(CHANNEL.UTILS.OPEN_URL, {
+              ipcMessenger.invoke(CHANNEL_INVOKES.UTILS.OPEN_URL, {
                 url: 'https://www.youtube.com/watch?v=FQKY70r2288&feature=youtu.be',
               })
             }}

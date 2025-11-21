@@ -1,6 +1,6 @@
 import { SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT } from '../../shared/consts'
 import { errorCodeToMessage } from '../../shared/errors'
-import { CHANNEL } from '../../shared/messages.types'
+import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
 import queries from '../database/queries'
 import { buildNewJobPostingDTO } from '../jobFinder/buildNewJobPostingDTO'
 import { processText } from '../jobFinder/processText'
@@ -9,7 +9,7 @@ import logger from '../logger'
 import { getStore } from '../store'
 import { typedIpcMain } from './ipcMain'
 
-typedIpcMain.handle(CHANNEL.DEBUG.SCRAPE, async (_event, params) => {
+typedIpcMain.handle(CHANNEL_INVOKES.DEBUG.SCRAPE, async (_event, params) => {
   try {
     const result = await scrape({
       siteUrl: params.url,
@@ -35,7 +35,7 @@ typedIpcMain.handle(CHANNEL.DEBUG.SCRAPE, async (_event, params) => {
   }
 })
 
-typedIpcMain.handle(CHANNEL.DEBUG.AI, async (_event, params) => {
+typedIpcMain.handle(CHANNEL_INVOKES.DEBUG.AI, async (_event, params) => {
   try {
     logger.info('Debug AI params:', params)
     const storeData = getStore()

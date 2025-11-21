@@ -1,7 +1,7 @@
 import { Box, Tab, Tabs, Typography } from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'
-import { CHANNEL } from '../../../shared/messages.types'
 import type { StoreSchema } from '../../../shared/types'
+import { CHANNEL_INVOKES } from '../../../shared/types/messages.invokes'
 import ipcMessenger from '../../ipcMessenger'
 import PageWrapper from '../../sharedComponents/PageWrapper'
 import { SPACING } from '../../styles/consts'
@@ -17,7 +17,7 @@ const Settings = () => {
   const [activeTab, setActiveTab] = useState(0)
 
   const loadStoreSettings = useCallback(async () => {
-    const store = await ipcMessenger.invoke(CHANNEL.STORE.GET, undefined)
+    const store = await ipcMessenger.invoke(CHANNEL_INVOKES.STORE.GET, undefined)
     setStoreFromServer(store)
   }, [])
 

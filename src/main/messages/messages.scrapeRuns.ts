@@ -1,9 +1,9 @@
-import { CHANNEL } from '../../shared/messages.types'
+import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
 import queries from '../database/queries'
 import logger from '../logger'
 import { typedIpcMain } from './ipcMain'
 
-typedIpcMain.handle(CHANNEL.SCRAPE_RUNS.GET_ALL, async () => {
+typedIpcMain.handle(CHANNEL_INVOKES.SCRAPE_RUNS.GET_ALL, async () => {
   try {
     const runs = await queries.getAllScrapeRuns()
     return {
@@ -19,7 +19,7 @@ typedIpcMain.handle(CHANNEL.SCRAPE_RUNS.GET_ALL, async () => {
   }
 })
 
-typedIpcMain.handle(CHANNEL.SCRAPE_RUNS.GET_TASKS, async (_event, params) => {
+typedIpcMain.handle(CHANNEL_INVOKES.SCRAPE_RUNS.GET_TASKS, async (_event, params) => {
   try {
     const tasks = await queries.getScrapeTasksByRunId(params.scrapeRunId)
     return {

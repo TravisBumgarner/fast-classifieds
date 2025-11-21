@@ -1,9 +1,9 @@
-import { CHANNEL } from '../../shared/messages.types'
+import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
 import queries from '../database/queries'
 import logger from '../logger'
 import { typedIpcMain } from './ipcMain'
 
-typedIpcMain.handle(CHANNEL.SITES.GET_ALL, async () => {
+typedIpcMain.handle(CHANNEL_INVOKES.SITES.GET_ALL, async () => {
   try {
     const sites = await queries.getAllSites()
     return {
@@ -19,7 +19,7 @@ typedIpcMain.handle(CHANNEL.SITES.GET_ALL, async () => {
   }
 })
 
-typedIpcMain.handle(CHANNEL.SITES.GET_ALL_WITH_JOB_COUNTS, async () => {
+typedIpcMain.handle(CHANNEL_INVOKES.SITES.GET_ALL_WITH_JOB_COUNTS, async () => {
   try {
     const sites = await queries.getAllSitesWithJobCounts()
     return {
@@ -35,7 +35,7 @@ typedIpcMain.handle(CHANNEL.SITES.GET_ALL_WITH_JOB_COUNTS, async () => {
   }
 })
 
-typedIpcMain.handle(CHANNEL.SITES.GET_BY_ID, async (_event, params) => {
+typedIpcMain.handle(CHANNEL_INVOKES.SITES.GET_BY_ID, async (_event, params) => {
   try {
     const site = await queries.getSiteById(params.id)
     return {
@@ -51,7 +51,7 @@ typedIpcMain.handle(CHANNEL.SITES.GET_BY_ID, async (_event, params) => {
   }
 })
 
-typedIpcMain.handle(CHANNEL.SITES.CREATE, async (_event, params) => {
+typedIpcMain.handle(CHANNEL_INVOKES.SITES.CREATE, async (_event, params) => {
   try {
     const result = await queries.insertSite(params)
     return {
@@ -69,7 +69,7 @@ typedIpcMain.handle(CHANNEL.SITES.CREATE, async (_event, params) => {
   }
 })
 
-typedIpcMain.handle(CHANNEL.SITES.UPDATE, async (_event, params) => {
+typedIpcMain.handle(CHANNEL_INVOKES.SITES.UPDATE, async (_event, params) => {
   try {
     const { id, ...updateData } = params
     await queries.updateSite(id, updateData)
@@ -87,7 +87,7 @@ typedIpcMain.handle(CHANNEL.SITES.UPDATE, async (_event, params) => {
   }
 })
 
-typedIpcMain.handle(CHANNEL.SITES.DELETE, async (_event, params) => {
+typedIpcMain.handle(CHANNEL_INVOKES.SITES.DELETE, async (_event, params) => {
   try {
     await queries.deleteSite(params.id)
     return {

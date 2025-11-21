@@ -22,8 +22,9 @@ import {
 } from '@mui/material'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
-import { CHANNEL } from '../../../shared/messages.types'
 import type { JobPostingStatus } from '../../../shared/types'
+import { CHANNEL_INVOKES_FROM_MAIN } from '../../../shared/types/messages.fromMain'
+import { CHANNEL_INVOKES } from '../../../shared/types/messages.invokes'
 import { PAGINATION, QUERY_KEYS } from '../../consts'
 import ipcMessenger from '../../ipcMessenger'
 import logger from '../../logger'
@@ -63,13 +64,13 @@ const JobPostings = () => {
 
   const { isLoading: isLoadingScrapeRuns, data: scrapeRunsData } = useQuery({
     queryKey: [QUERY_KEYS.SCRAPE_RUNS],
-    queryFn: async () => await ipcMessenger.invoke(CHANNEL.SCRAPE_RUNS.GET_ALL, undefined),
+    queryFn: async () => await ipcMessenger.invoke(CHANNEL_INVOKES.SCRAPE_RUNS.GET_ALL, undefined),
     initialData: { runs: [] },
   })
 
   const { isLoading: isLoadingJobPostings, data: jobPostingsData } = useQuery({
     queryKey: [QUERY_KEYS.JOB_POSTINGS],
-    queryFn: async () => await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.GET_ALL, undefined),
+    queryFn: async () => await ipcMessenger.invoke(CHANNEL_INVOKES.JOB_POSTINGS.GET_ALL, undefined),
     initialData: { postings: [], suspectedDuplicatesCount: 0 },
   })
 
@@ -138,12 +139,12 @@ const JobPostings = () => {
 
   const handleFindJobPostings = async () => {
     try {
-      const active = await ipcMessenger.invoke(CHANNEL.SCRAPER.GET_ACTIVE_RUN, undefined)
+      const active = await ipcMessenger.invoke(CHANNEL_INVOKES.SCRAPER.GET_ACTIVE_RUN, undefined)
       if (active?.hasActive) {
         setIsScraping(true)
         activeModalSignal.value = { id: MODAL_ID.SCRAPE_PROGRESS_MODAL }
       } else {
-        const result = await ipcMessenger.invoke(CHANNEL.SCRAPER.START, undefined)
+        const result = await ipcMessenger.invoke(CHANNEL_INVOKES.SCRAPER.START, undefined)
         if (result.success) {
           setIsScraping(true)
           activeModalSignal.value = { id: MODAL_ID.SCRAPE_PROGRESS_MODAL }
@@ -166,18 +167,18 @@ const JobPostings = () => {
   }
 
   useEffect(() => {
-    const unsub = window.electron.ipcRenderer.on('scraper:complete', () => {
+    const unsubscribe = window.electron.ipcRenderer.on(CHANNEL_INVOKES_FROM_MAIN.SCRAPE.COMPLETE, () => {
       setIsScraping(false)
     })
     return () => {
-      unsub()
+      unsubscribe()
     }
   }, [])
 
   const handleOpenSelectedInBrowser = () => {
     const postingsToOpen = filteredJobPostings.filter((posting) => selectedJobPostings.has(posting.id))
     postingsToOpen.forEach((posting) => {
-      ipcMessenger.invoke(CHANNEL.UTILS.OPEN_URL, { url: posting.siteUrl })
+      ipcMessenger.invoke(CHANNEL_INVOKES.UTILS.OPEN_URL, { url: posting.siteUrl })
     })
     setSelectedJobPostings(new Set())
   }
@@ -208,7 +209,10 @@ const JobPostings = () => {
 
   const handleUpdateJobPostingStatus = async (id: string, newStatus: JobPostingStatus) => {
     try {
-      const result = await ipcMessenger.invoke(CHANNEL.JOB_POSTINGS.UPDATE, { id, data: { status: newStatus } })
+      const result = await ipcMessenger.invoke(CHANNEL_INVOKES.JOB_POSTINGS.UPDATE, {
+        id,
+        data: { status: newStatus },
+      })
       if (result.success) {
         queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.JOB_POSTINGS] })
       } else {

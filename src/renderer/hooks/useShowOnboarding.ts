@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { CHANNEL } from '../../shared/messages.types'
+import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
 import ipcMessenger from '../ipcMessenger'
 import { MODAL_ID } from '../sharedComponents/Modal/Modal.consts'
 import { activeModalSignal, onboardingCompletedSignal } from '../signals'
@@ -11,7 +11,7 @@ const useShowOnboarding = () => {
     const checkFirstLaunch = async () => {
       if (hasCheckedOnboarding) return
 
-      const { onboardingCompleted } = await ipcMessenger.invoke(CHANNEL.STORE.GET, undefined)
+      const { onboardingCompleted } = await ipcMessenger.invoke(CHANNEL_INVOKES.STORE.GET, undefined)
       if (onboardingCompleted) {
         setHasCheckedOnboarding(true)
         onboardingCompletedSignal.value = true

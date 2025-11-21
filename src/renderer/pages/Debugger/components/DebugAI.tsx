@@ -14,8 +14,8 @@ import {
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT } from '../../../../shared/consts'
-import { CHANNEL } from '../../../../shared/messages.types'
 import type { NewJobPostingDTO, PromptDTO, ScrapedContentDTO, StoreSchema } from '../../../../shared/types'
+import { CHANNEL_INVOKES } from '../../../../shared/types/messages.invokes'
 import { renderPrompt } from '../../../../shared/utils'
 import { ROUTES } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
@@ -47,7 +47,7 @@ const DebugAI = ({
   const [storeFromServer, setStoreFromServer] = useState<StoreSchema | null>(null)
 
   const loadStoreSettings = useCallback(async () => {
-    const store = await ipcMessenger.invoke(CHANNEL.STORE.GET, undefined)
+    const store = await ipcMessenger.invoke(CHANNEL_INVOKES.STORE.GET, undefined)
     setStoreFromServer(store)
     setLoadingSettings(false)
   }, [])
@@ -56,7 +56,7 @@ const DebugAI = ({
     try {
       setLoadingPrompts(true)
       setError(null)
-      const result = await ipcMessenger.invoke(CHANNEL.PROMPTS.GET_ALL)
+      const result = await ipcMessenger.invoke(CHANNEL_INVOKES.PROMPTS.GET_ALL)
       setPrompts(result.prompts)
       setPromptId(result.prompts[0]?.id || null)
     } catch {
@@ -79,7 +79,7 @@ const DebugAI = ({
     setError(null)
 
     try {
-      const response = await ipcMessenger.invoke(CHANNEL.DEBUG.AI, {
+      const response = await ipcMessenger.invoke(CHANNEL_INVOKES.DEBUG.AI, {
         prompt: prompts[prompts.findIndex((p) => p.id === promptId)]?.content,
         scrapedContent,
         siteUrl: url,

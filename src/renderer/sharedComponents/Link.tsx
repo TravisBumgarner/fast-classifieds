@@ -1,11 +1,11 @@
 import { IconButton } from '@mui/material'
-import { CHANNEL } from 'src/shared/messages.types'
+import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
 import ipcMessenger from '../ipcMessenger'
 import Icon from './Icon'
 
 const Link = ({ url }: { url: string }) => {
   const handleClick = () => {
-    ipcMessenger.invoke(CHANNEL.UTILS.OPEN_URL, { url })
+    ipcMessenger.invoke(CHANNEL_INVOKES.UTILS.OPEN_URL, { url })
   }
 
   return (

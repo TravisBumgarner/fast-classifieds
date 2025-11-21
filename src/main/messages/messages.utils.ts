@@ -1,9 +1,9 @@
 import { shell } from 'electron'
-import { CHANNEL } from '../../shared/messages.types'
+import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
 import logger from '../logger'
 import { typedIpcMain } from './ipcMain'
 
-typedIpcMain.handle(CHANNEL.UTILS.OPEN_URL, async (_event, params) => {
+typedIpcMain.handle(CHANNEL_INVOKES.UTILS.OPEN_URL, async (_event, params) => {
   try {
     if (!params.url || typeof params.url !== 'string' || params.url.trim() === '') {
       logger.error('Invalid URL provided to openExternal:', params.url)

@@ -1,7 +1,7 @@
 import { Box, Button, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
-import { CHANNEL } from '../../../../shared/messages.types'
 import type { ScrapedContentDTO } from '../../../../shared/types'
+import { CHANNEL_INVOKES } from '../../../../shared/types/messages.invokes'
 import { TOOLTIPS } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
 import logger from '../../../logger'
@@ -115,7 +115,7 @@ const DebugSite = ({
     try {
       setLoading(true)
       setScraping(true)
-      const result = await ipcMessenger.invoke(CHANNEL.DEBUG.SCRAPE, {
+      const result = await ipcMessenger.invoke(CHANNEL_INVOKES.DEBUG.SCRAPE, {
         url,
         selector,
       })
@@ -183,7 +183,7 @@ const DebugSite = ({
             }}
             onClick={(e) => {
               e.preventDefault()
-              ipcMessenger.invoke(CHANNEL.UTILS.OPEN_URL, {
+              ipcMessenger.invoke(CHANNEL_INVOKES.UTILS.OPEN_URL, {
                 url: 'https://www.youtube.com/watch?v=4rQ9Alr6GIk&feature=youtu.be',
               })
             }}
