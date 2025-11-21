@@ -5,7 +5,7 @@ import Feedback from '../pages/Feedback'
 import JobPostings from '../pages/JobPostings/JobPostings'
 import NotFound from '../pages/NotFound'
 import Prompts from '../pages/Prompts'
-import ScrapeRuns from '../pages/ScrapeRuns'
+import ScrapeRuns from '../pages/ScrapeRuns/ScrapeRuns'
 import Settings from '../pages/Settings'
 import Sites from '../pages/Sites'
 
