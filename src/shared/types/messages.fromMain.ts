@@ -2,7 +2,7 @@
 
 import type { ScraperProgress, SiteProgressDTO } from '.'
 
-export const CHANNEL_INVOKES_FROM_MAIN = {
+export const CHANNEL_FROM_MAIN = {
   SCRAPE: {
     PROGRESS: 'scraper:progress',
     COMPLETE: 'scraper:complete',
@@ -10,7 +10,7 @@ export const CHANNEL_INVOKES_FROM_MAIN = {
 } as const
 
 export type FromMain = {
-  [CHANNEL_INVOKES_FROM_MAIN.SCRAPE.PROGRESS]: {
+  [CHANNEL_FROM_MAIN.SCRAPE.PROGRESS]: {
     scrapeRunId: string
     progress:
       | {
@@ -21,7 +21,7 @@ export type FromMain = {
         }
       | undefined
   }
-  [CHANNEL_INVOKES_FROM_MAIN.SCRAPE.COMPLETE]: {
+  [CHANNEL_FROM_MAIN.SCRAPE.COMPLETE]: {
     scrapeRunId: string
     totalNewJobs: number
     successfulSites: number

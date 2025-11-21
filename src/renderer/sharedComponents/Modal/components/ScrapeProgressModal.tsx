@@ -11,13 +11,12 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { SiteProgressDTO } from '../../../../shared/types'
-import { CHANNEL_INVOKES_FROM_MAIN } from '../../../../shared/types/messages.fromMain'
+import { CHANNEL_FROM_MAIN } from '../../../../shared/types/messages.fromMain'
 import { CHANNEL_INVOKES } from '../../../../shared/types/messages.invokes'
-import { QUERY_KEYS, ROUTES } from '../../../consts'
+import { ROUTES } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
 import logger from '../../../logger'
 import { activeModalSignal } from '../../../signals'
@@ -37,7 +36,6 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
   const [totalNewJobs, setTotalNewJobs] = useState(0)
   const [scrapeRunId, setScrapeRunId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const queryClient = useQueryClient()
 
   useEffect(() => {
     if (scrapeRunId === null) return
@@ -45,7 +43,7 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
     logger.info('[ScrapeProgressModal] Setting up listeners for runId:', scrapeRunId)
 
     // Listen for progress updates
-    const unsubscribeProgress = window.electron.ipcRenderer.on(CHANNEL_INVOKES_FROM_MAIN.SCRAPE.PROGRESS, (data) => {
+    const unsubscribeProgress = window.electron.ipcRenderer.on(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, (data) => {
       if (!data.progress) {
         logger.warn('[ScrapeProgressModal] Received progress update with no progress data:', data)
         return
@@ -58,7 +56,7 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
       }
     })
 
-    const unsubscribeComplete = window.electron.ipcRenderer.on(CHANNEL_INVOKES_FROM_MAIN.SCRAPE.COMPLETE, (data) => {
+    const unsubscribeComplete = window.electron.ipcRenderer.on(CHANNEL_FROM_MAIN.SCRAPE.COMPLETE, (data) => {
       logger.info('[ScrapeProgressModal] Received complete event:', data)
       if (data.scrapeRunId === scrapeRunId) {
         setTotalNewJobs(data.totalNewJobs)
@@ -102,10 +100,6 @@ const ScrapeProgressModal = (props: ScrapeProgressModalProps) => {
   }, [attachToActiveRun, props.initialError])
 
   const handleClose = () => {
-    if (isComplete) {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.JOB_POSTINGS] })
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SCRAPE_RUNS] })
-    }
     activeModalSignal.value = null
   }
 

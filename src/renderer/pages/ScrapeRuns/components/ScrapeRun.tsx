@@ -17,7 +17,7 @@ const ScrapeRun = ({
       ? Math.round((new Date(scrapeRun.completedAt).getTime() - new Date(scrapeRun.createdAt).getTime()) / 1000)
       : null
 
-  const handleRetryScrapeRun = (runId: string) => {}
+  const handleRetryScrapeRun = (_runId: string) => {}
 
   return (
     <TableRow hover>
