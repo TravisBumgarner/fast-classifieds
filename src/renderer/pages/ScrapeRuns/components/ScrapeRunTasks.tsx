@@ -8,15 +8,16 @@ import {
   TableHead,
   TableRow,
   TableSortLabel,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import type { ScrapeRunStatus, ScrapeTaskDTO } from '../../../../shared/types'
+import type { ScrapeRunStatus } from '../../../../shared/types'
 import { CHANNEL_INVOKES } from '../../../../shared/types/messages.invokes'
 import { QUERY_KEYS } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
-import { formatSelectOption } from '../../../utilities'
+import Icon from '../../../sharedComponents/Icon'
 
 type TaskSortField = 'siteUrl' | 'status' | 'newPostingsFound' | 'completedAt'
 type SortDirection = 'asc' | 'desc'
@@ -34,6 +35,19 @@ const getStatusColor = (status: ScrapeRunStatus): 'success' | 'warning' | 'error
   }
 }
 
+const getStatusText = (status: ScrapeRunStatus): string => {
+  switch (status) {
+    case 'new_data':
+      return 'New Data Found'
+    case 'hash_exists':
+      return 'No New Data'
+    case 'error':
+      return 'Error Occurred'
+    default:
+      return 'Unknown Status'
+  }
+}
+
 const ScrapeRunTasks = ({ scrapeRunId, isExpanded }: { scrapeRunId: string; isExpanded: boolean }) => {
   const [taskSortField, setTaskSortField] = useState<TaskSortField>('siteUrl')
   const [taskSortDirection, setTaskSortDirection] = useState<SortDirection>('asc')
@@ -45,7 +59,7 @@ const ScrapeRunTasks = ({ scrapeRunId, isExpanded }: { scrapeRunId: string; isEx
         scrapeRunId,
       })
     },
-    initialData: { tasks: [] as ScrapeTaskDTO[] },
+    initialData: { tasks: [] },
   })
 
   const handleTaskSort = (field: TaskSortField) => {
@@ -57,18 +71,14 @@ const ScrapeRunTasks = ({ scrapeRunId, isExpanded }: { scrapeRunId: string; isEx
     }
   }
 
-  const getSiteTitle = (foo: string) => {
-    return `replace me ${foo}`
-  }
-
   const sortedTasks = [...data.tasks].sort((a, b) => {
     let aVal: string | number
     let bVal: string | number
 
     switch (taskSortField) {
       case 'siteUrl':
-        aVal = getSiteTitle(a.siteId)
-        bVal = getSiteTitle(b.siteId)
+        aVal = a.siteTitle
+        bVal = b.siteTitle
         break
       case 'status':
         aVal = a.status
@@ -127,7 +137,6 @@ const ScrapeRunTasks = ({ scrapeRunId, isExpanded }: { scrapeRunId: string; isEx
                       New Postings
                     </TableSortLabel>
                   </TableCell>
-                  <TableCell>Error Message</TableCell>
                   <TableCell>
                     <TableSortLabel
                       active={taskSortField === 'completedAt'}
@@ -151,16 +160,18 @@ const ScrapeRunTasks = ({ scrapeRunId, isExpanded }: { scrapeRunId: string; isEx
                 ) : (
                   sortedTasks.map((task) => (
                     <TableRow key={task.id}>
-                      <TableCell>{getSiteTitle(task.siteId)}</TableCell>
+                      <TableCell>{task.siteTitle}</TableCell>
                       <TableCell>
-                        <Chip
-                          label={formatSelectOption(task.status)}
-                          color={getStatusColor(task.status)}
-                          size="small"
-                        />
+                        <Chip label={getStatusText(task.status)} color={getStatusColor(task.status)} size="small" />
+                        {task.status === 'error' && (
+                          <Tooltip title={task.errorMessage || 'No error message provided'}>
+                            <span>
+                              <Icon name="info" />
+                            </span>
+                          </Tooltip>
+                        )}
                       </TableCell>
                       <TableCell>{task.newPostingsFound}</TableCell>
-                      <TableCell>{task.errorMessage || '-'}</TableCell>
                       <TableCell>{task.completedAt ? new Date(task.completedAt).toLocaleString() : '-'}</TableCell>
                     </TableRow>
                   ))

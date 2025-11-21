@@ -251,7 +251,7 @@ export type Invokes = {
   [CHANNEL_INVOKES.SCRAPE_RUNS.GET_TASKS]: {
     args: { scrapeRunId: string }
     result: {
-      tasks: Array<ScrapeTaskDTO>
+      tasks: Array<ScrapeTaskDTO & { siteTitle: string }>
     }
   }
   [CHANNEL_INVOKES.JOB_POSTINGS.GET_ALL]: {

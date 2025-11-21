@@ -213,8 +213,21 @@ async function getAllScrapeRuns() {
 
 async function getScrapeTasksByRunId(scrapeRunId: string) {
   return db
-    .select()
+    .select({
+      id: scrapeTasks.id,
+      scrapeRunId: scrapeTasks.scrapeRunId,
+      siteId: scrapeTasks.siteId,
+      siteUrl: scrapeTasks.siteUrl,
+      status: scrapeTasks.status,
+      newPostingsFound: scrapeTasks.newPostingsFound,
+      errorMessage: scrapeTasks.errorMessage,
+      createdAt: scrapeTasks.createdAt,
+      updatedAt: scrapeTasks.updatedAt,
+      completedAt: scrapeTasks.completedAt,
+      siteTitle: sites.siteTitle,
+    })
     .from(scrapeTasks)
+    .leftJoin(sites, eq(scrapeTasks.siteId, sites.id))
     .where(eq(scrapeTasks.scrapeRunId, scrapeRunId))
     .orderBy(desc(scrapeTasks.createdAt))
 }
