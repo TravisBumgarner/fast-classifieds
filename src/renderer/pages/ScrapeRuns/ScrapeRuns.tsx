@@ -1,7 +1,6 @@
 import {
   Box,
   Chip,
-  Collapse,
   IconButton,
   Paper,
   Stack,
@@ -17,7 +16,7 @@ import {
   Typography,
 } from '@mui/material'
 import { Fragment, useCallback, useEffect, useState } from 'react'
-import type { ScrapeRunDTO, ScrapeTaskDTO, SiteDTO } from '../../../shared/types'
+import type { ScrapeRunDTO } from '../../../shared/types'
 import { CHANNEL_INVOKES } from '../../../shared/types/messages.invokes'
 import { PAGINATION } from '../../consts'
 import ipcMessenger from '../../ipcMessenger'
@@ -26,24 +25,20 @@ import Icon from '../../sharedComponents/Icon'
 import Message from '../../sharedComponents/Message'
 import PageWrapper from '../../sharedComponents/PageWrapper'
 import { SPACING } from '../../styles/consts'
-
-type Status = 'hash_exists' | 'new_data' | 'error'
+import { formatSelectOption } from '../../utilities'
+import ScrapeRunDetails from './components/ScrapeRunTasks'
 
 type RunSortField = 'createdAt' | 'status' | 'totalSites' | 'successfulSites' | 'failedSites'
-type TaskSortField = 'siteUrl' | 'status' | 'newPostingsFound' | 'completedAt'
 type SortDirection = 'asc' | 'desc'
 
 const ScrapeRuns = () => {
   const [runs, setRuns] = useState<ScrapeRunDTO[]>([])
-  const [tasks, setTasks] = useState<Record<string, ScrapeTaskDTO[]>>({})
-  const [sites, setSites] = useState<SiteDTO[]>([])
   const [expandedRunId, setExpandedRunId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [runSortField, setRunSortField] = useState<RunSortField>('createdAt')
   const [runSortDirection, setRunSortDirection] = useState<SortDirection>('desc')
-  const [taskSortField, setTaskSortField] = useState<TaskSortField>('siteUrl')
-  const [taskSortDirection, setTaskSortDirection] = useState<SortDirection>('asc')
+
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(PAGINATION.DEFAULT_ROWS_PER_PAGE)
 
@@ -54,20 +49,6 @@ const ScrapeRuns = () => {
       setRunSortField(field)
       setRunSortDirection('asc')
     }
-  }
-
-  const handleTaskSort = (field: TaskSortField) => {
-    if (taskSortField === field) {
-      setTaskSortDirection(taskSortDirection === 'asc' ? 'desc' : 'asc')
-    } else {
-      setTaskSortField(field)
-      setTaskSortDirection('asc')
-    }
-  }
-
-  const getSiteTitle = (siteId: string): string => {
-    const site = sites.find((s) => s.id === siteId)
-    return site?.siteTitle || 'Unknown'
   }
 
   const sortedRuns = [...runs].sort((a, b) => {
@@ -129,64 +110,10 @@ const ScrapeRuns = () => {
     }
   }, [])
 
-  const loadSites = useCallback(async () => {
-    try {
-      const result = await ipcMessenger.invoke(CHANNEL_INVOKES.SITES.GET_ALL, undefined)
-      setSites(result.sites)
-    } catch (err) {
-      logger.error('Failed to load sites:', err)
-    }
-  }, [])
-
-  const loadTasksForRun = async (runId: string) => {
-    if (tasks[runId]) {
-      // Already loaded
-      setExpandedRunId(expandedRunId === runId ? null : runId)
-      return
-    }
-
-    try {
-      const result = await ipcMessenger.invoke(CHANNEL_INVOKES.SCRAPE_RUNS.GET_TASKS, {
-        scrapeRunId: runId,
-      })
-      setTasks((prev) => ({ ...prev, [runId]: result.tasks }))
-      setExpandedRunId(runId)
-    } catch (err) {
-      setError('Failed to load scrape tasks')
-      logger.error(err)
-    }
-  }
-
   useEffect(() => {
     loadScrapeRuns()
-    loadSites()
-  }, [loadScrapeRuns, loadSites])
+  }, [loadScrapeRuns])
 
-  const formatStatus = (status: Status): string => {
-    switch (status) {
-      case 'new_data':
-        return 'New Data'
-      case 'hash_exists':
-        return 'No New Data'
-      case 'error':
-        return 'Error'
-      default:
-        return status
-    }
-  }
-
-  const getStatusColor = (status: Status): 'success' | 'warning' | 'error' | 'default' => {
-    switch (status) {
-      case 'new_data':
-        return 'success'
-      case 'hash_exists':
-        return 'warning'
-      case 'error':
-        return 'error'
-      default:
-        return 'default'
-    }
-  }
   if (loading) {
     return
   }
@@ -271,145 +198,44 @@ const ScrapeRuns = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                paginatedRuns.map((run) => {
-                  const isExpanded = expandedRunId === run.id
-                  const runTasks = tasks[run.id] || []
+                paginatedRuns.map((scrapeRun) => {
+                  const isExpanded = expandedRunId === scrapeRun.id
 
-                  const sortedTasks = [...runTasks].sort((a, b) => {
-                    let aVal: string | number
-                    let bVal: string | number
-
-                    switch (taskSortField) {
-                      case 'siteUrl':
-                        aVal = getSiteTitle(a.siteId)
-                        bVal = getSiteTitle(b.siteId)
-                        break
-                      case 'status':
-                        aVal = a.status
-                        bVal = b.status
-                        break
-                      case 'newPostingsFound':
-                        aVal = a.newPostingsFound
-                        bVal = b.newPostingsFound
-                        break
-                      case 'completedAt':
-                        aVal = a.completedAt ? new Date(a.completedAt).getTime() : 0
-                        bVal = b.completedAt ? new Date(b.completedAt).getTime() : 0
-                        break
-                    }
-
-                    if (aVal < bVal) return taskSortDirection === 'asc' ? -1 : 1
-                    if (aVal > bVal) return taskSortDirection === 'asc' ? 1 : -1
-                    return 0
-                  })
                   const duration =
-                    run.completedAt && run.createdAt
-                      ? Math.round((new Date(run.completedAt).getTime() - new Date(run.createdAt).getTime()) / 1000)
+                    scrapeRun.completedAt && scrapeRun.createdAt
+                      ? Math.round(
+                          (new Date(scrapeRun.completedAt).getTime() - new Date(scrapeRun.createdAt).getTime()) / 1000,
+                        )
                       : null
 
                   return (
-                    <Fragment key={run.id}>
+                    <Fragment key={scrapeRun.id}>
                       <TableRow hover>
                         <TableCell>
                           <Tooltip title={isExpanded ? 'Collapse details' : 'Expand details'}>
-                            <IconButton size="small" onClick={() => loadTasksForRun(run.id)}>
+                            <IconButton size="small" onClick={() => setExpandedRunId(isExpanded ? null : scrapeRun.id)}>
                               <Icon name={isExpanded ? 'down' : 'right'} />
                             </IconButton>
                           </Tooltip>
                         </TableCell>
-                        <TableCell>{new Date(run.createdAt).toLocaleString()}</TableCell>
+                        <TableCell>{new Date(scrapeRun.createdAt).toLocaleString()}</TableCell>
                         <TableCell>
-                          <Chip label={formatStatus(run.status)} color={getStatusColor(run.status)} size="small" />
+                          <Chip
+                            label={formatSelectOption(scrapeRun.status)}
+                            // color={getStatusColor(run.status)}
+                            size="small"
+                          />
                         </TableCell>
-                        <TableCell>{run.totalSites}</TableCell>
-                        <TableCell>{run.successfulSites}</TableCell>
-                        <TableCell>{run.failedSites}</TableCell>
+                        <TableCell>{scrapeRun.totalSites}</TableCell>
+                        <TableCell>{scrapeRun.successfulSites}</TableCell>
+                        <TableCell>{scrapeRun.failedSites}</TableCell>
                         <TableCell>{duration !== null ? `${duration}s` : 'In progress...'}</TableCell>
-                        <TableCell>{run.comments || '-'}</TableCell>
+                        <TableCell>{scrapeRun.comments || '-'}</TableCell>
                       </TableRow>
 
-                      {/* Expandable section for tasks */}
                       <TableRow>
                         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={9}>
-                          <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                            <Box sx={{ margin: 2 }}>
-                              <Typography variant="h6" gutterBottom component="div">
-                                Site Scan Details
-                              </Typography>
-                              <Table size="small">
-                                <TableHead>
-                                  <TableRow>
-                                    <TableCell>
-                                      <TableSortLabel
-                                        active={taskSortField === 'siteUrl'}
-                                        direction={taskSortField === 'siteUrl' ? taskSortDirection : 'asc'}
-                                        onClick={() => handleTaskSort('siteUrl')}
-                                      >
-                                        Company
-                                      </TableSortLabel>
-                                    </TableCell>
-                                    <TableCell>
-                                      <TableSortLabel
-                                        active={taskSortField === 'status'}
-                                        direction={taskSortField === 'status' ? taskSortDirection : 'asc'}
-                                        onClick={() => handleTaskSort('status')}
-                                      >
-                                        Status
-                                      </TableSortLabel>
-                                    </TableCell>
-                                    <TableCell>
-                                      <TableSortLabel
-                                        active={taskSortField === 'newPostingsFound'}
-                                        direction={taskSortField === 'newPostingsFound' ? taskSortDirection : 'asc'}
-                                        onClick={() => handleTaskSort('newPostingsFound')}
-                                      >
-                                        New Postings
-                                      </TableSortLabel>
-                                    </TableCell>
-                                    <TableCell>Error Message</TableCell>
-                                    <TableCell>
-                                      <TableSortLabel
-                                        active={taskSortField === 'completedAt'}
-                                        direction={taskSortField === 'completedAt' ? taskSortDirection : 'asc'}
-                                        onClick={() => handleTaskSort('completedAt')}
-                                      >
-                                        Completed At
-                                      </TableSortLabel>
-                                    </TableCell>
-                                  </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                  {sortedTasks.length === 0 ? (
-                                    <TableRow>
-                                      <TableCell colSpan={5} align="center">
-                                        <Typography variant="body2" color="textSecondary">
-                                          No task details available
-                                        </Typography>
-                                      </TableCell>
-                                    </TableRow>
-                                  ) : (
-                                    sortedTasks.map((task) => (
-                                      <TableRow key={task.id}>
-                                        <TableCell>{getSiteTitle(task.siteId)}</TableCell>
-                                        <TableCell>
-                                          <Chip
-                                            label={formatStatus(task.status)}
-                                            color={getStatusColor(task.status)}
-                                            size="small"
-                                          />
-                                        </TableCell>
-                                        <TableCell>{task.newPostingsFound}</TableCell>
-                                        <TableCell>{task.errorMessage || '-'}</TableCell>
-                                        <TableCell>
-                                          {task.completedAt ? new Date(task.completedAt).toLocaleString() : '-'}
-                                        </TableCell>
-                                      </TableRow>
-                                    ))
-                                  )}
-                                </TableBody>
-                              </Table>
-                            </Box>
-                          </Collapse>
+                          <ScrapeRunDetails scrapeRunId={scrapeRun.id} isExpanded={isExpanded} />
                         </TableCell>
                       </TableRow>
                     </Fragment>

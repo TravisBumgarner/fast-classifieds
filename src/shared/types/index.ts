@@ -30,12 +30,12 @@ export const JOB_POSTING_STATUS = {
 } as const
 export type JobPostingStatus = (typeof JOB_POSTING_STATUS)[keyof typeof JOB_POSTING_STATUS]
 
-export const STATUS = {
+export const SCRAPE_RUN_STATUS = {
   hash_exists: 'hash_exists',
   new_data: 'new_data',
   error: 'error',
 }
-export type Status = keyof typeof STATUS
+export type ScrapeRunStatus = keyof typeof SCRAPE_RUN_STATUS
 
 export const SITE_STATUS = {
   ACTIVE: 'active',
@@ -144,7 +144,7 @@ export type NewScrapeTaskDTO = {
   scrapeRunId: string
   siteId: string
   siteUrl: string
-  status: Status
+  status: ScrapeRunStatus
   newPostingsFound: number
   errorMessage?: string | null
   completedAt?: Date | null
@@ -153,7 +153,7 @@ export type NewScrapeTaskDTO = {
 export type ScrapeTaskDTO = NewScrapeTaskDTO & TimestampsAndID
 
 export type NewScrapeRunDTO = {
-  status: Status
+  status: ScrapeRunStatus
   totalSites: number
   successfulSites: number
   failedSites: number

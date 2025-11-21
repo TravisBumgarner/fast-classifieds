@@ -41,6 +41,7 @@ export const QUERY_KEYS = {
   PROMPTS: 'prompts',
   SCRAPE_RUNS: 'scrapeRuns',
   SITES: 'sites',
+  SCRAPE_TASKS: 'scrapeTasks',
 }
 
 export const PAGINATION = {

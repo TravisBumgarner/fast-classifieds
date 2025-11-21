@@ -11,7 +11,7 @@ import {
   type NewScrapeRunDTO,
   type NewScrapeTaskDTO,
   type NewSiteDTO,
-  type Status,
+  type ScrapeRunStatus,
   type UpdateSiteDTO,
 } from '../../shared/types'
 import { db } from './client'
@@ -233,7 +233,7 @@ async function updateScrapeRun(
     successfulSites?: number
     failedSites?: number
     completedAt?: Date
-    status?: Status
+    status?: ScrapeRunStatus
   },
 ) {
   return db.update(scrapeRuns).set(data).where(eq(scrapeRuns.id, id)).returning()

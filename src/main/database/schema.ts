@@ -8,10 +8,10 @@ import {
   type JobPostingStatus,
   PROMPT_STATUS,
   type PromptStatus,
+  SCRAPE_RUN_STATUS,
+  type ScrapeRunStatus,
   SITE_STATUS,
   type SiteStatus,
-  STATUS,
-  type Status,
 } from '../../shared/types'
 
 export const apiUsage = sqliteTable('api_usage', {
@@ -49,7 +49,7 @@ export const hashes = sqliteTable('hashes', {
 export const scrapeRuns = sqliteTable('scrape_runs', {
   id: text('id').primaryKey(),
   status: text('status', {
-    enum: Object.values(STATUS) as [Status, ...Status[]],
+    enum: Object.values(SCRAPE_RUN_STATUS) as [ScrapeRunStatus, ...ScrapeRunStatus[]],
   }).notNull(),
   totalSites: integer('total_sites').notNull().default(0),
   successfulSites: integer('successful_sites').notNull().default(0),
@@ -70,7 +70,7 @@ export const scrapeTasks = sqliteTable('scrape_tasks', {
   siteId: text('site_id').notNull(),
   siteUrl: text('site_url').notNull(),
   status: text('status', {
-    enum: Object.values(STATUS) as [Status, ...Status[]],
+    enum: Object.values(SCRAPE_RUN_STATUS) as [ScrapeRunStatus, ...ScrapeRunStatus[]],
   }).notNull(),
   newPostingsFound: integer('new_postings_found').notNull().default(0),
   errorMessage: text('error_message'),
