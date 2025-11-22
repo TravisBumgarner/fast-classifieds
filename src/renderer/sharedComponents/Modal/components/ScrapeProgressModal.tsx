@@ -14,7 +14,7 @@ import {
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import type { ScraperTaskProgress } from '../../../../shared/types'
-import { SCRAPER_RUN_PROGRESS, SCRAPER_TASK_STATUS } from '../../../../shared/types'
+import { SCRAPER_RUN_STATUS, SCRAPER_TASK_STATUS } from '../../../../shared/types'
 import { CHANNEL_FROM_MAIN } from '../../../../shared/types/messages.fromMain'
 import { CHANNEL_INVOKES } from '../../../../shared/types/messages.invokes'
 import { QUERY_KEYS } from '../../../consts'
@@ -98,7 +98,7 @@ const ScrapeProgressModal = (_props: ScrapeProgressModalProps) => {
   const errorCount = data?.progress?.sites.filter((s) => s.status === SCRAPER_TASK_STATUS.ERROR).length || 0
   const totalCount = data?.progress?.sites.length || 1
   const progress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0
-  const isInProgress = data?.progress?.status === SCRAPER_RUN_PROGRESS.IN_PROGRESS
+  const isInProgress = data?.progress?.status === SCRAPER_RUN_STATUS.IN_PROGRESS
 
   return (
     <DefaultModal title="Finding Jobs">

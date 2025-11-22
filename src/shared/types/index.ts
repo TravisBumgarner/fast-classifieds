@@ -161,13 +161,13 @@ export type ScrapedContentDTO = {
 
 export type ScrapeRunDTO = NewScrapeRunDTO & TimestampsAndID
 
-export const SCRAPER_RUN_PROGRESS = {
+export const SCRAPER_RUN_STATUS = {
   PENDING: 'PENDING',
   IN_PROGRESS: 'IN_PROGRESS',
   COMPLETED: 'COMPLETED',
   FAILED: 'FAILED',
 } as const
-export type ScraperRunProgress = keyof typeof SCRAPER_RUN_PROGRESS
+export type ScraperRunStatus = keyof typeof SCRAPER_RUN_STATUS
 
 export const SCRAPER_TASK_RESULT = {
   HASH_EXISTS: 'HASH_EXISTS',

@@ -1,7 +1,7 @@
 import {
-  SCRAPER_RUN_PROGRESS,
+  SCRAPER_RUN_STATUS,
   SCRAPER_TASK_STATUS,
-  type ScraperRunProgress,
+  type ScraperRunStatus,
   type ScraperTaskProgress,
 } from '../../shared/types'
 import { CHANNEL_FROM_MAIN } from '../../shared/types/messages.fromMain'
@@ -15,7 +15,7 @@ import processSite from './processSite'
 const activeRuns = new Map<
   string,
   {
-    status: ScraperRunProgress
+    status: ScraperRunStatus
     totalSites: number
     completedSites: number
     sites: Array<{
@@ -65,7 +65,7 @@ export async function startScraping(siteIds: string[]) {
 
     // Create scrape run
     const [scrapeRun] = await queries.insertScrapeRun({
-      status: SCRAPER_RUN_PROGRESS.PENDING,
+      status: SCRAPER_RUN_STATUS.PENDING,
       totalSites: sites.length,
       successfulSites: 0,
       failedSites: 0,
@@ -75,14 +75,14 @@ export async function startScraping(siteIds: string[]) {
 
     // Initialize progress tracking
     const progress = {
-      status: SCRAPER_RUN_PROGRESS.IN_PROGRESS,
+      status: SCRAPER_RUN_STATUS.IN_PROGRESS,
       totalSites: sites.length,
       completedSites: 0,
       sites: sites.map((site) => ({
         siteId: site.id,
         siteTitle: site.siteTitle,
         siteUrl: site.siteUrl,
-        status: SCRAPER_RUN_PROGRESS.PENDING,
+        status: SCRAPER_RUN_STATUS.PENDING,
       })),
     }
 
@@ -152,7 +152,7 @@ export async function startScraping(siteIds: string[]) {
       // Mark run as completed
       const finalProgress = activeRuns.get(scrapeRunId)
       if (finalProgress) {
-        finalProgress.status = SCRAPER_RUN_PROGRESS.COMPLETED
+        finalProgress.status = SCRAPER_RUN_STATUS.COMPLETED
         activeRuns.set(scrapeRunId, finalProgress)
       }
 
@@ -161,7 +161,7 @@ export async function startScraping(siteIds: string[]) {
         successfulSites,
         failedSites,
         completedAt: new Date(),
-        status: failedSites > 0 ? SCRAPER_RUN_PROGRESS.FAILED : SCRAPER_RUN_PROGRESS.COMPLETED,
+        status: failedSites > 0 ? SCRAPER_RUN_STATUS.FAILED : SCRAPER_RUN_STATUS.COMPLETED,
       })
 
       // Send completion event
@@ -194,7 +194,7 @@ export function getProgress(scrapeRunId: string) {
 
 export function getActiveRun() {
   for (const [scrapeRunId, progress] of activeRuns.entries()) {
-    if (progress.status === SCRAPER_RUN_PROGRESS.PENDING || progress.status === SCRAPER_RUN_PROGRESS.IN_PROGRESS) {
+    if (progress.status === SCRAPER_RUN_STATUS.PENDING || progress.status === SCRAPER_RUN_STATUS.IN_PROGRESS) {
       return { hasActive: true as const, scrapeRunId, progress }
     }
   }
