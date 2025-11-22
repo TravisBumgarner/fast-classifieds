@@ -29,8 +29,10 @@ import {
   type JobPostingStatus,
   type AIRecommendationStatus as TypeAIRecommendationStatus,
 } from '../../../shared/types'
+import { CHANNEL_FROM_MAIN } from '../../../shared/types/messages.fromMain'
 import { CHANNEL_INVOKES } from '../../../shared/types/messages.invokes'
 import { PAGINATION, QUERY_KEYS } from '../../consts'
+import { useIpcOn } from '../../hooks/useIpcOn'
 import ipcMessenger from '../../ipcMessenger'
 import logger from '../../logger'
 import Icon from '../../sharedComponents/Icon'
@@ -95,6 +97,10 @@ const JobPostings = () => {
     }
 
     isScrapingSignal.value === undefined && checkStatus()
+  })
+
+  useIpcOn(CHANNEL_FROM_MAIN.SCRAPE.COMPLETE, () => {
+    isScrapingSignal.value = false
   })
 
   const handleSort = (field: SortField) => {

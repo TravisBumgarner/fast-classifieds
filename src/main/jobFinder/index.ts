@@ -88,10 +88,7 @@ export async function startScraping(siteIds: string[]) {
 
     activeRuns.set(scrapeRunId, progress)
 
-    typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, {
-      scrapeRunId,
-      progress,
-    })
+    typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, undefined)
 
     const processSitesAsync = async () => {
       let totalNewJobs = 0
@@ -111,10 +108,7 @@ export async function startScraping(siteIds: string[]) {
 
         // Send progress update to renderer
         log.info('[Scraper] Sending progress update for site', i, 'runId:', scrapeRunId)
-        typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, {
-          scrapeRunId,
-          progress: activeRuns.get(scrapeRunId),
-        })
+        typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, undefined)
 
         const result = await processSite({
           siteId: site.id,
@@ -130,10 +124,7 @@ export async function startScraping(siteIds: string[]) {
             if (currentProgress) {
               currentProgress.sites[i].status = status
               activeRuns.set(scrapeRunId, currentProgress)
-              typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, {
-                scrapeRunId,
-                progress: currentProgress,
-              })
+              typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, undefined)
             }
           },
         })
@@ -155,10 +146,7 @@ export async function startScraping(siteIds: string[]) {
           failedSites++
         }
 
-        typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, {
-          scrapeRunId,
-          progress: activeRuns.get(scrapeRunId),
-        })
+        typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, undefined)
       }
 
       // Mark run as completed

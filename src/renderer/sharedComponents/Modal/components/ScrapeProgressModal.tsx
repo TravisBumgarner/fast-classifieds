@@ -12,6 +12,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import type { ScraperTaskProgress } from '../../../../shared/types'
 import { SCRAPER_RUN_PROGRESS, SCRAPER_TASK_STATUS } from '../../../../shared/types'
 import { CHANNEL_FROM_MAIN } from '../../../../shared/types/messages.fromMain'
@@ -63,6 +64,12 @@ export interface ScrapeProgressModalProps {
 
 const ScrapeProgressModal = (_props: ScrapeProgressModalProps) => {
   const queryClient = useQueryClient()
+  const [finalData, setFinalData] = useState<{
+    scrapeRunId: string
+    totalNewJobs: number
+    successfulSites: number
+    failedSites: number
+  } | null>(null)
 
   const { data } = useQuery({
     queryKey: [QUERY_KEYS.SCRAPE_PROGRESS],
@@ -76,8 +83,8 @@ const ScrapeProgressModal = (_props: ScrapeProgressModalProps) => {
     queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SCRAPE_PROGRESS] })
   })
 
-  useIpcOn(CHANNEL_FROM_MAIN.SCRAPE.COMPLETE, () => {
-    queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SCRAPE_PROGRESS] })
+  useIpcOn(CHANNEL_FROM_MAIN.SCRAPE.COMPLETE, (data) => {
+    setFinalData(data)
   })
 
   const handleClose = () => {
@@ -91,7 +98,6 @@ const ScrapeProgressModal = (_props: ScrapeProgressModalProps) => {
   const errorCount = data?.progress?.sites.filter((s) => s.status === SCRAPER_TASK_STATUS.ERROR).length || 0
   const totalCount = data?.progress?.sites.length || 1
   const progress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0
-  const isComplete = data?.progress?.status === SCRAPER_RUN_PROGRESS.COMPLETED
   const isInProgress = data?.progress?.status === SCRAPER_RUN_PROGRESS.IN_PROGRESS
 
   return (
@@ -115,16 +121,16 @@ const ScrapeProgressModal = (_props: ScrapeProgressModalProps) => {
             </Typography>
           </Box>
         )}
-        {isComplete && (
+        {finalData && (
           <Box sx={{ mb: SPACING.MEDIUM.PX }}>
             <Typography variant="h6" color="success.main" gutterBottom>
               Scrape Complete! 🎉
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              Found <strong>{totalCount}</strong> new job posting
-              {totalCount !== 1 ? 's' : ''} across {totalCount - errorCount} site
-              {totalCount - errorCount !== 1 ? 's' : ''}
-              {errorCount > 0 && (
+              Found <strong>{finalData.totalNewJobs}</strong> new job posting
+              {finalData.totalNewJobs !== 1 ? 's' : ''} across {finalData.successfulSites} site
+              {finalData.successfulSites !== 1 ? 's' : ''}
+              {finalData.failedSites > 0 && (
                 <>
                   {' '}
                   ({errorCount} site{errorCount !== 1 ? 's' : ''} had errors)
@@ -175,7 +181,7 @@ const ScrapeProgressModal = (_props: ScrapeProgressModalProps) => {
             </ListItem>
           ))}
         </List>
-        {isComplete && (
+        {finalData && (
           <Box sx={{ mt: SPACING.MEDIUM.PX }}>
             <Stack spacing={SPACING.SMALL.PX}>
               <Button variant="contained" onClick={handleClose} fullWidth>
