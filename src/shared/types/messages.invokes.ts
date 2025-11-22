@@ -67,6 +67,7 @@ export const CHANNEL_INVOKES = {
   },
   UTILS: {
     OPEN_URL: 'utils:open-url',
+    FETCH_PAGE_TITLE: 'utils:fetch-page-title',
   },
 } as const
 
@@ -297,5 +298,9 @@ export type Invokes = {
       url: string
     }
     result: { success: true } | { success: false; error: string }
+  }
+  [CHANNEL_INVOKES.UTILS.FETCH_PAGE_TITLE]: {
+    args: { url: string }
+    result: { success: true; title: string } | { success: false; error: string }
   }
 }

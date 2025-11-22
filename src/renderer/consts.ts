@@ -37,14 +37,15 @@ export const ROUTES = {
 } as const
 
 export const QUERY_KEYS = {
-  JOB_POSTINGS: 'jobPostings',
-  PROMPTS: 'prompts',
-  SCRAPE_RUNS: 'scrapeRuns',
-  SITES: 'sites',
-  SITES_WITH_JOB_COUNTS: 'sitesWithJobCounts',
-  SCRAPE_TASKS: 'scrapeTasks',
-  SCRAPE_PROGRESS: 'scrapeProgress',
-}
+  JOB_POSTINGS: 'JOB_POSTINGS',
+  PROMPTS: 'PROMPTS',
+  SCRAPE_RUNS: 'SCRAPE_RUNS',
+  SITES: 'SITES',
+  SITES_WITH_JOB_COUNTS: 'SITES_WITH_JOB_COUNTS',
+  SCRAPE_TASKS: 'SCRAPE_TASKS',
+  SCRAPE_PROGRESS: 'SCRAPE_PROGRESS',
+} as const
+export type QueryKey = keyof typeof QUERY_KEYS
 
 export const PAGINATION = {
   DEFAULT_ROWS_PER_PAGE: 10 as number,
