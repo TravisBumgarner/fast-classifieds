@@ -1,5 +1,6 @@
 import { SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT } from '../../shared/consts'
 import { errorCodeToMessage } from '../../shared/errors'
+import { SCRAPER_TASK_RESULT, SCRAPER_TASK_STATUS, type ScraperTaskProgress } from '../../shared/types'
 import queries from '../database/queries'
 import log from '../logger'
 import { hashContent } from '../utilities'
@@ -25,17 +26,17 @@ async function processSite({
   apiKey: string
   model: string
   delay?: number
-  onProgress?: (status: 'scraping' | 'processing' | 'complete' | 'error') => void
+  onProgress?: (status: ScraperTaskProgress) => void
 }) {
   try {
     log.info(`Processing: ${siteUrl}`)
-    onProgress?.('scraping')
+    onProgress?.(SCRAPER_TASK_STATUS.SCRAPING)
 
     const response = await scrape({ siteUrl, selector })
 
     if (!response.ok) {
       return {
-        status: 'error' as const,
+        status: SCRAPER_TASK_STATUS.ERROR,
         errorMessage: errorCodeToMessage({ error: response.errorCode, type: 'INTERNAL' }),
       }
     }
@@ -57,15 +58,15 @@ async function processSite({
         scrapeRunId,
         siteId,
         siteUrl,
-        status: 'hash_exists',
+        result: SCRAPER_TASK_RESULT.HASH_EXISTS,
         newPostingsFound: 0,
         completedAt: new Date(),
       })
-      return { newJobsFound: 0, status: 'complete' as const }
+      return { newJobsFound: 0, status: SCRAPER_TASK_STATUS.COMPLETE }
     }
 
     log.info(`New data found for: ${siteUrl}`)
-    onProgress?.('processing')
+    onProgress?.(SCRAPER_TASK_STATUS.PROCESSING)
 
     const { aiJobs, rawResponse } = await processText({
       prompt,
@@ -107,7 +108,7 @@ async function processSite({
       scrapeRunId,
       siteId,
       siteUrl,
-      status: 'new_data',
+      result: SCRAPER_TASK_RESULT.NEW_DATA,
       newPostingsFound: jobs.length,
       completedAt: new Date(),
     })
@@ -121,7 +122,7 @@ async function processSite({
       jobToJSONPromptHash,
     })
 
-    return { newJobsFound: jobs.length, status: 'complete' as const }
+    return { newJobsFound: jobs.length, status: SCRAPER_TASK_STATUS.COMPLETE }
   } catch (error) {
     const errorMessage = errorCodeToMessage({ error, type: 'OPEN_AI' })
     log.error(`✗ Error processing ${siteUrl}:`, error)
@@ -130,13 +131,13 @@ async function processSite({
       scrapeRunId,
       siteId,
       siteUrl,
-      status: 'error',
+      result: SCRAPER_TASK_RESULT.ERROR,
       newPostingsFound: 0,
       errorMessage,
       completedAt: new Date(),
     })
 
-    return { status: 'error' as const, errorMessage }
+    return { status: SCRAPER_TASK_STATUS.ERROR, errorMessage }
   }
 }
 

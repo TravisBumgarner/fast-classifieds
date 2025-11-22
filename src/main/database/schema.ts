@@ -9,7 +9,9 @@ import {
   PROMPT_STATUS,
   type PromptStatus,
   SCRAPE_RUN_STATUS,
+  SCRAPER_TASK_RESULT,
   type ScrapeRunStatus,
+  type ScraperTaskResult,
   SITE_STATUS,
   type SiteStatus,
 } from '../../shared/types'
@@ -69,8 +71,8 @@ export const scrapeTasks = sqliteTable('scrape_tasks', {
   scrapeRunId: text('scrape_run_id').notNull(),
   siteId: text('site_id').notNull(),
   siteUrl: text('site_url').notNull(),
-  status: text('status', {
-    enum: Object.values(SCRAPE_RUN_STATUS) as [ScrapeRunStatus, ...ScrapeRunStatus[]],
+  result: text('status', {
+    enum: Object.values(SCRAPER_TASK_RESULT) as [ScraperTaskResult, ...ScraperTaskResult[]],
   }).notNull(),
   newPostingsFound: integer('new_postings_found').notNull().default(0),
   errorMessage: text('error_message'),

@@ -13,35 +13,35 @@ import {
 } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import type { ScrapeRunStatus } from '../../../../shared/types'
+import { SCRAPER_TASK_RESULT, type ScraperTaskResult } from '../../../../shared/types'
 import { CHANNEL_INVOKES } from '../../../../shared/types/messages.invokes'
 import { QUERY_KEYS } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
 import Icon from '../../../sharedComponents/Icon'
 
-type TaskSortField = 'siteUrl' | 'status' | 'newPostingsFound' | 'completedAt'
+type TaskSortField = 'siteUrl' | 'result' | 'newPostingsFound' | 'completedAt'
 type SortDirection = 'asc' | 'desc'
 
-const getStatusColor = (status: ScrapeRunStatus): 'success' | 'warning' | 'error' | 'default' => {
+const getScrapeTaskResult = (status: ScraperTaskResult): 'success' | 'warning' | 'error' | 'default' => {
   switch (status) {
-    case 'new_data':
+    case SCRAPER_TASK_RESULT.NEW_DATA:
       return 'success'
-    case 'hash_exists':
+    case SCRAPER_TASK_RESULT.HASH_EXISTS:
       return 'warning'
-    case 'error':
+    case SCRAPER_TASK_RESULT.ERROR:
       return 'error'
     default:
       return 'default'
   }
 }
 
-const getStatusText = (status: ScrapeRunStatus): string => {
+const getStatusText = (status: ScraperTaskResult): string => {
   switch (status) {
-    case 'new_data':
+    case SCRAPER_TASK_RESULT.NEW_DATA:
       return 'New Data Found'
-    case 'hash_exists':
+    case SCRAPER_TASK_RESULT.HASH_EXISTS:
       return 'No New Data'
-    case 'error':
+    case SCRAPER_TASK_RESULT.ERROR:
       return 'Error Occurred'
     default:
       return 'Unknown Status'
@@ -80,9 +80,9 @@ const ScrapeRunTasks = ({ scrapeRunId, isExpanded }: { scrapeRunId: string; isEx
         aVal = a.siteTitle
         bVal = b.siteTitle
         break
-      case 'status':
-        aVal = a.status
-        bVal = b.status
+      case 'result':
+        aVal = a.result
+        bVal = b.result
         break
       case 'newPostingsFound':
         aVal = a.newPostingsFound
@@ -121,9 +121,9 @@ const ScrapeRunTasks = ({ scrapeRunId, isExpanded }: { scrapeRunId: string; isEx
                   </TableCell>
                   <TableCell>
                     <TableSortLabel
-                      active={taskSortField === 'status'}
-                      direction={taskSortField === 'status' ? taskSortDirection : 'asc'}
-                      onClick={() => handleTaskSort('status')}
+                      active={taskSortField === 'result'}
+                      direction={taskSortField === 'result' ? taskSortDirection : 'asc'}
+                      onClick={() => handleTaskSort('result')}
                     >
                       Status
                     </TableSortLabel>
@@ -162,8 +162,12 @@ const ScrapeRunTasks = ({ scrapeRunId, isExpanded }: { scrapeRunId: string; isEx
                     <TableRow key={task.id}>
                       <TableCell>{task.siteTitle}</TableCell>
                       <TableCell>
-                        <Chip label={getStatusText(task.status)} color={getStatusColor(task.status)} size="small" />
-                        {task.status === 'error' && (
+                        <Chip
+                          label={getStatusText(task.result)}
+                          color={getScrapeTaskResult(task.result)}
+                          size="small"
+                        />
+                        {task.result === SCRAPER_TASK_RESULT.ERROR && (
                           <Tooltip title={task.errorMessage || 'No error message provided'}>
                             <span>
                               <Icon name="info" />

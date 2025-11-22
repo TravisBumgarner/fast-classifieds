@@ -88,6 +88,15 @@ const JobPostings = () => {
   const queryClient = useQueryClient()
   useSignals()
 
+  useSignalEffect(() => {
+    const checkStatus = async () => {
+      const active = await ipcMessenger.invoke(CHANNEL_INVOKES.SCRAPER.GET_ACTIVE_RUN, undefined)
+      isScrapingSignal.value = active.hasActive
+    }
+
+    isScrapingSignal.value === undefined && checkStatus()
+  })
+
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
@@ -173,31 +182,10 @@ const JobPostings = () => {
   }
 
   const handleFindJobPostings = async () => {
-    try {
-      const active = await ipcMessenger.invoke(CHANNEL_INVOKES.SCRAPER.GET_ACTIVE_RUN, undefined)
-      if (active?.hasActive) {
-        activeModalSignal.value = { id: MODAL_ID.SCRAPE_PROGRESS_MODAL }
-        isScrapingSignal.value = true
-      } else {
-        const result = await ipcMessenger.invoke(CHANNEL_INVOKES.SCRAPER.START, undefined)
-        if (result.success) {
-          isScrapingSignal.value = true
-          activeModalSignal.value = { id: MODAL_ID.SCRAPE_PROGRESS_MODAL }
-        } else {
-          // Show error inside progress modal for consistent UX
-          activeModalSignal.value = {
-            id: MODAL_ID.SCRAPE_PROGRESS_MODAL,
-            initialError: result.error || 'No sites available to scrape',
-          }
-        }
-      }
-    } catch (err) {
-      // Fallback to modal error display
-      activeModalSignal.value = {
-        id: MODAL_ID.SCRAPE_PROGRESS_MODAL,
-        initialError: 'Failed to start scraping',
-      }
-      logger.error(err)
+    if (isScrapingSignal.value) {
+      activeModalSignal.value = { id: MODAL_ID.SCRAPE_PROGRESS_MODAL }
+    } else {
+      activeModalSignal.value = { id: MODAL_ID.JOB_SEARCH_SETUP_MODAL }
     }
   }
 

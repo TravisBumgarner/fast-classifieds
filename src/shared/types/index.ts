@@ -30,13 +30,6 @@ export const JOB_POSTING_STATUS = {
 } as const
 export type JobPostingStatus = (typeof JOB_POSTING_STATUS)[keyof typeof JOB_POSTING_STATUS]
 
-export const SCRAPE_RUN_STATUS = {
-  hash_exists: 'hash_exists',
-  new_data: 'new_data',
-  error: 'error',
-}
-export type ScrapeRunStatus = keyof typeof SCRAPE_RUN_STATUS
-
 export const SITE_STATUS = {
   ACTIVE: 'active',
   INACTIVE: 'inactive',
@@ -144,7 +137,7 @@ export type NewScrapeTaskDTO = {
   scrapeRunId: string
   siteId: string
   siteUrl: string
-  status: ScrapeRunStatus
+  result: ScraperTaskResult
   newPostingsFound: number
   errorMessage?: string | null
   completedAt?: Date | null
@@ -168,15 +161,43 @@ export type ScrapedContentDTO = {
 
 export type ScrapeRunDTO = NewScrapeRunDTO & TimestampsAndID
 
-export type ScraperProgress = 'pending' | 'in_progress' | 'completed' | 'failed'
+export const SCRAPER_RUN_PROGRESS = {
+  PENDING: 'PENDING',
+  IN_PROGRESS: 'IN_PROGRESS',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED',
+} as const
+export type ScraperRunProgress = keyof typeof SCRAPER_RUN_PROGRESS
 
-export type ScraperSiteProgress = 'pending' | 'scraping' | 'processing' | 'complete' | 'error'
+export const SCRAPER_TASK_RESULT = {
+  HASH_EXISTS: 'HASH_EXISTS',
+  NEW_DATA: 'NEW_DATA',
+  ERROR: 'ERROR',
+} as const
+export type ScraperTaskResult = keyof typeof SCRAPER_TASK_RESULT
 
-export type SiteProgressDTO = {
+export const SCRAPER_TASK_STATUS = {
+  PENDING: 'PENDING',
+  SCRAPING: 'SCRAPING',
+  PROCESSING: 'PROCESSING',
+  COMPLETE: 'COMPLETE',
+  ERROR: 'ERROR',
+} as const
+export type ScraperTaskProgress = keyof typeof SCRAPER_TASK_STATUS
+
+export type ScraperTask = {
   siteId: string
   siteUrl: string
   siteTitle: string
-  status: ScraperSiteProgress
+  status: ScraperTaskProgress
   newJobsFound?: number
   errorMessage?: string
 }
+
+export const SCRAPE_RUN_STATUS = {
+  PENDING: 'PENDING',
+  IN_PROGRESS: 'IN_PROGRESS',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED',
+} as const
+export type ScrapeRunStatus = keyof typeof SCRAPE_RUN_STATUS

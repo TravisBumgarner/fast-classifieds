@@ -6,6 +6,8 @@ import ConfirmationModal, { type ConfirmationModalProps } from './components/Con
 import DuplicateDetectionModal, { type DuplicateDetectionModalProps } from './components/DuplicateDetectionModal'
 import ImportSitesModal, { type ImportSitesModalProps } from './components/ImportSitesModal'
 import JobPostingModal, { type EditJobPostingModalProps } from './components/JobPostingModal'
+import type { JobSearchSetupModalProps } from './components/JobSearchSetupModal'
+import JobSearchSetupModal from './components/JobSearchSetupModal'
 import OnboardingModal, { type OnboardingModalProps } from './components/OnboardingModal'
 import PromptModal, { type AddPromptModalProps, type EditPromptModalProps } from './components/PromptModal'
 import ScrapeProgressModal, { type ScrapeProgressModalProps } from './components/ScrapeProgressModal'
@@ -24,6 +26,7 @@ export type ActiveModal =
   | ChangelogModalProps
   | EditJobPostingModalProps
   | DuplicateDetectionModalProps
+  | JobSearchSetupModalProps
 
 export type ModalId = (typeof MODAL_ID)[keyof typeof MODAL_ID]
 
@@ -55,6 +58,8 @@ const RenderModal: FC = () => {
       return <JobPostingModal {...(activeModalSignal.value as EditJobPostingModalProps)} />
     case MODAL_ID.DUPLICATE_POSTINGS_MODAL:
       return <DuplicateDetectionModal {...(activeModalSignal.value as DuplicateDetectionModalProps)} />
+    case MODAL_ID.JOB_SEARCH_SETUP_MODAL:
+      return <JobSearchSetupModal {...(activeModalSignal.value as JobSearchSetupModalProps)} />
     default:
       return null
   }

@@ -1,6 +1,6 @@
 // Send and forget from main.
 
-import type { ScraperProgress, SiteProgressDTO } from '.'
+import type { ScraperRunProgress, ScraperTask } from '.'
 
 export const CHANNEL_FROM_MAIN = {
   SCRAPE: {
@@ -14,10 +14,10 @@ export type FromMain = {
     scrapeRunId: string
     progress:
       | {
-          status: ScraperProgress
+          status: ScraperRunProgress
           totalSites: number
           completedSites: number
-          sites: Array<SiteProgressDTO>
+          sites: Array<ScraperTask>
         }
       | undefined
   }

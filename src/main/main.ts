@@ -6,7 +6,6 @@ import started from 'electron-squirrel-startup'
 import { updateElectronApp } from 'update-electron-app'
 import { migrateProduction } from './database/client'
 import logger from './logger'
-import { setMainWindow } from './messages/shared'
 import './messages'
 import { backfill } from './database/backfill'
 
@@ -54,9 +53,6 @@ const createWindow = () => {
   }
 
   const mainWindow = new BrowserWindow(windowOptions)
-
-  // Set the main window reference for IPC handlers
-  setMainWindow(mainWindow)
 
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL)

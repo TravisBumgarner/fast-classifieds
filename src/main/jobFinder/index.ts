@@ -1,4 +1,9 @@
-import type { BrowserWindow } from 'electron'
+import {
+  SCRAPER_RUN_PROGRESS,
+  SCRAPER_TASK_STATUS,
+  type ScraperRunProgress,
+  type ScraperTaskProgress,
+} from '../../shared/types'
 import { CHANNEL_FROM_MAIN } from '../../shared/types/messages.fromMain'
 import queries from '../database/queries'
 import log from '../logger'
@@ -10,21 +15,21 @@ import processSite from './processSite'
 const activeRuns = new Map<
   string,
   {
-    status: 'pending' | 'in_progress' | 'completed' | 'failed'
+    status: ScraperRunProgress
     totalSites: number
     completedSites: number
     sites: Array<{
       siteId: string
       siteTitle: string
       siteUrl: string
-      status: 'pending' | 'scraping' | 'processing' | 'complete' | 'error'
+      status: ScraperTaskProgress
       newJobsFound?: number
       errorMessage?: string
     }>
   }
 >()
 
-export async function startScraping(mainWindow: BrowserWindow | null) {
+export async function startScraping(siteIds: string[]) {
   try {
     const model = store.get('openaiModel')
     const delay = store.get('scrapeDelay')
@@ -52,17 +57,16 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
     }
 
     // Get all active sites
-    const allSites = await queries.getAllSites()
-    const activeSites = allSites.filter((s) => s.status === 'active')
+    const sites = await queries.getSites({ siteIds })
 
-    if (activeSites.length === 0) {
-      return { success: false as const, error: 'No active sites to scrape' }
+    if (sites.length === 0) {
+      return { success: false as const, error: 'No sites to scrape' }
     }
 
     // Create scrape run
     const [scrapeRun] = await queries.insertScrapeRun({
-      status: 'new_data',
-      totalSites: activeSites.length,
+      status: SCRAPER_RUN_PROGRESS.PENDING,
+      totalSites: sites.length,
       successfulSites: 0,
       failedSites: 0,
     })
@@ -71,53 +75,46 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
 
     // Initialize progress tracking
     const progress = {
-      status: 'in_progress' as const,
-      totalSites: activeSites.length,
+      status: SCRAPER_RUN_PROGRESS.IN_PROGRESS,
+      totalSites: sites.length,
       completedSites: 0,
-      sites: activeSites.map((site) => ({
+      sites: sites.map((site) => ({
         siteId: site.id,
         siteTitle: site.siteTitle,
         siteUrl: site.siteUrl,
-        status: 'pending' as const,
+        status: SCRAPER_RUN_PROGRESS.PENDING,
       })),
     }
 
     activeRuns.set(scrapeRunId, progress)
 
-    // Send initial progress to renderer
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      log.info('[Scraper] Sending initial progress for runId:', scrapeRunId)
-      typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, {
-        scrapeRunId,
-        progress,
-      })
-    }
+    typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, {
+      scrapeRunId,
+      progress,
+    })
 
-    // Process sites asynchronously (don't await)
     const processSitesAsync = async () => {
       let totalNewJobs = 0
       let successfulSites = 0
       let failedSites = 0
 
-      for (let i = 0; i < activeSites.length; i++) {
-        const site = activeSites[i]
+      for (let i = 0; i < sites.length; i++) {
+        const site = sites[i]
         const prompt = await queries.getPromptById(site.promptId)
 
         // Update progress
         const currentProgress = activeRuns.get(scrapeRunId)
         if (currentProgress) {
-          currentProgress.sites[i].status = 'scraping'
+          currentProgress.sites[i].status = SCRAPER_TASK_STATUS.SCRAPING
           activeRuns.set(scrapeRunId, currentProgress)
         }
 
         // Send progress update to renderer
-        if (mainWindow && !mainWindow.isDestroyed()) {
-          log.info('[Scraper] Sending progress update for site', i, 'runId:', scrapeRunId)
-          typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, {
-            scrapeRunId,
-            progress: activeRuns.get(scrapeRunId),
-          })
-        }
+        log.info('[Scraper] Sending progress update for site', i, 'runId:', scrapeRunId)
+        typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, {
+          scrapeRunId,
+          progress: activeRuns.get(scrapeRunId),
+        })
 
         const result = await processSite({
           siteId: site.id,
@@ -133,12 +130,10 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
             if (currentProgress) {
               currentProgress.sites[i].status = status
               activeRuns.set(scrapeRunId, currentProgress)
-              if (mainWindow && !mainWindow.isDestroyed()) {
-                typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, {
-                  scrapeRunId,
-                  progress: currentProgress,
-                })
-              }
+              typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, {
+                scrapeRunId,
+                progress: currentProgress,
+              })
             }
           },
         })
@@ -153,26 +148,23 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
           activeRuns.set(scrapeRunId, updatedProgress)
         }
 
-        if (result.status === 'complete') {
+        if (result.status === SCRAPER_TASK_STATUS.COMPLETE) {
           successfulSites++
           totalNewJobs += result.newJobsFound || 0
-        } else if (result.status === 'error') {
+        } else if (result.status === SCRAPER_TASK_STATUS.ERROR) {
           failedSites++
         }
 
-        // Send final progress update for this site
-        if (mainWindow && !mainWindow.isDestroyed()) {
-          mainWindow.webContents.send('scraper:progress', {
-            scrapeRunId,
-            progress: activeRuns.get(scrapeRunId),
-          })
-        }
+        typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, {
+          scrapeRunId,
+          progress: activeRuns.get(scrapeRunId),
+        })
       }
 
       // Mark run as completed
       const finalProgress = activeRuns.get(scrapeRunId)
       if (finalProgress) {
-        finalProgress.status = 'completed'
+        finalProgress.status = SCRAPER_RUN_PROGRESS.COMPLETED
         activeRuns.set(scrapeRunId, finalProgress)
       }
 
@@ -181,18 +173,16 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
         successfulSites,
         failedSites,
         completedAt: new Date(),
-        status: failedSites > 0 ? 'error' : 'new_data',
+        status: failedSites > 0 ? SCRAPER_RUN_PROGRESS.FAILED : SCRAPER_RUN_PROGRESS.COMPLETED,
       })
 
       // Send completion event
-      if (mainWindow && !mainWindow.isDestroyed()) {
-        typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.COMPLETE, {
-          scrapeRunId,
-          totalNewJobs,
-          successfulSites,
-          failedSites,
-        })
-      }
+      typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.COMPLETE, {
+        scrapeRunId,
+        totalNewJobs,
+        successfulSites,
+        failedSites,
+      })
     }
 
     // Start processing sites without blocking
@@ -216,7 +206,7 @@ export function getProgress(scrapeRunId: string) {
 
 export function getActiveRun() {
   for (const [scrapeRunId, progress] of activeRuns.entries()) {
-    if (progress.status === 'pending' || progress.status === 'in_progress') {
+    if (progress.status === SCRAPER_RUN_PROGRESS.PENDING || progress.status === SCRAPER_RUN_PROGRESS.IN_PROGRESS) {
       return { hasActive: true as const, scrapeRunId, progress }
     }
   }
