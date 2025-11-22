@@ -10,7 +10,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
 import type { PromptDTO } from '../../../../shared/types'
 import { CHANNEL_INVOKES } from '../../../../shared/types/messages.invokes'
@@ -32,25 +32,22 @@ const ImportSitesModal = (_props: ImportSitesModalProps) => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  const [prompts, setPrompts] = useState<PromptDTO[]>([])
   const queryClient = useQueryClient()
 
-  const loadPrompts = useCallback(async () => {
-    try {
+  const { data: promptsData } = useQuery({
+    queryKey: [QUERY_KEYS.PROMPTS],
+    queryFn: async () => {
       const result = await ipcMessenger.invoke(CHANNEL_INVOKES.PROMPTS.GET_ALL, undefined)
-      setPrompts(result.prompts)
-      // Auto-select first prompt if available
-      if (result.prompts.length > 0) {
-        setPromptId(result.prompts[0].id)
-      }
-    } catch (err) {
-      logger.error('Failed to load prompts:', err)
-    }
-  }, [])
+      return result.prompts as PromptDTO[]
+    },
+    initialData: [],
+  })
 
   useEffect(() => {
-    loadPrompts()
-  }, [loadPrompts])
+    if (promptsData.length > 0 && !promptId) {
+      setPromptId(promptsData[0].id)
+    }
+  }, [promptsData, promptId])
 
   const fetchPageTitle = async (url: string): Promise<string> => {
     try {
@@ -78,7 +75,7 @@ const ImportSitesModal = (_props: ImportSitesModalProps) => {
     setLoading(true)
 
     try {
-      const selectedPrompt = prompts.find((p) => p.id === promptId)
+      const selectedPrompt = promptsData.find((p) => p.id === promptId)
       if (!selectedPrompt) {
         setError('Please select a prompt')
         setLoading(false)
@@ -187,7 +184,7 @@ const ImportSitesModal = (_props: ImportSitesModalProps) => {
           <FormControl fullWidth required disabled={loading} size="small">
             <InputLabel>Prompt</InputLabel>
             <Select value={promptId} onChange={(e) => setPromptId(e.target.value)} label="Prompt">
-              {prompts.map((prompt) => (
+              {promptsData.map((prompt) => (
                 <MenuItem key={prompt.id} value={prompt.id}>
                   {prompt.title}
                 </MenuItem>

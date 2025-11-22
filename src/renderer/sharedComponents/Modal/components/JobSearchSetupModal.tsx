@@ -136,7 +136,9 @@ const JobSearchSetupModal = (props: JobSearchSetupModalProps) => {
                 label={
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Typography variant="body1">{site.siteTitle}</Typography>
-                    <Chip label="Active" color="success" size="small" />
+                    <Typography variant="body2" color="text.secondary">
+                      ({site.siteUrl})
+                    </Typography>
                   </Box>
                 }
               />
