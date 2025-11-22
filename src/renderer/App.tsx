@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/electron/renderer'
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { MemoryRouter } from 'react-router-dom'
-import { CHANNEL_INVOKES_FROM_MAIN } from '../shared/types/messages.fromMain'
+import { CHANNEL_FROM_MAIN } from '../shared/types/messages.fromMain'
 import ErrorBoundary from './components/ErrorBoundary'
 import Navigation from './components/Navigation'
 import Router from './components/Router'
@@ -30,7 +30,7 @@ function App() {
 
   // Invalidate job postings on scrape completion globally
   React.useEffect(() => {
-    const unsubscribe = window.electron.ipcRenderer.on(CHANNEL_INVOKES_FROM_MAIN.SCRAPE.COMPLETE, () => {
+    const unsubscribe = window.electron.ipcRenderer.on(CHANNEL_FROM_MAIN.SCRAPE.COMPLETE, () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.JOB_POSTINGS] })
     })
     return () => {

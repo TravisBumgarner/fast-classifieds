@@ -16,7 +16,7 @@ typedIpcMain.handle(CHANNEL_INVOKES.APP.GET_BACKUP_DIRECTORY, async () => {
 })
 
 typedIpcMain.handle(CHANNEL_INVOKES.APP.EXPORT_ALL_DATA, async () => {
-  const sites = await queries.getAllSites()
+  const sites = await queries.getSites({})
   const prompts = await queries.getAllPrompts()
   const jobPostings = await queries.getJobPostings({})
   const scrapeRuns = await queries.getAllScrapeRuns()

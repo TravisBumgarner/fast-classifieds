@@ -56,8 +56,6 @@ export async function processText({
     },
   })
 
-  console.log('AI response received', response.output_parsed)
-
   const parsedJobs = response.output_parsed?.jobs || []
 
   if (parsedJobs.length === 0) {

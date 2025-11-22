@@ -5,7 +5,7 @@ import { typedIpcMain } from './ipcMain'
 
 typedIpcMain.handle(CHANNEL_INVOKES.SITES.GET_ALL, async () => {
   try {
-    const sites = await queries.getAllSites()
+    const sites = await queries.getSites({})
     return {
       type: 'get_all_sites',
       sites,

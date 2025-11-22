@@ -56,7 +56,7 @@ const DebugAI = ({
     try {
       setLoadingPrompts(true)
       setError(null)
-      const result = await ipcMessenger.invoke(CHANNEL_INVOKES.PROMPTS.GET_ALL)
+      const result = await ipcMessenger.invoke(CHANNEL_INVOKES.PROMPTS.GET_ALL, undefined)
       setPrompts(result.prompts)
       setPromptId(result.prompts[0]?.id || null)
     } catch {

@@ -11,7 +11,7 @@ import {
   type NewScrapeRunDTO,
   type NewScrapeTaskDTO,
   type NewSiteDTO,
-  type Status,
+  type ScrapeRunStatus,
   type UpdateSiteDTO,
 } from '../../shared/types'
 import { db } from './client'
@@ -99,13 +99,6 @@ async function insertScrapeTask(data: NewScrapeTaskDTO) {
     .returning()
 }
 
-async function insertJobPosting(data: NewJobPostingDTO) {
-  return db
-    .insert(jobPostings)
-    .values({ ...data, id: uuidv4() })
-    .returning()
-}
-
 async function updateJobPosting(id: string, data: Partial<NewJobPostingDTO>) {
   return db
     .update(jobPostings)
@@ -117,12 +110,14 @@ async function updateJobPosting(id: string, data: Partial<NewJobPostingDTO>) {
 async function insertJobPostings(data: NewJobPostingDTO[]) {
   if (data.length === 0) return []
   const dataWithIds = data.map((item) => ({ ...item, id: uuidv4() }))
-  console.log(`Inserting ${JSON.stringify(dataWithIds)} job postings...`)
   return db.insert(jobPostings).values(dataWithIds).returning()
 }
 
-async function getAllSites() {
-  return db.select().from(sites)
+async function getSites({ siteIds }: { siteIds?: string[] }) {
+  return db
+    .select()
+    .from(sites)
+    .where(siteIds ? inArray(sites.id, siteIds) : undefined)
 }
 
 async function getAllSitesWithJobCounts() {
@@ -213,17 +208,22 @@ async function getAllScrapeRuns() {
 
 async function getScrapeTasksByRunId(scrapeRunId: string) {
   return db
-    .select()
+    .select({
+      id: scrapeTasks.id,
+      scrapeRunId: scrapeTasks.scrapeRunId,
+      siteId: scrapeTasks.siteId,
+      siteUrl: scrapeTasks.siteUrl,
+      result: scrapeTasks.result,
+      newPostingsFound: scrapeTasks.newPostingsFound,
+      errorMessage: scrapeTasks.errorMessage,
+      createdAt: scrapeTasks.createdAt,
+      updatedAt: scrapeTasks.updatedAt,
+      completedAt: scrapeTasks.completedAt,
+      siteTitle: sites.siteTitle,
+    })
     .from(scrapeTasks)
+    .leftJoin(sites, eq(scrapeTasks.siteId, sites.id))
     .where(eq(scrapeTasks.scrapeRunId, scrapeRunId))
-    .orderBy(desc(scrapeTasks.createdAt))
-}
-
-async function getFailedTasksByRunId(scrapeRunId: string) {
-  return db
-    .select()
-    .from(scrapeTasks)
-    .where(and(eq(scrapeTasks.scrapeRunId, scrapeRunId), eq(scrapeTasks.status, 'error')))
     .orderBy(desc(scrapeTasks.createdAt))
 }
 
@@ -233,7 +233,7 @@ async function updateScrapeRun(
     successfulSites?: number
     failedSites?: number
     completedAt?: Date
-    status?: Status
+    status?: ScrapeRunStatus
   },
 ) {
   return db.update(scrapeRuns).set(data).where(eq(scrapeRuns.id, id)).returning()
@@ -380,10 +380,9 @@ export default {
   insertScrapeRun,
   insertScrapeTask,
   updateScrapeRun,
-  insertJobPosting,
   insertJobPostings,
   updateJobPosting,
-  getAllSites,
+  getSites,
   getAllSitesWithJobCounts,
   getSiteById,
   getAllApiUsage,
@@ -400,7 +399,6 @@ export default {
   deletePrompt,
   getAllScrapeRuns,
   getScrapeTasksByRunId,
-  getFailedTasksByRunId,
   getJobPostings,
   getSuspectedDuplicateGroups,
   nukeDatabase,

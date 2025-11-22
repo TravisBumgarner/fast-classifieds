@@ -2,12 +2,10 @@ import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
 import * as scraper from '../jobFinder'
 import logger from '../logger'
 import { typedIpcMain } from './ipcMain'
-import { getMainWindow } from './shared'
 
-typedIpcMain.handle(CHANNEL_INVOKES.SCRAPER.START, async () => {
-  const mainWindow = getMainWindow()
+typedIpcMain.handle(CHANNEL_INVOKES.SCRAPER.START, async (_event, params) => {
   try {
-    const result = await scraper.startScraping(mainWindow)
+    const result = await scraper.startScraping(params.siteIds)
     return {
       type: 'start_scraping',
       ...result,

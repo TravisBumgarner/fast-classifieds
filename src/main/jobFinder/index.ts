@@ -1,168 +1,35 @@
-import type { BrowserWindow } from 'electron'
-import { SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT } from '../../shared/consts'
-import { errorCodeToMessage } from '../../shared/errors'
-import { CHANNEL_INVOKES_FROM_MAIN } from '../../shared/types/messages.fromMain'
+import {
+  SCRAPER_RUN_STATUS,
+  SCRAPER_TASK_STATUS,
+  type ScraperRunStatus,
+  type ScraperTaskProgress,
+} from '../../shared/types'
+import { CHANNEL_FROM_MAIN } from '../../shared/types/messages.fromMain'
 import queries from '../database/queries'
 import log from '../logger'
 import { typedIpcMain } from '../messages/ipcMain'
 import store from '../store'
-import { hashContent } from '../utilities'
-import { buildNewJobPostingDTO } from './buildNewJobPostingDTO'
-import { processText } from './processText'
-import { scrape } from './scrape'
+import processSite from './processSite'
 
 // Store active scrape runs in memory
 const activeRuns = new Map<
   string,
   {
-    status: 'pending' | 'in_progress' | 'completed' | 'failed'
+    status: ScraperRunStatus
     totalSites: number
     completedSites: number
     sites: Array<{
       siteId: string
       siteTitle: string
       siteUrl: string
-      status: 'pending' | 'scraping' | 'processing' | 'complete' | 'error'
+      status: ScraperTaskProgress
       newJobsFound?: number
       errorMessage?: string
     }>
   }
 >()
 
-async function processSite({
-  siteId,
-  siteUrl,
-  prompt,
-  selector,
-  scrapeRunId,
-  apiKey,
-  model,
-  onProgress,
-}: {
-  siteId: string
-  siteUrl: string
-  prompt: string
-  selector: string
-  scrapeRunId: string
-  apiKey: string
-  model: string
-  delay?: number
-  onProgress?: (status: 'scraping' | 'processing' | 'complete' | 'error') => void
-}) {
-  try {
-    log.info(`Processing: ${siteUrl}`)
-    onProgress?.('scraping')
-
-    const response = await scrape({ siteUrl, selector })
-
-    if (!response.ok) {
-      return {
-        status: 'error' as const,
-        errorMessage: errorCodeToMessage({ error: response.errorCode, type: 'INTERNAL' }),
-      }
-    }
-
-    const { scrapedContent, hash: siteContentHash } = response
-
-    log.info(`Scraped content for: ${siteUrl}, siteContentHash: ${siteContentHash}`)
-
-    const promptHash = hashContent(prompt)
-
-    const jobToJSONPromptHash = hashContent(SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT)
-
-    const exists = await queries.hashExists({ siteContentHash, siteId, promptHash, jobToJSONPromptHash })
-    log.info(`Hash exists: ${exists}`)
-
-    if (exists) {
-      log.info(`Hash exists for: ${siteUrl}`)
-      await queries.insertScrapeTask({
-        scrapeRunId,
-        siteId,
-        siteUrl,
-        status: 'hash_exists',
-        newPostingsFound: 0,
-        completedAt: new Date(),
-      })
-      return { newJobsFound: 0, status: 'complete' as const }
-    }
-
-    log.info(`New data found for: ${siteUrl}`)
-    onProgress?.('processing')
-
-    const { aiJobs, rawResponse } = await processText({
-      prompt,
-      scrapedContent,
-      siteUrl,
-      apiKey,
-      model,
-      jobToJSONPrompt: SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT,
-      siteId,
-      scrapeRunId,
-    })
-
-    const existingDuplicationDetectionIds = new Set(
-      (await queries.getJobPostings({})).map((j) => j.duplicationDetectionId),
-    )
-
-    const jobs = aiJobs.map((job) =>
-      buildNewJobPostingDTO({
-        ...job,
-        siteId,
-        scrapeRunId,
-        siteUrl,
-        existingDuplicationDetectionIds,
-      }),
-    )
-
-    await queries.insertApiUsage({
-      response: rawResponse,
-      prompt,
-      siteContent: JSON.stringify(scrapedContent),
-      siteUrl,
-    })
-
-    if (jobs.length > 0) {
-      await queries.insertJobPostings(jobs)
-    }
-
-    await queries.insertScrapeTask({
-      scrapeRunId,
-      siteId,
-      siteUrl,
-      status: 'new_data',
-      newPostingsFound: jobs.length,
-      completedAt: new Date(),
-    })
-
-    // Only store the hash once AI has done its thing.
-    // If something errors, we want to be able to retry.
-    queries.insertHash({
-      siteContentHash,
-      promptHash,
-      siteId,
-      jobToJSONPromptHash,
-    })
-
-    return { newJobsFound: jobs.length, status: 'complete' as const }
-  } catch (error) {
-    const errorMessage = errorCodeToMessage({ error, type: 'OPEN_AI' })
-    log.error(`✗ Error processing ${siteUrl}:`, error)
-
-    await queries.insertScrapeTask({
-      scrapeRunId,
-      siteId,
-      siteUrl,
-      status: 'error',
-      newPostingsFound: 0,
-      errorMessage,
-      completedAt: new Date(),
-    })
-
-    return { status: 'error' as const, errorMessage }
-  }
-}
-
-export async function startScraping(mainWindow: BrowserWindow | null) {
+export async function startScraping(siteIds: string[]) {
   try {
     const model = store.get('openaiModel')
     const delay = store.get('scrapeDelay')
@@ -190,17 +57,16 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
     }
 
     // Get all active sites
-    const allSites = await queries.getAllSites()
-    const activeSites = allSites.filter((s) => s.status === 'active')
+    const sites = await queries.getSites({ siteIds })
 
-    if (activeSites.length === 0) {
-      return { success: false as const, error: 'No active sites to scrape' }
+    if (sites.length === 0) {
+      return { success: false as const, error: 'No sites to scrape' }
     }
 
     // Create scrape run
     const [scrapeRun] = await queries.insertScrapeRun({
-      status: 'new_data',
-      totalSites: activeSites.length,
+      status: SCRAPER_RUN_STATUS.PENDING,
+      totalSites: sites.length,
       successfulSites: 0,
       failedSites: 0,
     })
@@ -209,53 +75,40 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
 
     // Initialize progress tracking
     const progress = {
-      status: 'in_progress' as const,
-      totalSites: activeSites.length,
+      status: SCRAPER_RUN_STATUS.IN_PROGRESS,
+      totalSites: sites.length,
       completedSites: 0,
-      sites: activeSites.map((site) => ({
+      sites: sites.map((site) => ({
         siteId: site.id,
         siteTitle: site.siteTitle,
         siteUrl: site.siteUrl,
-        status: 'pending' as const,
+        status: SCRAPER_RUN_STATUS.PENDING,
       })),
     }
 
     activeRuns.set(scrapeRunId, progress)
 
-    // Send initial progress to renderer
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      log.info('[Scraper] Sending initial progress for runId:', scrapeRunId)
-      typedIpcMain.send(CHANNEL_INVOKES_FROM_MAIN.SCRAPE.PROGRESS, {
-        scrapeRunId,
-        progress,
-      })
-    }
+    typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, undefined)
 
-    // Process sites asynchronously (don't await)
     const processSitesAsync = async () => {
       let totalNewJobs = 0
       let successfulSites = 0
       let failedSites = 0
 
-      for (let i = 0; i < activeSites.length; i++) {
-        const site = activeSites[i]
+      for (let i = 0; i < sites.length; i++) {
+        const site = sites[i]
         const prompt = await queries.getPromptById(site.promptId)
 
         // Update progress
         const currentProgress = activeRuns.get(scrapeRunId)
         if (currentProgress) {
-          currentProgress.sites[i].status = 'scraping'
+          currentProgress.sites[i].status = SCRAPER_TASK_STATUS.SCRAPING
           activeRuns.set(scrapeRunId, currentProgress)
         }
 
         // Send progress update to renderer
-        if (mainWindow && !mainWindow.isDestroyed()) {
-          log.info('[Scraper] Sending progress update for site', i, 'runId:', scrapeRunId)
-          typedIpcMain.send(CHANNEL_INVOKES_FROM_MAIN.SCRAPE.PROGRESS, {
-            scrapeRunId,
-            progress: activeRuns.get(scrapeRunId),
-          })
-        }
+        log.info('[Scraper] Sending progress update for site', i, 'runId:', scrapeRunId)
+        typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, undefined)
 
         const result = await processSite({
           siteId: site.id,
@@ -271,12 +124,7 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
             if (currentProgress) {
               currentProgress.sites[i].status = status
               activeRuns.set(scrapeRunId, currentProgress)
-              if (mainWindow && !mainWindow.isDestroyed()) {
-                typedIpcMain.send(CHANNEL_INVOKES_FROM_MAIN.SCRAPE.PROGRESS, {
-                  scrapeRunId,
-                  progress: currentProgress,
-                })
-              }
+              typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, undefined)
             }
           },
         })
@@ -291,26 +139,20 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
           activeRuns.set(scrapeRunId, updatedProgress)
         }
 
-        if (result.status === 'complete') {
+        if (result.status === SCRAPER_TASK_STATUS.COMPLETE) {
           successfulSites++
           totalNewJobs += result.newJobsFound || 0
-        } else if (result.status === 'error') {
+        } else if (result.status === SCRAPER_TASK_STATUS.ERROR) {
           failedSites++
         }
 
-        // Send final progress update for this site
-        if (mainWindow && !mainWindow.isDestroyed()) {
-          mainWindow.webContents.send('scraper:progress', {
-            scrapeRunId,
-            progress: activeRuns.get(scrapeRunId),
-          })
-        }
+        typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, undefined)
       }
 
       // Mark run as completed
       const finalProgress = activeRuns.get(scrapeRunId)
       if (finalProgress) {
-        finalProgress.status = 'completed'
+        finalProgress.status = SCRAPER_RUN_STATUS.COMPLETED
         activeRuns.set(scrapeRunId, finalProgress)
       }
 
@@ -319,18 +161,16 @@ export async function startScraping(mainWindow: BrowserWindow | null) {
         successfulSites,
         failedSites,
         completedAt: new Date(),
-        status: failedSites > 0 ? 'error' : 'new_data',
+        status: failedSites > 0 ? SCRAPER_RUN_STATUS.FAILED : SCRAPER_RUN_STATUS.COMPLETED,
       })
 
       // Send completion event
-      if (mainWindow && !mainWindow.isDestroyed()) {
-        typedIpcMain.send(CHANNEL_INVOKES_FROM_MAIN.SCRAPE.COMPLETE, {
-          scrapeRunId,
-          totalNewJobs,
-          successfulSites,
-          failedSites,
-        })
-      }
+      typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.COMPLETE, {
+        scrapeRunId,
+        totalNewJobs,
+        successfulSites,
+        failedSites,
+      })
     }
 
     // Start processing sites without blocking
@@ -354,7 +194,7 @@ export function getProgress(scrapeRunId: string) {
 
 export function getActiveRun() {
   for (const [scrapeRunId, progress] of activeRuns.entries()) {
-    if (progress.status === 'pending' || progress.status === 'in_progress') {
+    if (progress.status === SCRAPER_RUN_STATUS.PENDING || progress.status === SCRAPER_RUN_STATUS.IN_PROGRESS) {
       return { hasActive: true as const, scrapeRunId, progress }
     }
   }

@@ -24,7 +24,10 @@ typedIpcMain.handle(CHANNEL_INVOKES.SCRAPE_RUNS.GET_TASKS, async (_event, params
     const tasks = await queries.getScrapeTasksByRunId(params.scrapeRunId)
     return {
       type: 'get_scrape_tasks',
-      tasks,
+      tasks: tasks.map((task) => ({
+        ...task,
+        siteTitle: task.siteTitle ?? 'Unknown',
+      })),
     }
   } catch (error) {
     logger.error('Error getting scrape tasks:', error)

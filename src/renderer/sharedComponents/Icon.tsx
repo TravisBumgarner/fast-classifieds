@@ -2,7 +2,7 @@ import { CgDebug } from 'react-icons/cg'
 import { FaCheck, FaExternalLinkAlt } from 'react-icons/fa'
 import { FaFilterCircleXmark } from 'react-icons/fa6'
 import { GiHamburgerMenu } from 'react-icons/gi'
-import { IoIosSkipForward, IoMdSettings } from 'react-icons/io'
+import { IoIosRefresh, IoIosSkipForward, IoMdSettings } from 'react-icons/io'
 import { IoInformationCircleOutline } from 'react-icons/io5'
 import { LuPartyPopper } from 'react-icons/lu'
 
@@ -19,6 +19,7 @@ import {
 } from 'react-icons/md'
 
 export const iconMap = {
+  refresh: IoIosRefresh,
   check: FaCheck,
   edit: MdEdit,
   menu: GiHamburgerMenu,

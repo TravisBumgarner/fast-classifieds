@@ -20,16 +20,19 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import { useSignalEffect } from '@preact/signals-react'
+import { useSignals } from '@preact/signals-react/runtime'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   AI_RECOMMENDATION_STATUS,
   type JobPostingStatus,
   type AIRecommendationStatus as TypeAIRecommendationStatus,
 } from '../../../shared/types'
-import { CHANNEL_INVOKES_FROM_MAIN } from '../../../shared/types/messages.fromMain'
+import { CHANNEL_FROM_MAIN } from '../../../shared/types/messages.fromMain'
 import { CHANNEL_INVOKES } from '../../../shared/types/messages.invokes'
 import { PAGINATION, QUERY_KEYS } from '../../consts'
+import { useIpcOn } from '../../hooks/useIpcOn'
 import ipcMessenger from '../../ipcMessenger'
 import logger from '../../logger'
 import Icon from '../../sharedComponents/Icon'
@@ -37,7 +40,7 @@ import Link from '../../sharedComponents/Link'
 import Message from '../../sharedComponents/Message'
 import { MODAL_ID } from '../../sharedComponents/Modal/Modal.consts'
 import PageWrapper from '../../sharedComponents/PageWrapper'
-import { activeModalSignal } from '../../signals'
+import { activeModalSignal, isScrapingSignal } from '../../signals'
 import { SPACING } from '../../styles/consts'
 import Filters, { DEFAULT_STATUS_FILTERS } from './components/Filters'
 import QuickActions from './components/QuickActions'
@@ -84,8 +87,21 @@ const JobPostings = () => {
   const [selectedJobPostings, setSelectedJobPostings] = useState<Set<string>>(new Set())
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(PAGINATION.DEFAULT_ROWS_PER_PAGE)
-  const [isScraping, setIsScraping] = useState(false)
   const queryClient = useQueryClient()
+  useSignals()
+
+  useSignalEffect(() => {
+    const checkStatus = async () => {
+      const active = await ipcMessenger.invoke(CHANNEL_INVOKES.SCRAPER.GET_ACTIVE_RUN, undefined)
+      isScrapingSignal.value = active.hasActive
+    }
+
+    isScrapingSignal.value === undefined && checkStatus()
+  })
+
+  useIpcOn(CHANNEL_FROM_MAIN.SCRAPE.COMPLETE, () => {
+    isScrapingSignal.value = false
+  })
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -172,42 +188,19 @@ const JobPostings = () => {
   }
 
   const handleFindJobPostings = async () => {
-    try {
-      const active = await ipcMessenger.invoke(CHANNEL_INVOKES.SCRAPER.GET_ACTIVE_RUN, undefined)
-      if (active?.hasActive) {
-        setIsScraping(true)
-        activeModalSignal.value = { id: MODAL_ID.SCRAPE_PROGRESS_MODAL }
-      } else {
-        const result = await ipcMessenger.invoke(CHANNEL_INVOKES.SCRAPER.START, undefined)
-        if (result.success) {
-          setIsScraping(true)
-          activeModalSignal.value = { id: MODAL_ID.SCRAPE_PROGRESS_MODAL }
-        } else {
-          // Show error inside progress modal for consistent UX
-          activeModalSignal.value = {
-            id: MODAL_ID.SCRAPE_PROGRESS_MODAL,
-            initialError: result.error || 'No sites available to scrape',
-          }
-        }
-      }
-    } catch (err) {
-      // Fallback to modal error display
-      activeModalSignal.value = {
-        id: MODAL_ID.SCRAPE_PROGRESS_MODAL,
-        initialError: 'Failed to start scraping',
-      }
-      logger.error(err)
+    if (isScrapingSignal.value) {
+      activeModalSignal.value = { id: MODAL_ID.SCRAPE_PROGRESS_MODAL }
+    } else {
+      activeModalSignal.value = { id: MODAL_ID.JOB_SEARCH_SETUP_MODAL }
     }
   }
 
-  useEffect(() => {
-    const unsubscribe = window.electron.ipcRenderer.on(CHANNEL_INVOKES_FROM_MAIN.SCRAPE.COMPLETE, () => {
-      setIsScraping(false)
-    })
-    return () => {
-      unsubscribe()
+  useSignalEffect(() => {
+    if (!isScrapingSignal.value) {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.JOB_POSTINGS] })
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SCRAPE_RUNS] })
     }
-  }, [])
+  })
 
   const handleOpenSelectedInBrowser = () => {
     const postingsToOpen = filteredJobPostings.filter((posting) => selectedJobPostings.has(posting.id))
@@ -291,7 +284,7 @@ const JobPostings = () => {
       >
         <Stack direction="row" spacing={SPACING.SMALL.PX} alignItems="center">
           <Button size="small" variant="contained" onClick={handleFindJobPostings}>
-            {isScraping ? 'Finding jobs…' : 'Find Jobs'}
+            {isScrapingSignal.value ? 'Finding jobs…' : 'Find Jobs'}
           </Button>
           {selectedJobPostings.size > 0 && (
             <Button size="small" variant="outlined" onClick={handleOpenSelectedInBrowser}>

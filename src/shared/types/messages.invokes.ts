@@ -8,8 +8,8 @@ import type {
   PromptDTO,
   ScrapedContentDTO,
   ScrapeRunDTO,
-  ScraperProgress,
-  ScraperSiteProgress,
+  ScrapeRunStatus,
+  ScraperTaskProgress,
   ScrapeTaskDTO,
   SiteDTO,
   StoreSchema,
@@ -178,7 +178,7 @@ export type Invokes = {
     result: { success: true } | { success: false; error: string }
   }
   [CHANNEL_INVOKES.SCRAPER.START]: {
-    args: undefined
+    args: { siteIds: string[] }
     result: { success: true; scrapeRunId: string } | { success: false; error: string }
   }
   [CHANNEL_INVOKES.SCRAPER.GET_PROGRESS]: {
@@ -186,14 +186,14 @@ export type Invokes = {
     result: {
       success: boolean
       progress?: {
-        status: ScraperProgress
+        status: ScrapeRunStatus
         totalSites: number
         completedSites: number
         sites: Array<{
           siteId: string
           siteTitle: string
           siteUrl: string
-          status: ScraperSiteProgress
+          status: ScraperTaskProgress
           newJobsFound?: number
           errorMessage?: string
         }>
@@ -207,14 +207,14 @@ export type Invokes = {
       hasActive: boolean
       scrapeRunId?: string
       progress?: {
-        status: ScraperProgress
+        status: ScrapeRunStatus
         totalSites: number
         completedSites: number
         sites: Array<{
           siteId: string
           siteTitle: string
           siteUrl: string
-          status: ScraperSiteProgress
+          status: ScraperTaskProgress
           newJobsFound?: number
           errorMessage?: string
         }>
@@ -251,7 +251,7 @@ export type Invokes = {
   [CHANNEL_INVOKES.SCRAPE_RUNS.GET_TASKS]: {
     args: { scrapeRunId: string }
     result: {
-      tasks: Array<ScrapeTaskDTO>
+      tasks: Array<ScrapeTaskDTO & { siteTitle: string }>
     }
   }
   [CHANNEL_INVOKES.JOB_POSTINGS.GET_ALL]: {
