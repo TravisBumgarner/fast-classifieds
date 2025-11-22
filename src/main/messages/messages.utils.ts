@@ -3,21 +3,46 @@ import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
 import logger from '../logger'
 import { typedIpcMain } from './ipcMain'
 
-function cleanTitle(input: string): string {
-  const s = input.trim()
-  let output = s
+function decodeEntities(str: string): string {
+  return str
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(+n))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => String.fromCharCode(parseInt(h, 16)))
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+}
 
-  // If starts with "Careers at"
-  if (s.startsWith('Careers at')) {
-    output = s.replace(/^Careers at[^a-zA-Z0-9]*([a-zA-Z0-9].*)$/i, '$1').trim()
+export function cleanTitle(input: string): string {
+  const decoded = decodeEntities(input.trim())
+  let s = decoded
+
+  // 1. Careers at Foo → Foo
+  if (/^careers at\b/i.test(s)) {
+    s = s.replace(/^careers at\s*/i, '')
+    console.log(`cleanTitle: "${input}" → "${s.trim()}"`)
+    return s.trim()
   }
 
-  // If starts with "Careers", strip everything up to first alphanumeric
-  if (s.startsWith('Careers')) {
-    output = output.replace(/^Careers[^a-zA-Z0-9]*([a-zA-Z0-9].*)$/i, '$1').trim()
+  // 2. Careers - Foo → Foo
+  if (/^careers\b/i.test(s)) {
+    s = s.replace(/^careers[^a-zA-Z0-9]*([a-zA-Z0-9].*)$/i, '$1')
+    console.log(`cleanTitle: "${input}" → "${s.trim()}"`)
+    return s.trim()
   }
 
-  return output
+  // 3. Jobs at Foo → Foo
+  s = s.replace(/^jobs at\s*/i, '')
+
+  // 4. Strip job-related prefixes on left side of separators
+  s = s.replace(/^(all jobs|view jobs|search jobs)\s*[-|—]+\s*/i, '')
+
+  // 5. Patterns like "All Jobs | Foo" → Foo
+  s = s.replace(/^(all jobs|view jobs|search jobs)\s*\|\s*/i, '')
+
+  console.log(`cleanTitle: "${input}" → "${s.trim()}"`)
+  return s.trim()
 }
 
 typedIpcMain.handle(CHANNEL_INVOKES.UTILS.OPEN_URL, async (_event, params) => {
@@ -82,7 +107,7 @@ typedIpcMain.handle(CHANNEL_INVOKES.UTILS.FETCH_PAGE_TITLE, async (_event, param
       return { success: true, title: 'Untitled Site' }
     }
   } catch (error) {
-    logger.error('Error fetching page title:', error)
+    logger.error('Error fetching page title:', error, params.url)
 
     // Try to extract hostname as fallback
     try {

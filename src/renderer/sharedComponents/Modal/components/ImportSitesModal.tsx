@@ -248,7 +248,7 @@ const ImportSitesModal = (_props: ImportSitesModalProps) => {
           // If all sites were successful, clear the URLs
           setUrls('')
         }
-        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SITES] })
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SITES_WITH_JOB_COUNTS] })
       } else {
         setError(`Failed to import all ${failCount} sites`)
       }
