@@ -22,11 +22,13 @@ async function insertApiUsage({
   prompt,
   siteContent,
   siteUrl,
+  siteTitle,
 }: {
   response: OpenAI.Responses.Response
   prompt: string
   siteContent: string
   siteUrl: string
+  siteTitle: string
 }) {
   return db
     .insert(apiUsage)
@@ -36,7 +38,7 @@ async function insertApiUsage({
       model: response.model,
       createdAt: new Date(),
       status: response.status,
-
+      siteTitle: siteTitle,
       inputTokens: response.usage?.input_tokens || 0,
       outputTokens: response.usage?.output_tokens || 0,
       totalTokens: response.usage?.total_tokens || 0,

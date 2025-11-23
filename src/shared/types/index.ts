@@ -49,22 +49,23 @@ export type HashDTO = NewHashDTO & TimestampsAndID
 
 export type ApiUsageDTO = {
   id: string
-  responseId: string
+  responseId: string | null
   model: string
   createdAt: Date
-  status: string
+  status: string | null
   inputTokens: number
   outputTokens: number
   totalTokens: number
-  cachedTokens: number
-  reasoningTokens: number
+  cachedTokens: number | null
+  reasoningTokens: number | null
   prompt: string
   siteContent: string
   siteUrl: string
+  siteTitle: string
   outputText: string
-  temperature: number
-  servicetier: string
-  reasoningEffort: string
+  temperature: number | null
+  servicetier: string | null
+  reasoningEffort: string | null
 }
 
 export type NewSiteDTO = {

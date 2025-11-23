@@ -19,6 +19,11 @@ export const ROUTES = {
     label: 'History',
     target: '_self',
   },
+  apiUsage: {
+    href: () => '/api-usage',
+    label: 'API Usage',
+    target: '_self',
+  },
   settings: {
     href: () => '/settings',
     label: 'Settings',
@@ -44,6 +49,7 @@ export const QUERY_KEYS = {
   SITES_WITH_JOB_COUNTS: 'SITES_WITH_JOB_COUNTS',
   SCRAPE_TASKS: 'SCRAPE_TASKS',
   SCRAPE_PROGRESS: 'SCRAPE_PROGRESS',
+  API_USAGE: 'API_USAGE',
 } as const
 export type QueryKey = keyof typeof QUERY_KEYS
 
@@ -58,4 +64,3 @@ export const TOOLTIPS = {
   API_KEY: 'Get your API key from https://platform.openai.com/settings/organization/api-keys',
   MODEL: 'View pricing and available models at https://platform.openai.com/docs/pricing',
 } as const
-

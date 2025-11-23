@@ -99,6 +99,7 @@ async function processSite({
       prompt,
       siteContent: JSON.stringify(scrapedContent),
       siteUrl,
+      siteTitle: siteUrl,
     })
 
     if (jobs.length > 0) {

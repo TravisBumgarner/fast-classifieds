@@ -69,6 +69,9 @@ export const CHANNEL_INVOKES = {
     OPEN_URL: 'utils:open-url',
     FETCH_PAGE_TITLE: 'utils:fetch-page-title',
   },
+  API_USAGE: {
+    GET_ALL: 'api-usage:get-all',
+  },
 } as const
 
 export type Invokes = {
@@ -302,5 +305,11 @@ export type Invokes = {
   [CHANNEL_INVOKES.UTILS.FETCH_PAGE_TITLE]: {
     args: { url: string }
     result: { success: true; title: string } | { success: false; error: string }
+  }
+  [CHANNEL_INVOKES.API_USAGE.GET_ALL]: {
+    args: undefined
+    result: {
+      apiUsage: Array<ApiUsageDTO>
+    }
   }
 }

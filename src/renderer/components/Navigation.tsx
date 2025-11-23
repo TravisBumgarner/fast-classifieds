@@ -20,6 +20,7 @@ const NAV_ROUTES: Array<keyof typeof ROUTES> = [
   'prompts',
   'sites',
   'scrapeRuns',
+  'apiUsage',
   'settings',
   'debugger',
   'feedback',
