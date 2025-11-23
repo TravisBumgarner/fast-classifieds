@@ -57,7 +57,8 @@ const Settings = () => {
           <TabOpenAI
             initialOpenAiApiKey={storeFromServer.openaiApiKey}
             loadStoreSettings={loadStoreSettings}
-            initialOpenAIModel={storeFromServer.openaiModel}
+            initialSelectedModel={storeFromServer.selectedModel}
+            initialCustomModels={storeFromServer.customModels}
           />
         )}
 

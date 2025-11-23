@@ -58,3 +58,4 @@ export const TOOLTIPS = {
   API_KEY: 'Get your API key from https://platform.openai.com/settings/organization/api-keys',
   MODEL: 'View pricing and available models at https://platform.openai.com/docs/pricing',
 } as const
+

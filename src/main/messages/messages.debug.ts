@@ -41,7 +41,7 @@ typedIpcMain.handle(CHANNEL_INVOKES.DEBUG.AI, async (_event, params) => {
     const storeData = getStore()
     const result = await processText({
       apiKey: storeData.openaiApiKey,
-      model: storeData.openaiModel,
+      model: storeData.selectedModel.model,
       prompt: params.prompt,
       scrapedContent: params.scrapedContent,
       siteUrl: params.siteUrl,

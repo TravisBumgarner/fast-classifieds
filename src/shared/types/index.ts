@@ -1,3 +1,5 @@
+import type { KnownModel } from '../consts'
+
 export type PartialWithRequired<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>
 
 type TimestampsAndID = {
@@ -103,7 +105,8 @@ export type JobPostingDTO = { siteTitle: string } & NewJobPostingDTO & Timestamp
 
 export interface StoreSchema {
   openaiApiKey: string
-  openaiModel: string
+  selectedModel: KnownModel
+  customModels: KnownModel[]
   changelogLastSeenVersion: string | null
   scrapeDelay: number
   showStatusBarProgress: boolean
