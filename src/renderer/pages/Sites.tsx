@@ -71,7 +71,7 @@ const Sites = () => {
   }
 
   const { isLoading: isLoadingSites, data: sitesData } = useQuery({
-    queryKey: createQueryKey(QUERY_KEYS.SITES_WITH_JOB_COUNTS, 'sitesPage'),
+    queryKey: createQueryKey(QUERY_KEYS.SITES, 'sitesPage'),
     queryFn: async () => {
       setPage(0)
       return await ipcMessenger.invoke(CHANNEL_INVOKES.SITES.GET_ALL_WITH_JOB_COUNTS, undefined)

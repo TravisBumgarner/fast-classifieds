@@ -37,6 +37,15 @@ interface ImportResult {
   error?: string
 }
 
+const isURLValid = (urlString: string): boolean => {
+  try {
+    new URL(urlString)
+    return true
+  } catch {
+    return false
+  }
+}
+
 const ImportSitesModal = (_props: ImportSitesModalProps) => {
   const [urls, setUrls] = useState('')
   const [promptId, setPromptId] = useState<string | ''>('')
@@ -120,32 +129,15 @@ const ImportSitesModal = (_props: ImportSitesModalProps) => {
         return
       }
 
-      // Validate URLs
-      const validUrls: string[] = []
-      for (const url of urlList) {
-        try {
-          new URL(url)
-          validUrls.push(url)
-        } catch {
-          logger.error(`Invalid URL: ${url}`)
-        }
-      }
-
-      if (validUrls.length === 0) {
-        setError('No valid URLs found')
-        setLoading(false)
-        return
-      }
-
       // Initialize progress tracking
-      const initialResults: ImportResult[] = validUrls.map((url) => ({
+      const initialResults: ImportResult[] = urlList.map((url) => ({
         url,
         status: 'pending',
       }))
 
       setProgress({
         current: 0,
-        total: validUrls.length,
+        total: urlList.length,
         results: initialResults,
       })
 
@@ -153,8 +145,8 @@ const ImportSitesModal = (_props: ImportSitesModalProps) => {
       let successCount = 0
       let failCount = 0
 
-      for (let i = 0; i < validUrls.length; i++) {
-        const url = validUrls[i]
+      for (let i = 0; i < urlList.length; i++) {
+        const url = urlList[i]
 
         // Update current URL being processed
         setProgress((prev) => ({
@@ -165,6 +157,20 @@ const ImportSitesModal = (_props: ImportSitesModalProps) => {
             index === i ? { ...result, status: 'fetching-title' } : result,
           ),
         }))
+
+        const isValid = isURLValid(url)
+        if (!isValid) {
+          failCount++
+          const errorMsg = 'Invalid URL'
+          logger.error(`Invalid URL provided: ${url}`)
+          setProgress((prev) => ({
+            ...prev,
+            results: prev.results.map((result, index) =>
+              index === i ? { ...result, status: 'failed', error: errorMsg } : result,
+            ),
+          }))
+          continue
+        }
 
         try {
           // Fetch title from main process to avoid CORS issues
@@ -234,7 +240,7 @@ const ImportSitesModal = (_props: ImportSitesModalProps) => {
       // Update final progress
       setProgress((prev) => ({
         ...prev,
-        current: validUrls.length,
+        current: urlList.length,
         currentUrl: undefined,
       }))
 
@@ -244,11 +250,11 @@ const ImportSitesModal = (_props: ImportSitesModalProps) => {
             failCount > 0 ? `. Failed to import ${failCount}.` : ''
           }`,
         )
-        if (successCount === validUrls.length) {
+        if (successCount === urlList.length) {
           // If all sites were successful, clear the URLs
           setUrls('')
         }
-        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SITES_WITH_JOB_COUNTS] })
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SITES] })
       } else {
         setError(`Failed to import all ${failCount} sites`)
       }
