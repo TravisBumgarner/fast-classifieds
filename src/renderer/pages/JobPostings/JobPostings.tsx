@@ -46,7 +46,7 @@ import { createQueryKey } from '../../utilities'
 import Filters, { DEFAULT_STATUS_FILTERS } from './components/Filters'
 import QuickActions from './components/QuickActions'
 
-type SortField = 'company' | 'title' | 'status' | 'createdAt' | 'location' | 'aiRecommendationStatus'
+type SortField = 'company' | 'title' | 'status' | 'createdAt' | 'location' | 'aiRecommendationStatus' | 'datePosted'
 type SortDirection = 'asc' | 'desc'
 
 const AIRecommendationStatus = ({ status, id }: { status: TypeAIRecommendationStatus; id: string }) => {
@@ -105,6 +105,7 @@ const JobPostings = () => {
     isScrapingSignal.value = false
     queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.JOB_POSTINGS] })
     queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SCRAPE_RUNS] })
+    setScrapeRunsFilter([])
   })
 
   const handleSort = (field: SortField) => {
@@ -156,6 +157,14 @@ const JobPostings = () => {
         aVal = a.location?.toLowerCase() || ''
         bVal = b.location?.toLowerCase() || ''
         break
+      case 'aiRecommendationStatus':
+        aVal = a.aiRecommendationStatus
+        bVal = b.aiRecommendationStatus
+        break
+      case 'datePosted':
+        aVal = a.datePosted ? new Date(a.datePosted) : new Date(0)
+        bVal = b.datePosted ? new Date(b.datePosted) : new Date(0)
+        break
       default:
         aVal = ''
         bVal = ''
@@ -204,13 +213,6 @@ const JobPostings = () => {
       activeModalSignal.value = { id: MODAL_ID.JOB_SEARCH_SETUP_MODAL }
     }
   }
-
-  useSignalEffect(() => {
-    if (!isScrapingSignal.value) {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.JOB_POSTINGS] })
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SCRAPE_RUNS] })
-    }
-  })
 
   const handleOpenSelectedInBrowser = () => {
     const postingsToOpen = filteredJobPostings.filter((posting) => selectedJobPostings.has(posting.id))
@@ -403,6 +405,15 @@ const JobPostings = () => {
                 <TableCell>Description</TableCell>
                 <TableCell>
                   <TableSortLabel
+                    active={sortField === 'datePosted'}
+                    direction={sortField === 'datePosted' ? sortDirection : 'asc'}
+                    onClick={() => handleSort('datePosted')}
+                  >
+                    Date Posted
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
                     active={sortField === 'createdAt'}
                     direction={sortField === 'createdAt' ? sortDirection : 'asc'}
                     onClick={() => handleSort('createdAt')}
@@ -507,6 +518,9 @@ const JobPostings = () => {
                           {`${jobPosting.description?.slice(0, 75)}...` || '-'}
                         </Typography>
                       </Tooltip>
+                    </TableCell>
+                    <TableCell>
+                      {jobPosting.datePosted ? new Date(jobPosting.datePosted).toLocaleDateString() : 'Unknown'}
                     </TableCell>
                     <TableCell>{new Date(jobPosting.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell align="right">

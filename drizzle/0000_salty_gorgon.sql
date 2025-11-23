@@ -42,6 +42,7 @@ CREATE TABLE `job_postings` (
 	`location` text NOT NULL,
 	`status` text DEFAULT 'new' NOT NULL,
 	`created_at` integer NOT NULL,
+	`date_posted` integer,
 	`updated_at` integer NOT NULL
 );
 --> statement-breakpoint

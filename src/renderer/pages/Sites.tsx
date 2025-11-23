@@ -44,7 +44,7 @@ type SiteStatus = 'active' | 'inactive'
 
 type JobPostingStatus = 'new' | 'applied' | 'skipped' | 'interview' | 'rejected' | 'offer'
 
-type SortField = 'siteTitle' | 'status' | 'updatedAt' | 'prompt'
+type SortField = 'siteTitle' | 'status' | 'updatedAt' | 'prompt' | 'totalJobs'
 type SortDirection = 'asc' | 'desc'
 
 const Sites = () => {
@@ -99,6 +99,10 @@ const Sites = () => {
       case 'prompt':
         aVal = a.promptId.toLowerCase()
         bVal = b.promptId.toLowerCase()
+        break
+      case 'totalJobs':
+        aVal = a.totalJobs
+        bVal = b.totalJobs
         break
     }
 
@@ -291,7 +295,15 @@ const Sites = () => {
                     Company
                   </TableSortLabel>
                 </TableCell>
-                <TableCell>Total Jobs</TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortField === 'totalJobs'}
+                    direction={sortField === 'totalJobs' ? sortDirection : 'asc'}
+                    onClick={() => handleSort('totalJobs')}
+                  >
+                    Total Jobs
+                  </TableSortLabel>
+                </TableCell>
                 <TableCell>
                   <TableSortLabel
                     active={sortField === 'status'}

@@ -26,8 +26,6 @@ function App() {
   useShowOnboarding()
   const queryClient = useQueryClient()
 
-  logger.info('App rendered')
-
   // Invalidate job postings on scrape completion globally
   React.useEffect(() => {
     const unsubscribe = window.electron.ipcRenderer.on(CHANNEL_FROM_MAIN.SCRAPE.COMPLETE, () => {

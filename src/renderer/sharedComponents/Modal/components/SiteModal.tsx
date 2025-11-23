@@ -213,6 +213,10 @@ const SiteModal = (props: SiteModalProps) => {
     <DefaultModal title={isEditMode ? 'Edit Site' : 'Add Site'}>
       <Box component="form" onSubmit={handleSubmit}>
         <Stack spacing={SPACING.MEDIUM.PX}>
+          <Alert severity="warning">
+            Fast Classifieds is not currently engineered for job boards with many pages. For best results, apply filters
+            such as location and role, then enter the URL here.
+          </Alert>
           {error && <Typography color="error">{error}</Typography>}
 
           <TextField

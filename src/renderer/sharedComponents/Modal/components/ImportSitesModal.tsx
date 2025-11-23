@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   Button,
   Chip,
@@ -276,10 +277,10 @@ const ImportSitesModal = (_props: ImportSitesModalProps) => {
               Enter one URL per line. The site title will be fetched automatically.
             </Typography>
           )}
-
-          {showInputs && (
-            <Typography variant="body2">Advanced Users: The selector will be set to &apos;body&apos;.</Typography>
-          )}
+          <Alert severity="warning">
+            Fast Classifieds is not currently engineered for job boards with many pages. For best results, apply filters
+            such as location and role, then enter the URL here.
+          </Alert>
 
           {loading && progress.total > 0 && (
             <Paper sx={{ p: SPACING.MEDIUM.PX, bgcolor: 'grey.50' }}>

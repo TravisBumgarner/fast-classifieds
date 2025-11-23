@@ -11,6 +11,7 @@ const aiJobSchema = z.object({
   description: z.string(),
   recommendationExplanation: z.string(),
   location: z.string(),
+  datePosted: z.string().nullable(),
   aiRecommendationStatus: z.enum([AI_RECOMMENDATION_STATUS.RECOMMENDED, AI_RECOMMENDATION_STATUS.NOT_RECOMMENDED]),
 })
 type AiJob = z.infer<typeof aiJobSchema>
@@ -36,6 +37,7 @@ export async function processText({
   jobToJSONPrompt: string
   siteId: string
   scrapeRunId: string
+  datePosted?: string | null
 }): Promise<{ aiJobs: AiJob[]; rawResponse: OpenAI.Responses.Response }> {
   if (!apiKey) {
     throw new Error('OpenAI API key is not configured. Please set it in Settings.')

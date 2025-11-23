@@ -110,6 +110,7 @@ export const jobPostings = sqliteTable('job_postings', {
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
     .$defaultFn(() => new Date()),
+  datePosted: integer('date_posted', { mode: 'timestamp' }),
   updatedAt: integer('updated_at', { mode: 'timestamp' })
     .notNull()
     .$defaultFn(() => new Date()),
