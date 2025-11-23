@@ -7,7 +7,7 @@ import ipcMessenger from '../../../ipcMessenger'
 import Icon from '../../../sharedComponents/Icon'
 import { MODAL_ID } from '../../../sharedComponents/Modal/Modal.consts'
 import { activeModalSignal } from '../../../signals'
-import { formatSelectOption } from '../../../utilities'
+import { createQueryKey, formatSelectOption } from '../../../utilities'
 
 const ScrapeRun = ({
   scrapeRun,
@@ -24,7 +24,7 @@ const ScrapeRun = ({
       : null
 
   const { data } = useQuery({
-    queryKey: [QUERY_KEYS.SCRAPE_RUNS, scrapeRun.id],
+    queryKey: createQueryKey(QUERY_KEYS.SCRAPE_RUNS, scrapeRun.id),
     queryFn: async () => {
       return await ipcMessenger.invoke(CHANNEL_INVOKES.SCRAPE_RUNS.GET_TASKS, {
         scrapeRunId: scrapeRun.id,

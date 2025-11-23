@@ -21,7 +21,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { PromptDTO, PromptStatus } from '../../shared/types'
 import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
 import { PAGINATION, QUERY_KEYS } from '../consts'
@@ -33,6 +33,7 @@ import { MODAL_ID } from '../sharedComponents/Modal/Modal.consts'
 import PageWrapper from '../sharedComponents/PageWrapper'
 import { activeModalSignal } from '../signals'
 import { SPACING } from '../styles/consts'
+import { createQueryKey } from '../utilities'
 
 type SortField = 'title' | 'status' | 'updatedAt'
 type SortDirection = 'asc' | 'desc'
@@ -46,6 +47,7 @@ const Prompts = () => {
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(PAGINATION.DEFAULT_ROWS_PER_PAGE)
   const queryClient = useQueryClient()
+  const tableScrollContainerRef = useRef<HTMLTableElement>(null)
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -57,8 +59,11 @@ const Prompts = () => {
   }
 
   const { isLoading: isLoadingPrompts, data: promptsData } = useQuery({
-    queryKey: [QUERY_KEYS.PROMPTS],
-    queryFn: async () => await ipcMessenger.invoke(CHANNEL_INVOKES.PROMPTS.GET_ALL, undefined),
+    queryKey: createQueryKey(QUERY_KEYS.PROMPTS, 'promptsPage'),
+    queryFn: async () => {
+      setPage(0)
+      return await ipcMessenger.invoke(CHANNEL_INVOKES.PROMPTS.GET_ALL, undefined)
+    },
     initialData: { prompts: [] },
   })
 
@@ -94,6 +99,9 @@ const Prompts = () => {
   const paginatedPrompts = filteredPrompts.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
 
   const handleChangePage = (_event: unknown, newPage: number) => {
+    if (tableScrollContainerRef.current) {
+      tableScrollContainerRef.current.scrollTo({ top: 0, behavior: 'instant' })
+    }
     setPage(newPage)
   }
 
@@ -201,7 +209,7 @@ const Prompts = () => {
           overflow: 'hidden',
         }}
       >
-        <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
+        <Box sx={{ flexGrow: 1, overflow: 'auto' }} ref={tableScrollContainerRef}>
           <Table stickyHeader>
             <TableHead>
               <TableRow>

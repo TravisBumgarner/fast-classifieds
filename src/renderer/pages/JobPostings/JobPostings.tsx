@@ -23,7 +23,7 @@ import {
 import { useSignalEffect } from '@preact/signals-react'
 import { useSignals } from '@preact/signals-react/runtime'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import {
   AI_RECOMMENDATION_STATUS,
   type JobPostingStatus,
@@ -42,6 +42,7 @@ import { MODAL_ID } from '../../sharedComponents/Modal/Modal.consts'
 import PageWrapper from '../../sharedComponents/PageWrapper'
 import { activeModalSignal, isScrapingSignal } from '../../signals'
 import { SPACING } from '../../styles/consts'
+import { createQueryKey } from '../../utilities'
 import Filters, { DEFAULT_STATUS_FILTERS } from './components/Filters'
 import QuickActions from './components/QuickActions'
 
@@ -88,6 +89,7 @@ const JobPostings = () => {
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(PAGINATION.DEFAULT_ROWS_PER_PAGE)
   const queryClient = useQueryClient()
+  const tableScrollContainerRef = useRef<HTMLTableElement>(null)
   useSignals()
 
   useSignalEffect(() => {
@@ -101,6 +103,7 @@ const JobPostings = () => {
 
   useIpcOn(CHANNEL_FROM_MAIN.SCRAPE.COMPLETE, () => {
     isScrapingSignal.value = false
+    queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.JOB_POSTINGS] })
   })
 
   const handleSort = (field: SortField) => {
@@ -113,14 +116,17 @@ const JobPostings = () => {
   }
 
   const { isLoading: isLoadingScrapeRuns, data: scrapeRunsData } = useQuery({
-    queryKey: [QUERY_KEYS.SCRAPE_RUNS],
+    queryKey: createQueryKey(QUERY_KEYS.SCRAPE_RUNS, 'jobPostingsPage'),
     queryFn: async () => await ipcMessenger.invoke(CHANNEL_INVOKES.SCRAPE_RUNS.GET_ALL, undefined),
     initialData: { runs: [] },
   })
 
   const { isLoading: isLoadingJobPostings, data: jobPostingsData } = useQuery({
-    queryKey: [QUERY_KEYS.JOB_POSTINGS],
-    queryFn: async () => await ipcMessenger.invoke(CHANNEL_INVOKES.JOB_POSTINGS.GET_ALL, undefined),
+    queryKey: createQueryKey(QUERY_KEYS.JOB_POSTINGS, 'jobPostingsPage'),
+    queryFn: async () => {
+      setPage(0)
+      return await ipcMessenger.invoke(CHANNEL_INVOKES.JOB_POSTINGS.GET_ALL, undefined)
+    },
     initialData: { postings: [], suspectedDuplicatesCount: 0 },
   })
 
@@ -179,6 +185,9 @@ const JobPostings = () => {
   const paginatedJobPostings = filteredJobPostings.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
 
   const handleChangePage = (_event: unknown, newPage: number) => {
+    if (tableScrollContainerRef.current) {
+      tableScrollContainerRef.current.scrollTo({ top: 0, behavior: 'instant' })
+    }
     setPage(newPage)
   }
 
@@ -321,7 +330,7 @@ const JobPostings = () => {
           overflow: 'hidden',
         }}
       >
-        <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
+        <Box sx={{ flexGrow: 1, overflow: 'auto' }} ref={tableScrollContainerRef}>
           <Table stickyHeader>
             <TableHead>
               <TableRow>

@@ -12,15 +12,15 @@ import {
   TableSortLabel,
   Typography,
 } from '@mui/material'
-import { Fragment, useCallback, useEffect, useState } from 'react'
-import type { ScrapeRunDTO } from '../../../shared/types'
+import { useQuery } from '@tanstack/react-query'
+import { Fragment, useRef, useState } from 'react'
 import { CHANNEL_INVOKES } from '../../../shared/types/messages.invokes'
-import { PAGINATION } from '../../consts'
+import { PAGINATION, QUERY_KEYS } from '../../consts'
 import ipcMessenger from '../../ipcMessenger'
-import logger from '../../logger'
 import Message from '../../sharedComponents/Message'
 import PageWrapper from '../../sharedComponents/PageWrapper'
 import { SPACING } from '../../styles/consts'
+import { createQueryKey } from '../../utilities'
 import ScrapeRun from './components/ScrapeRun'
 import ScrapeRunDetails from './components/ScrapeRunTasks'
 
@@ -28,15 +28,22 @@ type RunSortField = 'createdAt' | 'status' | 'totalSites' | 'successfulSites' | 
 type SortDirection = 'asc' | 'desc'
 
 const ScrapeRuns = () => {
-  const [runs, setRuns] = useState<ScrapeRunDTO[]>([])
   const [expandedRunId, setExpandedRunId] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [runSortField, setRunSortField] = useState<RunSortField>('createdAt')
   const [runSortDirection, setRunSortDirection] = useState<SortDirection>('desc')
+  const tableScrollContainerRef = useRef<HTMLTableElement>(null)
 
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(PAGINATION.DEFAULT_ROWS_PER_PAGE)
+
+  const { data, error, isLoading } = useQuery({
+    queryKey: createQueryKey(QUERY_KEYS.SCRAPE_RUNS, 'scrapeRunsPage'),
+    queryFn: async () => {
+      setPage(0)
+      return await ipcMessenger.invoke(CHANNEL_INVOKES.SCRAPE_RUNS.GET_ALL, undefined)
+    },
+    initialData: { runs: [] },
+  })
 
   const handleRunSort = (field: RunSortField) => {
     if (runSortField === field) {
@@ -47,7 +54,7 @@ const ScrapeRuns = () => {
     }
   }
 
-  const sortedRuns = [...runs].sort((a, b) => {
+  const sortedRuns = [...data.runs].sort((a, b) => {
     let aVal: string | number
     let bVal: string | number
 
@@ -82,6 +89,9 @@ const ScrapeRuns = () => {
   const paginatedRuns = sortedRuns.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
 
   const handleChangePage = (_event: unknown, newPage: number) => {
+    if (tableScrollContainerRef.current) {
+      tableScrollContainerRef.current.scrollTo({ top: 0, behavior: 'instant' })
+    }
     setPage(newPage)
     setExpandedRunId(null) // Collapse expanded rows when changing pages
   }
@@ -92,31 +102,13 @@ const ScrapeRuns = () => {
     setExpandedRunId(null)
   }
 
-  const loadScrapeRuns = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const result = await ipcMessenger.invoke(CHANNEL_INVOKES.SCRAPE_RUNS.GET_ALL, undefined)
-      setRuns(result.runs)
-    } catch (err) {
-      setError('Failed to load scrape runs')
-      logger.error(err)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    loadScrapeRuns()
-  }, [loadScrapeRuns])
-
-  if (loading) {
+  if (isLoading) {
     return
   }
 
   return (
     <PageWrapper>
-      {error && <Message message={error} color="error" />}
+      {error && <Message message={error.message} color="error" />}
 
       <TableContainer
         component={Paper}
@@ -127,7 +119,7 @@ const ScrapeRuns = () => {
           overflow: 'hidden',
         }}
       >
-        <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
+        <Box sx={{ flexGrow: 1, overflow: 'auto' }} ref={tableScrollContainerRef}>
           <Table stickyHeader>
             <TableHead>
               <TableRow>
