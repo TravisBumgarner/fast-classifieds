@@ -65,6 +65,13 @@ const PostingCard = ({ posting, title }: { posting?: JobPostingDTO; title: strin
         />
       </Stack>
       <FieldRow label="Location" value={posting.location} />
+      <FieldRow label="Found On" value={new Date(posting.createdAt).toLocaleString()} />
+      <FieldRow
+        label="Posted on"
+        value={posting.datePosted ? new Date(posting.datePosted).toLocaleString() : 'Unknown'}
+      />
+      <FieldRow label="Description" value={posting.description} />
+
       <FieldRow
         label="Job URL"
         value={
@@ -77,8 +84,6 @@ const PostingCard = ({ posting, title }: { posting?: JobPostingDTO; title: strin
           )
         }
       />
-      <FieldRow label="Description" value={posting.description} />
-      <FieldRow label="Created" value={new Date(posting.createdAt).toLocaleString()} />
     </Stack>
   )
 }

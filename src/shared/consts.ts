@@ -8,6 +8,7 @@ For each job posting, provide:
 - description (ONLY literal text found immediately around the job in the scraped content; if none exists, use "")
 - recommendationExplanation (state why this is or isn't relevant based ONLY on literal words found in the content; no inference)
 - aiRecommendationStatus (one of "RECOMMENDED", "NOT_RECOMMENDED")
+- datePosted - (Exact date as ISO 8601 if found, otherwise empty)
 
 Rules:
 1. Do NOT invent jobs. Only extract what truly appears in the content.

@@ -266,6 +266,7 @@ async function getJobPostings({
       jobUrl: jobPostings.jobUrl,
       duplicationDetectionId: jobPostings.duplicationDetectionId,
       duplicateStatus: jobPostings.duplicateStatus,
+      datePosted: jobPostings.datePosted,
     })
     .from(jobPostings)
     .leftJoin(sites, eq(jobPostings.siteId, sites.id))

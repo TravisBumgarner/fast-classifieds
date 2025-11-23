@@ -17,6 +17,7 @@ export const buildNewJobPostingDTO = (job: {
   scrapeRunId: string
   siteUrl: string
   existingDuplicationDetectionIds: Set<string>
+  datePosted?: string | null
 }): NewJobPostingDTO => {
   const duplicationDetectionId = generateDuplicationDetectionId({
     siteUrl: job.siteUrl,
@@ -28,6 +29,7 @@ export const buildNewJobPostingDTO = (job: {
     ...job,
     status: JOB_POSTING_STATUS.NEW,
     duplicationDetectionId,
+    datePosted: job.datePosted ? new Date(job.datePosted) : null,
     duplicateStatus: job.existingDuplicationDetectionIds.has(duplicationDetectionId)
       ? JOB_POSTING_DUPLICATE_STATUS.SUSPECTED_DUPLICATE
       : JOB_POSTING_DUPLICATE_STATUS.UNIQUE,

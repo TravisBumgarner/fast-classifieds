@@ -78,6 +78,7 @@ async function processSite({
       siteId,
       scrapeRunId,
     })
+    log.info(aiJobs)
 
     const existingDuplicationDetectionIds = new Set(
       (await queries.getJobPostings({})).map((j) => j.duplicationDetectionId),
