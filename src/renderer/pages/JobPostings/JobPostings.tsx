@@ -103,6 +103,7 @@ const JobPostings = () => {
 
   useIpcOn(CHANNEL_FROM_MAIN.SCRAPE.COMPLETE, () => {
     isScrapingSignal.value = false
+    queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.JOB_POSTINGS] })
   })
 
   const handleSort = (field: SortField) => {
