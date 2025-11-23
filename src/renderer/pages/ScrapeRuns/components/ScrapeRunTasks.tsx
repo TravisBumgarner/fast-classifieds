@@ -18,6 +18,7 @@ import { CHANNEL_INVOKES } from '../../../../shared/types/messages.invokes'
 import { QUERY_KEYS } from '../../../consts'
 import ipcMessenger from '../../../ipcMessenger'
 import Icon from '../../../sharedComponents/Icon'
+import { createQueryKey } from '../../../utilities'
 
 type TaskSortField = 'siteUrl' | 'result' | 'newPostingsFound' | 'completedAt'
 type SortDirection = 'asc' | 'desc'
@@ -53,7 +54,7 @@ const ScrapeRunTasks = ({ scrapeRunId, isExpanded }: { scrapeRunId: string; isEx
   const [taskSortDirection, setTaskSortDirection] = useState<SortDirection>('asc')
 
   const { data } = useQuery({
-    queryKey: [QUERY_KEYS.SCRAPE_RUNS, scrapeRunId],
+    queryKey: createQueryKey(QUERY_KEYS.SCRAPE_RUNS, ['scrapeRunTasks', scrapeRunId]),
     queryFn: async () => {
       return await ipcMessenger.invoke(CHANNEL_INVOKES.SCRAPE_RUNS.GET_TASKS, {
         scrapeRunId,

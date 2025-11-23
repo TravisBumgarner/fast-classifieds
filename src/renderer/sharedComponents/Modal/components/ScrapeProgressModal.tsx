@@ -22,6 +22,7 @@ import { useIpcOn } from '../../../hooks/useIpcOn'
 import ipcMessenger from '../../../ipcMessenger'
 import { activeModalSignal } from '../../../signals'
 import { SPACING } from '../../../styles/consts'
+import { createQueryKey } from '../../../utilities'
 import type { MODAL_ID } from '../Modal.consts'
 import DefaultModal from './DefaultModal'
 
@@ -72,7 +73,7 @@ const ScrapeProgressModal = (_props: ScrapeProgressModalProps) => {
   } | null>(null)
 
   const { data } = useQuery({
-    queryKey: [QUERY_KEYS.SCRAPE_PROGRESS],
+    queryKey: createQueryKey(QUERY_KEYS.SCRAPE_PROGRESS, 'scrapeProgressModal'),
     queryFn: async () => {
       const result = await ipcMessenger.invoke(CHANNEL_INVOKES.SCRAPER.GET_ACTIVE_RUN, undefined)
       return result

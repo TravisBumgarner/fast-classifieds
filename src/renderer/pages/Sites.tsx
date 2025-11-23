@@ -24,7 +24,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Fragment, useState } from 'react'
+import { Fragment, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { JobPostingDTO, SiteDTO } from '../../shared/types'
 import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
@@ -38,6 +38,7 @@ import { MODAL_ID } from '../sharedComponents/Modal/Modal.consts'
 import PageWrapper from '../sharedComponents/PageWrapper'
 import { activeModalSignal } from '../signals'
 import { SPACING } from '../styles/consts'
+import { createQueryKey } from '../utilities'
 
 type SiteStatus = 'active' | 'inactive'
 
@@ -58,6 +59,7 @@ const Sites = () => {
   const navigate = useNavigate()
   const [rowsPerPage, setRowsPerPage] = useState(PAGINATION.DEFAULT_ROWS_PER_PAGE)
   const queryClient = useQueryClient()
+  const tableScrollContainerRef = useRef<HTMLTableElement>(null)
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -69,8 +71,11 @@ const Sites = () => {
   }
 
   const { isLoading: isLoadingSites, data: sitesData } = useQuery({
-    queryKey: [QUERY_KEYS.SITES_WITH_JOB_COUNTS],
-    queryFn: async () => await ipcMessenger.invoke(CHANNEL_INVOKES.SITES.GET_ALL_WITH_JOB_COUNTS, undefined),
+    queryKey: createQueryKey(QUERY_KEYS.SITES_WITH_JOB_COUNTS, 'sitesPage'),
+    queryFn: async () => {
+      setPage(0)
+      return await ipcMessenger.invoke(CHANNEL_INVOKES.SITES.GET_ALL_WITH_JOB_COUNTS, undefined)
+    },
     initialData: { sites: [] },
   })
 
@@ -110,6 +115,9 @@ const Sites = () => {
   const paginatedSites = filteredSites.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
 
   const handleChangePage = (_event: unknown, newPage: number) => {
+    if (tableScrollContainerRef.current) {
+      tableScrollContainerRef.current.scrollTo({ top: 0, behavior: 'instant' })
+    }
     setPage(newPage)
     setExpandedSiteId(null) // Collapse expanded rows when changing pages
   }
@@ -269,7 +277,7 @@ const Sites = () => {
           overflow: 'hidden',
         }}
       >
-        <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
+        <Box sx={{ flexGrow: 1, overflow: 'auto' }} ref={tableScrollContainerRef}>
           <Table stickyHeader>
             <TableHead>
               <TableRow>

@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Checkbox, Chip, FormControlLabel, FormGroup, Stack, Typography } from '@mui/material'
+import { Alert, Box, Button, Checkbox, FormControlLabel, FormGroup, Stack, Typography } from '@mui/material'
 import { useSignals } from '@preact/signals-react/runtime'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -9,6 +9,7 @@ import ipcMessenger from '../../../ipcMessenger'
 import logger from '../../../logger'
 import { activeModalSignal, isScrapingSignal } from '../../../signals'
 import { SPACING } from '../../../styles/consts'
+import { createQueryKey } from '../../../utilities'
 import { MODAL_ID } from '../Modal.consts'
 import DefaultModal from './DefaultModal'
 
@@ -24,7 +25,7 @@ const JobSearchSetupModal = (props: JobSearchSetupModalProps) => {
   const [error, setError] = useState<string | null>(null)
 
   const { data: sites, isLoading } = useQuery({
-    queryKey: [QUERY_KEYS.SITES],
+    queryKey: createQueryKey(QUERY_KEYS.SITES, 'jobSearchSetupModal'),
     queryFn: async () => {
       const result = await ipcMessenger.invoke(CHANNEL_INVOKES.SITES.GET_ALL, undefined)
       return result.sites as SiteDTO[]
