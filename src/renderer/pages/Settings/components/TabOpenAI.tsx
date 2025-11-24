@@ -14,7 +14,8 @@ import {
   Typography,
 } from '@mui/material'
 import { useState } from 'react'
-import { CUSTOM_MODEL_OPTION, KNOWN_MODELS, type KnownModel } from '../../../../shared/consts'
+import { CUSTOM_MODEL_OPTION, KNOWN_MODELS } from '../../../../shared/consts'
+import type { KnownModel } from '../../../../shared/types'
 import { CHANNEL_INVOKES } from '../../../../shared/types/messages.invokes'
 import ipcMessenger from '../../../ipcMessenger'
 import Icon from '../../../sharedComponents/Icon'

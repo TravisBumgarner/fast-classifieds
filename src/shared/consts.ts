@@ -1,3 +1,5 @@
+import type { KnownModel } from './types'
+
 export const SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT = `
 Extract ALL real job postings found in the scraped content.
 
@@ -19,12 +21,7 @@ Rules:
 6. Do NOT infer, summarize, expand, embellish, or generalize. Use ONLY literal text from the content.
 `
 
-export type KnownModel = {
-  model: string
-  input: number
-  cachedInput: number | null
-  output: number
-}
+// https://openai.com/api/pricing/
 export const KNOWN_MODELS: KnownModel[] = [
   {
     model: 'gpt-5.1',

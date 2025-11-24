@@ -1,5 +1,3 @@
-import type { KnownModel } from '../consts'
-
 export type PartialWithRequired<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>
 
 type TimestampsAndID = {
@@ -207,3 +205,10 @@ export const SCRAPE_RUN_STATUS = {
   FAILED: 'FAILED',
 } as const
 export type ScrapeRunStatus = keyof typeof SCRAPE_RUN_STATUS
+
+export type KnownModel = {
+  model: string
+  input: number
+  cachedInput: number | null
+  output: number
+}
