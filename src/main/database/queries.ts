@@ -19,24 +19,29 @@ import { apiUsage, hashes, jobPostings, prompts, scrapeRuns, scrapeTasks, sites 
 
 async function insertApiUsage({
   response,
+  userSelectedModel,
   prompt,
   siteContent,
   siteUrl,
+  siteTitle,
 }: {
   response: OpenAI.Responses.Response
+  userSelectedModel: string
   prompt: string
   siteContent: string
   siteUrl: string
+  siteTitle: string
 }) {
   return db
     .insert(apiUsage)
     .values({
       id: uuidv4(),
       responseId: response.id,
-      model: response.model,
+      actualModel: response.model,
+      userSelectedModel: userSelectedModel,
       createdAt: new Date(),
       status: response.status,
-
+      siteTitle: siteTitle,
       inputTokens: response.usage?.input_tokens || 0,
       outputTokens: response.usage?.output_tokens || 0,
       totalTokens: response.usage?.total_tokens || 0,

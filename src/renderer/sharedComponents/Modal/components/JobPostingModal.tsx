@@ -122,7 +122,7 @@ const JobPostingModal = (props: JobPostingModalProps) => {
 
           <TextField
             size="small"
-            label="Company"
+            label="Site Title"
             value={siteTitle}
             onChange={(e) => setSiteTitle(e.target.value)}
             fullWidth

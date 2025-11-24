@@ -1,9 +1,11 @@
 import Store from 'electron-store'
+import { KNOWN_MODELS } from '../shared/consts'
 import type { StoreSchema } from '../shared/types'
 
 const defaults: StoreSchema = {
   openaiApiKey: '',
-  openaiModel: 'gpt-5-nano',
+  selectedModel: KNOWN_MODELS.find((m) => m.model === 'gpt-5-nano') || KNOWN_MODELS[0],
+  customModels: [],
   changelogLastSeenVersion: null,
   scrapeDelay: 3000,
   showStatusBarProgress: true,
@@ -16,7 +18,8 @@ const store = new Store<StoreSchema>({ defaults })
 export const getStore = () => {
   const data = {
     openaiApiKey: store.get('openaiApiKey'),
-    openaiModel: store.get('openaiModel'),
+    selectedModel: store.get('selectedModel'),
+    customModels: store.get('customModels'),
     changelogLastSeenVersion: store.get('changelogLastSeenVersion'),
     scrapeDelay: store.get('scrapeDelay'),
     showStatusBarProgress: store.get('showStatusBarProgress'),

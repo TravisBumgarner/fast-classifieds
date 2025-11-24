@@ -46,7 +46,7 @@ import { createQueryKey } from '../../utilities'
 import Filters, { DEFAULT_STATUS_FILTERS } from './components/Filters'
 import QuickActions from './components/QuickActions'
 
-type SortField = 'company' | 'title' | 'status' | 'createdAt' | 'location' | 'aiRecommendationStatus' | 'datePosted'
+type SortField = 'site' | 'title' | 'status' | 'createdAt' | 'location' | 'aiRecommendationStatus' | 'datePosted'
 type SortDirection = 'asc' | 'desc'
 
 const AIRecommendationStatus = ({ status, id }: { status: TypeAIRecommendationStatus; id: string }) => {
@@ -137,7 +137,7 @@ const JobPostings = () => {
     let bVal: string | number | Date
 
     switch (sortField) {
-      case 'company':
+      case 'site':
         aVal = a.siteTitle?.toLowerCase() || ''
         bVal = b.siteTitle?.toLowerCase() || ''
         break
@@ -348,11 +348,11 @@ const JobPostings = () => {
                 </TableCell>
                 <TableCell>
                   <TableSortLabel
-                    active={sortField === 'company'}
-                    direction={sortField === 'company' ? sortDirection : 'asc'}
-                    onClick={() => handleSort('company')}
+                    active={sortField === 'site'}
+                    direction={sortField === 'site' ? sortDirection : 'asc'}
+                    onClick={() => handleSort('site')}
                   >
-                    Company
+                    Site
                   </TableSortLabel>
                 </TableCell>
                 <TableCell>

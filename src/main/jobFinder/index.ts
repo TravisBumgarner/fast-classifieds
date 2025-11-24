@@ -31,7 +31,8 @@ const activeRuns = new Map<
 
 export async function startScraping(siteIds: string[]) {
   try {
-    const model = store.get('openaiModel')
+    const selectedModel = store.get('selectedModel')
+    const model = selectedModel.model
     const delay = store.get('scrapeDelay')
     const apiKey = store.get('openaiApiKey')
 

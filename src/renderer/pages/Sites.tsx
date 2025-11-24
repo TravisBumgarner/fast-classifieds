@@ -292,7 +292,7 @@ const Sites = () => {
                     direction={sortField === 'siteTitle' ? sortDirection : 'asc'}
                     onClick={() => handleSort('siteTitle')}
                   >
-                    Company
+                    Site
                   </TableSortLabel>
                 </TableCell>
                 <TableCell>

@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "b272b458-46f2-402e-bbbe-1bec5af97a8c",
+  "id": "3fd4e125-a391-441f-95c2-e2e3ac5859a8",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "api_usage": {
@@ -21,8 +21,15 @@
           "notNull": false,
           "autoincrement": false
         },
-        "model": {
-          "name": "model",
+        "actual_model": {
+          "name": "actual_model",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_selected_model": {
+          "name": "user_selected_model",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -81,28 +88,35 @@
           "name": "prompt",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "site_content": {
           "name": "site_content",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "site_url": {
           "name": "site_url",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "site_title": {
+          "name": "site_title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
           "autoincrement": false
         },
         "output_text": {
           "name": "output_text",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "temperature": {

@@ -47,22 +47,24 @@ export type HashDTO = NewHashDTO & TimestampsAndID
 
 export type ApiUsageDTO = {
   id: string
-  responseId: string
-  model: string
+  responseId: string | null
+  actualModel: string
+  userSelectedModel: string
   createdAt: Date
-  status: string
+  status: string | null
   inputTokens: number
   outputTokens: number
   totalTokens: number
-  cachedTokens: number
-  reasoningTokens: number
+  cachedTokens: number | null
+  reasoningTokens: number | null
   prompt: string
   siteContent: string
   siteUrl: string
+  siteTitle: string
   outputText: string
-  temperature: number
-  servicetier: string
-  reasoningEffort: string
+  temperature: number | null
+  servicetier: string | null
+  reasoningEffort: string | null
 }
 
 export type NewSiteDTO = {
@@ -103,7 +105,8 @@ export type JobPostingDTO = { siteTitle: string } & NewJobPostingDTO & Timestamp
 
 export interface StoreSchema {
   openaiApiKey: string
-  openaiModel: string
+  selectedModel: KnownModel
+  customModels: KnownModel[]
   changelogLastSeenVersion: string | null
   scrapeDelay: number
   showStatusBarProgress: boolean
@@ -202,3 +205,10 @@ export const SCRAPE_RUN_STATUS = {
   FAILED: 'FAILED',
 } as const
 export type ScrapeRunStatus = keyof typeof SCRAPE_RUN_STATUS
+
+export type KnownModel = {
+  model: string
+  input: number
+  cachedInput: number | null
+  output: number
+}

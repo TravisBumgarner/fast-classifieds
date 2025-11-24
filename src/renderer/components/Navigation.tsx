@@ -7,7 +7,7 @@ import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import Toolbar from '@mui/material/Toolbar'
 import { useState } from 'react'
-import { Link as RouterLink, useLocation } from 'react-router-dom'
+import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom'
 import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
 import Logo from '../assets/icon.png'
 import { ROUTES } from '../consts'
@@ -15,20 +15,13 @@ import ipcMessenger from '../ipcMessenger'
 import Icon from '../sharedComponents/Icon'
 import { SPACING } from '../styles/consts'
 
-const NAV_ROUTES: Array<keyof typeof ROUTES> = [
-  'postings',
-  'prompts',
-  'sites',
-  'scrapeRuns',
-  'settings',
-  'debugger',
-  'feedback',
-]
+const NAV_ROUTES: Array<keyof typeof ROUTES> = ['postings', 'prompts', 'sites', 'scrapeRuns', 'costs']
 
 const Navigation = () => {
   const location = useLocation()
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
+  const navigate = useNavigate()
 
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
@@ -83,10 +76,15 @@ const Navigation = () => {
                   key={key}
                   component={RouterLink}
                   to={route.href()}
-                  variant={isActive ? 'contained' : 'text'}
-                  color={isActive ? 'primary' : 'inherit'}
+                  variant="text"
                   sx={{
-                    width: '70px',
+                    backgroundColor: isActive ? 'primary.main' : 'transparent',
+                    color: isActive ? 'primary.contrastText' : 'inherit',
+                    '&:hover': {
+                      backgroundColor: 'action.hover',
+                    },
+                    minWidth: 'auto',
+                    px: 2,
                   }}
                 >
                   {route.label}
@@ -119,6 +117,9 @@ const Navigation = () => {
                 horizontal: 'right',
               }}
             >
+              <MenuItem onClick={() => navigate(ROUTES.settings.href())}>Settings</MenuItem>
+              <MenuItem onClick={() => navigate(ROUTES.feedback.href())}>Feedback</MenuItem>
+              <MenuItem onClick={() => navigate(ROUTES.debugger.href())}>Debug</MenuItem>
               <MenuItem onClick={() => handleExternalLink('https://github.com/TravisBumgarner/fast-classifieds')}>
                 GitHub
               </MenuItem>

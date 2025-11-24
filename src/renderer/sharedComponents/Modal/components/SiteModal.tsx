@@ -241,7 +241,7 @@ const SiteModal = (props: SiteModalProps) => {
             required
             fullWidth
             disabled={loading}
-            placeholder="e.g., Company Name"
+            placeholder="e.g., Site Title"
           />
 
           <FormControl fullWidth required disabled={loading} size="small">
