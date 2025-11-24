@@ -31,6 +31,7 @@ export const errorCodeToMessage = (error: OpenAI | InternalApp): string => {
     if (ERRORS[errorCode as keyof typeof ERRORS]) {
       errorMessage = OPEN_AI_ERRORS[errorCode as keyof typeof OPEN_AI_ERRORS]
     } else {
+      // biome-ignore lint/suspicious/noConsole: it's fine.
       console.log('Unmapped error code:', errorCode)
     }
   }

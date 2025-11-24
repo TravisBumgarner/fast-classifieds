@@ -21,14 +21,12 @@ export function cleanTitle(input: string): string {
   // 1. Careers at Foo → Foo
   if (/^careers at\b/i.test(s)) {
     s = s.replace(/^careers at\s*/i, '')
-    console.log(`cleanTitle: "${input}" → "${s.trim()}"`)
     return s.trim()
   }
 
   // 2. Careers - Foo → Foo
   if (/^careers\b/i.test(s)) {
     s = s.replace(/^careers[^a-zA-Z0-9]*([a-zA-Z0-9].*)$/i, '$1')
-    console.log(`cleanTitle: "${input}" → "${s.trim()}"`)
     return s.trim()
   }
 
@@ -41,7 +39,6 @@ export function cleanTitle(input: string): string {
   // 5. Patterns like "All Jobs | Foo" → Foo
   s = s.replace(/^(all jobs|view jobs|search jobs)\s*\|\s*/i, '')
 
-  console.log(`cleanTitle: "${input}" → "${s.trim()}"`)
   return s.trim()
 }
 
