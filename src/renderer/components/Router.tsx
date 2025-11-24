@@ -1,6 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 import { ROUTES } from '../consts'
-import ApiUsage from '../pages/ApiUsage'
+import Costs from '../pages/Costs'
 import Debugger from '../pages/Debugger'
 import Feedback from '../pages/Feedback'
 import JobPostings from '../pages/JobPostings/JobPostings'
@@ -18,7 +18,7 @@ export default function AppRouter() {
       <Route path={ROUTES.sites.href()} element={<Sites />} />
       <Route path={ROUTES.prompts.href()} element={<Prompts />} />
       <Route path={ROUTES.scrapeRuns.href()} element={<ScrapeRuns />} />
-      <Route path={ROUTES.apiUsage.href()} element={<ApiUsage />} />
+      <Route path={ROUTES.costs.href()} element={<Costs />} />
       <Route path={ROUTES.debugger.href()} element={<Debugger />} />
       <Route path={ROUTES.feedback.href()} element={<Feedback />} />
       <Route path="*" element={<NotFound />} />

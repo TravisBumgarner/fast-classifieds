@@ -96,6 +96,7 @@ async function processSite({
 
     await queries.insertApiUsage({
       response: rawResponse,
+      userSelectedModel: model,
       prompt,
       siteContent: JSON.stringify(scrapedContent),
       siteUrl,

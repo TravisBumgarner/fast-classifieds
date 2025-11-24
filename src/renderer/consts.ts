@@ -19,9 +19,9 @@ export const ROUTES = {
     label: 'History',
     target: '_self',
   },
-  apiUsage: {
-    href: () => '/api-usage',
-    label: 'API Usage',
+  costs: {
+    href: () => '/costs',
+    label: 'Estimated Costs',
     target: '_self',
   },
   settings: {

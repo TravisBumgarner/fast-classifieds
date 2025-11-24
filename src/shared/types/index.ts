@@ -50,7 +50,8 @@ export type HashDTO = NewHashDTO & TimestampsAndID
 export type ApiUsageDTO = {
   id: string
   responseId: string | null
-  model: string
+  actualModel: string
+  userSelectedModel: string
   createdAt: Date
   status: string | null
   inputTokens: number

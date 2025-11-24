@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "99b54c2a-e151-49e4-bca8-19bdfdd1d67b",
+  "id": "3fd4e125-a391-441f-95c2-e2e3ac5859a8",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "api_usage": {
@@ -21,8 +21,15 @@
           "notNull": false,
           "autoincrement": false
         },
-        "model": {
-          "name": "model",
+        "actual_model": {
+          "name": "actual_model",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_selected_model": {
+          "name": "user_selected_model",
           "type": "text",
           "primaryKey": false,
           "notNull": true,

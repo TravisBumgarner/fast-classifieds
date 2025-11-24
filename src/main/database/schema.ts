@@ -19,7 +19,8 @@ import {
 export const apiUsage = sqliteTable('api_usage', {
   id: text('id').primaryKey(),
   responseId: text('response_id'),
-  model: text('model').notNull(),
+  actualModel: text('actual_model').notNull(),
+  userSelectedModel: text('user_selected_model').notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
   status: text('status'),
   inputTokens: integer('input_tokens').notNull(),

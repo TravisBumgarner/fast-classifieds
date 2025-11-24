@@ -217,6 +217,7 @@ const TabOpenAI = ({
           <Tooltip
             title={
               <span>
+                Prices are per 1 million tokens. <br />
                 <a
                   href="https://platform.openai.com/docs/pricing"
                   target="_blank"

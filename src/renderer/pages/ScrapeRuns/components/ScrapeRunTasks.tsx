@@ -20,7 +20,7 @@ import ipcMessenger from '../../../ipcMessenger'
 import Icon from '../../../sharedComponents/Icon'
 import { createQueryKey } from '../../../utilities'
 
-type TaskSortField = 'siteUrl' | 'result' | 'newPostingsFound' | 'completedAt'
+type TaskSortField = 'siteTitle' | 'result' | 'newPostingsFound' | 'completedAt'
 type SortDirection = 'asc' | 'desc'
 
 const getScrapeTaskResult = (status: ScraperTaskResult): 'success' | 'warning' | 'error' | 'default' => {
@@ -50,7 +50,7 @@ const getStatusText = (status: ScraperTaskResult): string => {
 }
 
 const ScrapeRunTasks = ({ scrapeRunId, isExpanded }: { scrapeRunId: string; isExpanded: boolean }) => {
-  const [taskSortField, setTaskSortField] = useState<TaskSortField>('siteUrl')
+  const [taskSortField, setTaskSortField] = useState<TaskSortField>('siteTitle')
   const [taskSortDirection, setTaskSortDirection] = useState<SortDirection>('asc')
 
   const { data } = useQuery({
@@ -77,7 +77,7 @@ const ScrapeRunTasks = ({ scrapeRunId, isExpanded }: { scrapeRunId: string; isEx
     let bVal: string | number
 
     switch (taskSortField) {
-      case 'siteUrl':
+      case 'siteTitle':
         aVal = a.siteTitle
         bVal = b.siteTitle
         break
@@ -113,11 +113,11 @@ const ScrapeRunTasks = ({ scrapeRunId, isExpanded }: { scrapeRunId: string; isEx
                 <TableRow>
                   <TableCell>
                     <TableSortLabel
-                      active={taskSortField === 'siteUrl'}
-                      direction={taskSortField === 'siteUrl' ? taskSortDirection : 'asc'}
-                      onClick={() => handleTaskSort('siteUrl')}
+                      active={taskSortField === 'siteTitle'}
+                      direction={taskSortField === 'siteTitle' ? taskSortDirection : 'asc'}
+                      onClick={() => handleTaskSort('siteTitle')}
                     >
-                      Company
+                      Site
                     </TableSortLabel>
                   </TableCell>
                   <TableCell>

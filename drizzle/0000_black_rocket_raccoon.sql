@@ -1,7 +1,8 @@
 CREATE TABLE `api_usage` (
 	`id` text PRIMARY KEY NOT NULL,
 	`response_id` text,
-	`model` text NOT NULL,
+	`actual_model` text NOT NULL,
+	`user_selected_model` text NOT NULL,
 	`created_at` integer NOT NULL,
 	`status` text,
 	`input_tokens` integer NOT NULL,
