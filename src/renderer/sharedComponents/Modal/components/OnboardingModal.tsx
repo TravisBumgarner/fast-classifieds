@@ -101,7 +101,7 @@ const OnboardingModal = () => {
         </Typography>
 
         <Typography variant="body2">
-          <strong>Note:</strong> You can re-open this guide anytime from Settings.
+          <strong>Note:</strong> You can re-open this guide anytime from the main menu.
         </Typography>
 
         <Stepper activeStep={activeStep} orientation="vertical">

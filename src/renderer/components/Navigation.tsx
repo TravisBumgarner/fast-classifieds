@@ -1,4 +1,4 @@
-import { Tooltip, Typography } from '@mui/material'
+import { Divider, Tooltip, Typography } from '@mui/material'
 import AppBar from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -13,6 +13,8 @@ import Logo from '../assets/icon.png'
 import { ROUTES } from '../consts'
 import ipcMessenger from '../ipcMessenger'
 import Icon from '../sharedComponents/Icon'
+import { MODAL_ID } from '../sharedComponents/Modal/Modal.consts'
+import { activeModalSignal } from '../signals'
 import { SPACING } from '../styles/consts'
 
 const NAV_ROUTES: Array<keyof typeof ROUTES> = ['postings', 'prompts', 'sites', 'scrapeRuns', 'costs']
@@ -34,6 +36,16 @@ const Navigation = () => {
   const handleExternalLink = (url: string) => {
     handleMenuClose()
     ipcMessenger.invoke(CHANNEL_INVOKES.UTILS.OPEN_URL, { url })
+  }
+
+  const handleOnboardingOpen = () => {
+    handleMenuClose()
+    activeModalSignal.value = { id: MODAL_ID.ONBOARDING_MODAL }
+  }
+
+  const handleChangelogOpen = () => {
+    handleMenuClose()
+    activeModalSignal.value = { id: MODAL_ID.CHANGELOG_MODAL }
   }
 
   return (
@@ -120,14 +132,18 @@ const Navigation = () => {
               <MenuItem onClick={() => navigate(ROUTES.settings.href())}>Settings</MenuItem>
               <MenuItem onClick={() => navigate(ROUTES.feedback.href())}>Feedback</MenuItem>
               <MenuItem onClick={() => navigate(ROUTES.debugger.href())}>Debug</MenuItem>
+              <MenuItem onClick={handleOnboardingOpen}>Onboarding</MenuItem>
+              <MenuItem onClick={handleChangelogOpen}>Changelog</MenuItem>
+              <Divider />
               <MenuItem onClick={() => handleExternalLink('https://github.com/TravisBumgarner/fast-classifieds')}>
                 GitHub
               </MenuItem>
               <MenuItem onClick={() => handleExternalLink('https://travisbumgarner.dev/marketing/classifieds')}>
                 Website & Support
               </MenuItem>
-              <MenuItem onClick={() => handleExternalLink('https://travisbumgarner.dev/')}>More from Creator</MenuItem>
               <MenuItem onClick={() => handleExternalLink('https://discord.gg/xSZwF7PQ')}>Join the Community</MenuItem>
+              <Divider />
+              <MenuItem onClick={() => handleExternalLink('https://travisbumgarner.dev/')}>More from Creator</MenuItem>
             </Menu>
           </Box>
         </Box>
