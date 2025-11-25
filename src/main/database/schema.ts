@@ -123,6 +123,7 @@ export const sites = sqliteTable('sites', {
   siteUrl: text('site_url').notNull().unique(),
   promptId: text('prompt_id').notNull(),
   selector: text('selector').notNull(),
+  notes: text('notes'),
   status: text('status', {
     enum: Object.values(SITE_STATUS) as [SiteStatus, ...SiteStatus[]],
   })

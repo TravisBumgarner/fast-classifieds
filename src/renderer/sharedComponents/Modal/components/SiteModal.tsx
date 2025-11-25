@@ -54,6 +54,7 @@ const SiteModal = (props: SiteModalProps) => {
   const [error, setError] = useState<string | null>(null)
   const [prompts, setPrompts] = useState<PromptDTO[]>([])
   const queryClient = useQueryClient()
+  const [notes, setNotes] = useState('')
 
   const handleUrlAndTitleSync = () => {
     if (!siteTitle) {
@@ -94,6 +95,7 @@ const SiteModal = (props: SiteModalProps) => {
         setSiteUrl(result.site.siteUrl)
         setSelector(result.site.selector)
         setStatus(result.site.status || 'active')
+        setNotes(result.site.notes || '')
 
         const matchingPrompt = prompts.find((p) => p.id === result.site?.promptId)
         if (matchingPrompt) {
@@ -139,6 +141,7 @@ const SiteModal = (props: SiteModalProps) => {
           promptId: selectedPrompt.id,
           selector,
           status,
+          notes,
         })
         if (result.success) {
           queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SITES] })
@@ -153,6 +156,7 @@ const SiteModal = (props: SiteModalProps) => {
           promptId: selectedPrompt.id,
           selector,
           status,
+          notes,
         })
         if (result.success) {
           queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SITES] })
@@ -262,6 +266,18 @@ const SiteModal = (props: SiteModalProps) => {
               <MenuItem value="inactive">Inactive</MenuItem>
             </Select>
           </FormControl>
+
+          <TextField
+            size="small"
+            label="Notes"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            fullWidth
+            disabled={loading}
+            multiline
+            minRows={3}
+            placeholder="Additional notes about this site"
+          />
 
           {/* --- ADVANCED CONFIG WRAP --- */}
           <Accordion disableGutters>

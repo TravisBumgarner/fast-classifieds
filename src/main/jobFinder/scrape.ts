@@ -25,7 +25,22 @@ function extractTextAndLinks(html: string, baseUrl = ''): ScrapedContentDTO {
     // find closest ancestor link if any
     const linkEl = walker.currentNode.parentElement?.closest('a')
     let link = linkEl?.getAttribute('href') || null
-    if (link && baseUrl) link = new URL(link, baseUrl).href
+    if (link && baseUrl) {
+      // ignore invalid/broken hrefs like "http:", "https:", "#", "javascript:", etc.
+      if (
+        link === '#' ||
+        link.startsWith('javascript:') ||
+        /^https?:?$/.test(link) // "http:", "https:", "http", "https"
+      ) {
+        link = null
+      } else {
+        try {
+          link = new URL(link, baseUrl).href
+        } catch {
+          link = null
+        }
+      }
+    }
 
     items.push({ text, link })
   }

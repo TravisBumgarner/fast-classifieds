@@ -204,6 +204,7 @@ const ImportSitesModal = (_props: ImportSitesModalProps) => {
             promptId: selectedPrompt.id,
             selector: 'body',
             status: 'active',
+            notes: '',
           })
 
           if (result.success) {
