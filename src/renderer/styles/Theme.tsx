@@ -128,6 +128,7 @@ const getThemeOptions = (isDark: boolean): ThemeOptions => {
             borderBottom: '0px',
             fontSize: FONT_SIZES.SMALL.PX,
             color: colors.text.primary,
+            padding: SPACING.TINY.PX,
           },
           head: {
             backgroundColor: colors.hover.medium,
