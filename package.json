@@ -17,8 +17,7 @@
     "typecheck": "tsc -p tsconfig.main.json --noEmit && tsc -p tsconfig.renderer.json --noEmit",
     "check-version": "node --no-warnings ./scripts/check-version.js",
     "prepare": "husky",
-    "bootstrap": "./scripts/bootstrap.sh",
-    "nuke-local-db": "rm -rf ./drizzle && rm -rf ./data.sqlite && npm run db:generate && npm run db:apply"
+    "bootstrap": "./scripts/bootstrap.sh"
   },
   "keywords": [],
   "repository": {
