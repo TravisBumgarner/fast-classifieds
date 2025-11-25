@@ -8,6 +8,28 @@ export interface ChangelogEntry {
 }
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.6.0',
+    date: '2025-11-25',
+    changes: [
+      {
+        category: 'Improved',
+        description: 'Tables have fixed column widths for better readability',
+      },
+      {
+        category: 'Fixed',
+        description: 'Site scraping fail on invalid a tags',
+      },
+      {
+        category: 'Improved',
+        description: 'Increased legibility of setup modal',
+      },
+      {
+        category: 'New',
+        description: 'Job site notes',
+      },
+    ],
+  },
+  {
     version: '1.5.0',
     date: '2025-11-24',
     changes: [
