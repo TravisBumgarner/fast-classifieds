@@ -228,7 +228,8 @@ const DuplicateDetectionModal = (_props: DuplicateDetectionModalProps) => {
       sx={{ width: '1100px', maxWidth: '95%', height: '90vh' }}
     >
       <Alert severity="info" sx={{ mb: SPACING.MEDIUM.PX }}>
-        Do you keep seeing duplicates? Try changing the CSS selectors under a site's advanced config
+        Do you keep seeing duplicates? Try changing the CSS selectors under a site's advanced config to be more
+        specific.
       </Alert>
       {loading ? (
         <Stack alignItems="center" justifyContent="center">
