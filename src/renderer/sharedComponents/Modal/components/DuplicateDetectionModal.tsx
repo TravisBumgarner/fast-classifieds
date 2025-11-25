@@ -1,4 +1,4 @@
-import { Box, Button, Chip, CircularProgress, Divider, Stack, Typography } from '@mui/material'
+import { Alert, Box, Button, Chip, CircularProgress, Divider, Stack, Typography } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
 import type { JobPostingDTO, JobPostingDuplicateStatus } from '../../../../shared/types'
@@ -227,6 +227,9 @@ const DuplicateDetectionModal = (_props: DuplicateDetectionModalProps) => {
       title="Duplicate Detection"
       sx={{ width: '1100px', maxWidth: '95%', height: '90vh' }}
     >
+      <Alert severity="info" sx={{ mb: SPACING.MEDIUM.PX }}>
+        Do you keep seeing duplicates? Try changing the CSS selectors under a site's advanced config
+      </Alert>
       {loading ? (
         <Stack alignItems="center" justifyContent="center">
           <CircularProgress size={28} />
