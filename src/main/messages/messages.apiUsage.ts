@@ -1,5 +1,6 @@
 import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
 import queries from '../database/queries'
+import logger from '../logger'
 import { typedIpcMain } from './ipcMain'
 
 typedIpcMain.handle(CHANNEL_INVOKES.API_USAGE.GET_ALL, async () => {
@@ -7,7 +8,7 @@ typedIpcMain.handle(CHANNEL_INVOKES.API_USAGE.GET_ALL, async () => {
     const apiUsage = await queries.getAllApiUsage()
     return { apiUsage }
   } catch (error) {
-    console.error('Error getting API usage:', error)
+    logger.error('Error getting API usage:', error)
     return { apiUsage: [] }
   }
 })

@@ -6,7 +6,6 @@ import ipcMessenger from '../../ipcMessenger'
 import PageWrapper from '../../sharedComponents/PageWrapper'
 import { SPACING } from '../../styles/consts'
 import TabData from './components/TabData'
-import TabHelpAndOnboarding from './components/TabHelpAndOnboarding'
 import TabJobFinder from './components/TabJobFinder'
 import TabOpenAI from './components/TabOpenAI'
 
@@ -50,7 +49,6 @@ const Settings = () => {
           <Tab label="OpenAI" />
           <Tab label="Job Finder" />
           <Tab label="Data" />
-          <Tab label="Help & Onboarding" />
         </Tabs>
 
         {activeTab === 0 && (
@@ -66,7 +64,6 @@ const Settings = () => {
           <TabJobFinder loadStoreSettings={loadStoreSettings} initialScrapeDelay={storeFromServer.scrapeDelay} />
         )}
         {activeTab === 2 && <TabData />}
-        {activeTab === 3 && <TabHelpAndOnboarding />}
       </Box>
     </PageWrapper>
   )

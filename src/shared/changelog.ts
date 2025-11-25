@@ -8,6 +8,32 @@ export interface ChangelogEntry {
 }
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.5.0',
+    date: '2025-11-24',
+    changes: [
+      {
+        category: 'Improved',
+        description: 'Job postings show date posted',
+      },
+      {
+        category: 'New',
+        description: 'Retries for failed scraper tasks',
+      },
+      {
+        category: 'New',
+        description: 'Feedback form',
+      },
+      {
+        category: 'Improved',
+        description: 'Bulk import experience for sites including better site title detection and progress indicators',
+      },
+      {
+        category: 'Improved',
+        description: 'Better errors messages throughout the app',
+      },
+    ],
+  },
+  {
     version: '1.4.0',
     date: '2025-11-19',
     changes: [

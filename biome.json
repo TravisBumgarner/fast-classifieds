@@ -2,12 +2,28 @@
   "linter": {
     "rules": {
       "suspicious": {
-        "useBiomeIgnoreFolder": "error"
+        "useBiomeIgnoreFolder": "error",
+        "noConsole": "error"
       }
     }
   },
   "files": {
-    "includes": ["**", "!.vite", "!node_modules", "!.husky", "!out", "!drizzle"]
+    "includes": [
+      "**",
+      "!.vite",
+      "!node_modules",
+      "!.husky",
+      "!out",
+      "!drizzle",
+      "!fake_website",
+      "!biome.json",
+      "!tsconfig.json",
+      "!tsconfig.node.json",
+      "!vite.config.ts",
+      "!*.log",
+      "!package.json",
+      "!package-lock.json"
+    ]
   },
   "formatter": {
     "enabled": true,

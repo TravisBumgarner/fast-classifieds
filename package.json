@@ -1,14 +1,14 @@
 {
   "name": "fast-classifieds",
   "productName": "Fast Classifieds",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "An Electron app to quickly browse classified ads sites.",
   "main": ".vite/build/main.js",
   "scripts": {
     "dev": "electron-forge start",
-    "package": "NODE_ENV=development electron-forge package && open ./out",
-    "make": "npm run check-version && NODE_ENV=production dotenv -e .env -- electron-forge make && open ./out",
-    "publish": "npm run check-version && NODE_ENV=production dotenv -e .env -- electron-forge publish && open ./out",
+    "package": "SHOULD_APPLE_SIGN=0 electron-forge package && open ./out",
+    "make": "npm run check-version && SHOULD_APPLE_SIGN=1 dotenv -e .env -- electron-forge make && open ./out",
+    "publish": "npm run check-version && SHOULD_APPLE_SIGN=1 dotenv -e .env -- electron-forge publish && open ./out",
     "lint": "biome check",
     "lint:fix": "biome format",
     "db:generate": "drizzle-kit generate --config ./drizzle.config.ts",

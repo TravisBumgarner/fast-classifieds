@@ -67,13 +67,13 @@ typedIpcMain.handle(CHANNEL_INVOKES.APP.RESTORE_ALL_DATA, async (_event, params)
       scrapeTasks: storeScrapeTasks,
     } = await params.data
 
-    await db.insert(sites).values(storeSites).run()
-    await db.insert(prompts).values(storePrompts).run()
-    await db.insert(jobPostings).values(storeJobPostings).run()
-    await db.insert(scrapeRuns).values(storeScrapeRuns).run()
-    await db.insert(hashes).values(storeHashes).run()
-    await db.insert(apiUsage).values(storeApiUsage).run()
-    await db.insert(scrapeTasks).values(storeScrapeTasks).run()
+    if (storeSites.length) await db.insert(sites).values(storeSites).run()
+    if (storePrompts.length) await db.insert(prompts).values(storePrompts).run()
+    if (storeJobPostings.length) await db.insert(jobPostings).values(storeJobPostings).run()
+    if (storeScrapeRuns.length) await db.insert(scrapeRuns).values(storeScrapeRuns).run()
+    if (storeHashes.length) await db.insert(hashes).values(storeHashes).run()
+    if (storeApiUsage.length) await db.insert(apiUsage).values(storeApiUsage).run()
+    if (storeScrapeTasks.length) await db.insert(scrapeTasks).values(storeScrapeTasks).run()
 
     return {
       type: 'restore_all_data',

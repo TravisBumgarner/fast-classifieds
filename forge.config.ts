@@ -22,7 +22,7 @@ const config: ForgeConfig = {
     icon: './src/assets/icon',
     extraResource: ['./drizzle'],
     osxSign:
-      process.env.NODE_ENV === 'production'
+      process.env.SHOULD_APPLE_SIGN === '1'
         ? {
             optionsForFile: () => {
               return {
@@ -43,7 +43,7 @@ const config: ForgeConfig = {
     // new MakerDeb({}),
   ],
   plugins: [
-    ...(process.env.NODE_ENV === 'production' ? [new AutoUnpackNativesPlugin({})] : []),
+    ...(process.env.SHOULD_APPLE_SIGN === '1' ? [new AutoUnpackNativesPlugin({})] : []),
     new VitePlugin({
       // `build` can specify multiple entry builds, which can be Main process, Preload scripts, Worker process, etc.
       // If you are familiar with Vite configuration, it will look really familiar.
@@ -82,7 +82,7 @@ const config: ForgeConfig = {
   ],
   hooks: {
     postPackage: async (_forgeConfig, options: { outputPaths: string[]; platform: string; arch: string }) => {
-      if (options.platform === 'darwin' && process.env.NODE_ENV === 'production') {
+      if (options.platform === 'darwin' && process.env.SHOULD_APPLE_SIGN === '1') {
         const { notarize } = await import('@electron/notarize')
         const appPath = `${options.outputPaths[0]}/Fast Classifieds.app`
 

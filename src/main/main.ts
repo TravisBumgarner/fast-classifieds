@@ -7,7 +7,7 @@ import { updateElectronApp } from 'update-electron-app'
 import { migrateProduction } from './database/client'
 import logger from './logger'
 import './messages'
-import { backfill } from './database/backfill'
+import { backfillDevelopment } from './database/backfillDevelopment'
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string
 declare const MAIN_WINDOW_VITE_NAME: string
@@ -53,7 +53,6 @@ const createWindow = () => {
   }
 
   const mainWindow = new BrowserWindow(windowOptions)
-
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL)
   } else {
@@ -66,10 +65,15 @@ const createWindow = () => {
 }
 
 app.on('ready', () => {
+  // At some point, backfillDevelopment was run in production. Zero idea how. Thus logs for the future.
+  logger.info('App isPackaged:', app.isPackaged)
+  logger.info('Process platform:', process.platform)
+  logger.info('__dirname:', __dirname)
+
   if (app.isPackaged) {
     migrateProduction()
   } else {
-    backfill()
+    backfillDevelopment()
   }
   createWindow()
 })
