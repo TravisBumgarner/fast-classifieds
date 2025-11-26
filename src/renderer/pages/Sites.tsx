@@ -38,7 +38,7 @@ import { MODAL_ID } from '../sharedComponents/Modal/Modal.consts'
 import PageWrapper from '../sharedComponents/PageWrapper'
 import { activeModalSignal } from '../signals'
 import { SPACING } from '../styles/consts'
-import { createQueryKey } from '../utilities'
+import { createQueryKey, formatSelectOption } from '../utilities'
 
 type SiteStatus = 'active' | 'inactive'
 
@@ -282,11 +282,11 @@ const Sites = () => {
         }}
       >
         <Box sx={{ flexGrow: 1, overflow: 'auto' }} ref={tableScrollContainerRef}>
-          <Table stickyHeader>
+          <Table stickyHeader sx={{ tableLayout: 'fixed' }}>
             <TableHead>
               <TableRow>
-                <TableCell padding="checkbox" />
-                <TableCell>
+                <TableCell width="35px" />
+                <TableCell width="120px">
                   <TableSortLabel
                     active={sortField === 'siteTitle'}
                     direction={sortField === 'siteTitle' ? sortDirection : 'asc'}
@@ -295,16 +295,16 @@ const Sites = () => {
                     Site
                   </TableSortLabel>
                 </TableCell>
-                <TableCell>
+                <TableCell width="50px">
                   <TableSortLabel
                     active={sortField === 'totalJobs'}
                     direction={sortField === 'totalJobs' ? sortDirection : 'asc'}
                     onClick={() => handleSort('totalJobs')}
                   >
-                    Total Jobs
+                    Jobs
                   </TableSortLabel>
                 </TableCell>
-                <TableCell>
+                <TableCell width="90px">
                   <TableSortLabel
                     active={sortField === 'status'}
                     direction={sortField === 'status' ? sortDirection : 'asc'}
@@ -313,7 +313,7 @@ const Sites = () => {
                     Status
                   </TableSortLabel>
                 </TableCell>
-                <TableCell>
+                <TableCell width="80px">
                   <TableSortLabel
                     active={sortField === 'updatedAt'}
                     direction={sortField === 'updatedAt' ? sortDirection : 'asc'}
@@ -322,7 +322,7 @@ const Sites = () => {
                     Updated
                   </TableSortLabel>
                 </TableCell>
-                <TableCell>
+                <TableCell width="100px">
                   <TableSortLabel
                     active={sortField === 'prompt'}
                     direction={sortField === 'prompt' ? sortDirection : 'asc'}
@@ -331,13 +331,9 @@ const Sites = () => {
                     Prompt
                   </TableSortLabel>
                 </TableCell>
-                <TableCell>Advanced</TableCell>
-                <TableCell
-                  align="right"
-                  sx={{
-                    width: '200px',
-                  }}
-                >
+                <TableCell width="150px">Notes</TableCell>
+                <TableCell width="150px">Advanced</TableCell>
+                <TableCell align="right" width="150px">
                   Actions
                 </TableCell>
               </TableRow>
@@ -391,19 +387,21 @@ const Sites = () => {
                         <TableCell>{site.totalJobs}</TableCell>
                         <TableCell>
                           <Chip
-                            label={site.status.charAt(0).toUpperCase() + site.status.slice(1)}
+                            sx={{ width: '100%' }}
+                            label={formatSelectOption(site.status)}
                             color={site.status === 'active' ? 'success' : 'default'}
                           />
                         </TableCell>
                         <TableCell>{new Date(site.updatedAt).toLocaleDateString()}</TableCell>
                         <TableCell>
                           <Tooltip title={site.promptTitle}>
-                            <Button variant="outlined" onClick={openPrompt}>
+                            <Button sx={{ width: '90px' }} variant="outlined" onClick={openPrompt}>
                               {site.promptTitle.slice(0, 20)}
                               {site.promptTitle.length > 20 ? '...' : ''}
                             </Button>
                           </Tooltip>
                         </TableCell>
+                        <TableCell>{site.notes}</TableCell>
                         <TableCell>
                           <code>Selector: {site.selector}</code>
                         </TableCell>
@@ -431,7 +429,7 @@ const Sites = () => {
                         </TableCell>
                       </TableRow>
                       <TableRow>
-                        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
+                        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={9}>
                           <Collapse in={isExpanded} timeout="auto" unmountOnExit>
                             <Box sx={{ margin: 2 }}>
                               {loading ? (

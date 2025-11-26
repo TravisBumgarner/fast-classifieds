@@ -128,22 +128,33 @@ const JobSearchSetupModal = (props: JobSearchSetupModalProps) => {
           }}
         >
           <FormGroup>
-            {activeSites.map((site) => (
-              <FormControlLabel
-                key={site.id}
-                control={
-                  <Checkbox checked={selectedSiteIds.includes(site.id)} onChange={() => handleToggleSite(site.id)} />
-                }
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography variant="body1">{site.siteTitle}</Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      ({site.siteUrl})
-                    </Typography>
-                  </Box>
-                }
-              />
-            ))}
+            {activeSites
+              .sort((a, b) => a.siteTitle.localeCompare(b.siteTitle))
+              .map((site) => (
+                <FormControlLabel
+                  key={site.id}
+                  control={
+                    <Checkbox checked={selectedSiteIds.includes(site.id)} onChange={() => handleToggleSite(site.id)} />
+                  }
+                  label={
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        flexDirection: 'column',
+                      }}
+                    >
+                      <Typography sx={{ padding: 0 }} variant="body1">
+                        {site.siteTitle.slice(0, 60)}
+                        {site.siteTitle.length > 60 ? '...' : ''}
+                      </Typography>
+                      <Typography sx={{ padding: 0 }} variant="body2" color="text.secondary">
+                        {site.siteUrl}
+                      </Typography>
+                    </Box>
+                  }
+                />
+              ))}
           </FormGroup>
         </Box>
 

@@ -25,6 +25,7 @@ export async function backfillDevelopment() {
     promptId: prompt[0].id,
     selector: 'body',
     status: 'active',
+    notes: '',
   })
   logger.info('Inserted site')
 

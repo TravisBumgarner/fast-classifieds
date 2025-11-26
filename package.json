@@ -1,7 +1,7 @@
 {
   "name": "fast-classifieds",
   "productName": "Fast Classifieds",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "An Electron app to quickly browse classified ads sites.",
   "main": ".vite/build/main.js",
   "scripts": {
@@ -17,8 +17,7 @@
     "typecheck": "tsc -p tsconfig.main.json --noEmit && tsc -p tsconfig.renderer.json --noEmit",
     "check-version": "node --no-warnings ./scripts/check-version.js",
     "prepare": "husky",
-    "bootstrap": "./scripts/bootstrap.sh",
-    "nuke-local-db": "rm -rf ./drizzle && rm -rf ./data.sqlite && npm run db:generate && npm run db:apply"
+    "bootstrap": "./scripts/bootstrap.sh"
   },
   "keywords": [],
   "repository": {

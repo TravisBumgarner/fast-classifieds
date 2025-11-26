@@ -23,7 +23,7 @@ import {
 import { useSignalEffect } from '@preact/signals-react'
 import { useSignals } from '@preact/signals-react/runtime'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import {
   AI_RECOMMENDATION_STATUS,
   type JobPostingStatus,
@@ -49,34 +49,72 @@ import QuickActions from './components/QuickActions'
 type SortField = 'site' | 'title' | 'status' | 'createdAt' | 'location' | 'aiRecommendationStatus' | 'datePosted'
 type SortDirection = 'asc' | 'desc'
 
-const AIRecommendationStatus = ({ status, id }: { status: TypeAIRecommendationStatus; id: string }) => {
+const AIRecommendationStatus = ({
+  status,
+  id,
+  recommendationExplanation,
+}: {
+  status: TypeAIRecommendationStatus
+  id: string
+  recommendationExplanation: string
+}) => {
+  const queryClient = useQueryClient()
+
   const markAsHumanOverride = async () => {
     await ipcMessenger.invoke(CHANNEL_INVOKES.JOB_POSTINGS.UPDATE, {
       id,
       data: { aiRecommendationStatus: AI_RECOMMENDATION_STATUS.HUMAN_OVERRIDE },
     })
+    queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.JOB_POSTINGS] })
   }
 
-  if (status === AI_RECOMMENDATION_STATUS.RECOMMENDED) {
-    return <Chip label="AI Match" color="success" size="small" />
-  }
+  const chipDetails = useMemo(() => {
+    if (status === AI_RECOMMENDATION_STATUS.RECOMMENDED) {
+      return { label: 'AI Match', color: 'success' as const }
+    }
 
-  if (status === AI_RECOMMENDATION_STATUS.NOT_RECOMMENDED) {
-    return (
-      <Box>
-        <Chip label="No match" color="default" size="small" />
-        <Tooltip title="Mark as human approved">
+    if (status === AI_RECOMMENDATION_STATUS.NOT_RECOMMENDED) {
+      return { label: 'No match', color: 'default' as const }
+    }
+
+    if (status === AI_RECOMMENDATION_STATUS.HUMAN_OVERRIDE) {
+      return { label: 'User Match', color: 'info' as const }
+    }
+
+    return null
+  }, [status])
+
+  return (
+    <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Tooltip
+        title={
+          status === AI_RECOMMENDATION_STATUS.HUMAN_OVERRIDE ? 'User marked as relevant' : recommendationExplanation
+        }
+      >
+        <Chip sx={{ width: '100%' }} label={chipDetails?.label} color={chipDetails?.color} size="small" />
+      </Tooltip>
+      {status === 'not_recommended' && (
+        <Tooltip title="Mark as user match">
           <IconButton onClick={markAsHumanOverride}>
-            <Icon name="check" />
+            <Icon name="check" size={16} />
           </IconButton>
         </Tooltip>
-      </Box>
-    )
-  }
+      )}
+    </Box>
+  )
 
-  if (status === AI_RECOMMENDATION_STATUS.HUMAN_OVERRIDE) {
-    return <Chip label="User Match" color="info" size="small" />
-  }
+  // // if (status === AI_RECOMMENDATION_STATUS.NOT_RECOMMENDED) {
+  // //   return (
+  // //     <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+  // //       <Chip label="No match" color="default" size="small" />
+
+  // //     </Box>
+  // //   )
+  // // }
+
+  // if (status === AI_RECOMMENDATION_STATUS.HUMAN_OVERRIDE) {
+  //   return <Chip sx={{ width: '100%' }} label="User Match" color="info" size="small" />
+  // }
 }
 
 const JobPostings = () => {
@@ -334,11 +372,12 @@ const JobPostings = () => {
         }}
       >
         <Box sx={{ flexGrow: 1, overflow: 'auto' }} ref={tableScrollContainerRef}>
-          <Table stickyHeader>
+          <Table stickyHeader sx={{ tableLayout: 'fixed' }}>
             <TableHead>
               <TableRow>
-                <TableCell padding="checkbox">
+                <TableCell width="35px">
                   <Checkbox
+                    size="small"
                     indeterminate={
                       selectedJobPostings.size > 0 && selectedJobPostings.size < filteredJobPostings.length
                     }
@@ -346,7 +385,7 @@ const JobPostings = () => {
                     onChange={handleSelectAllJobPostings}
                   />
                 </TableCell>
-                <TableCell>
+                <TableCell width="80px">
                   <TableSortLabel
                     active={sortField === 'site'}
                     direction={sortField === 'site' ? sortDirection : 'asc'}
@@ -355,7 +394,7 @@ const JobPostings = () => {
                     Site
                   </TableSortLabel>
                 </TableCell>
-                <TableCell>
+                <TableCell width="150px">
                   <TableSortLabel
                     active={sortField === 'title'}
                     direction={sortField === 'title' ? sortDirection : 'asc'}
@@ -364,7 +403,7 @@ const JobPostings = () => {
                     Title
                   </TableSortLabel>
                 </TableCell>
-                <TableCell>
+                <TableCell width="90px">
                   <TableSortLabel
                     active={sortField === 'location'}
                     direction={sortField === 'location' ? sortDirection : 'asc'}
@@ -374,7 +413,7 @@ const JobPostings = () => {
                   </TableSortLabel>
                 </TableCell>
 
-                <TableCell>
+                <TableCell width="160px">
                   <TableSortLabel
                     active={sortField === 'status'}
                     direction={sortField === 'status' ? sortDirection : 'asc'}
@@ -384,44 +423,36 @@ const JobPostings = () => {
                   </TableSortLabel>
                 </TableCell>
 
-                <TableCell>
-                  <Tooltip
-                    title="AI matched jobs are highlighted, but accuracy is still being evaluated. All results are shown regardless."
-                    arrow
-                  >
-                    <span style={{ position: 'relative', top: 6, paddingRight: SPACING.SMALL.PX }}>
-                      <Icon name="info" />
-                    </span>
-                  </Tooltip>
+                <TableCell width="110px">
                   <TableSortLabel
                     active={sortField === 'aiRecommendationStatus'}
                     direction={sortField === 'aiRecommendationStatus' ? sortDirection : 'asc'}
                     onClick={() => handleSort('aiRecommendationStatus' as SortField)}
                   >
-                    Recommended{' '}
+                    Recommended
                   </TableSortLabel>
                 </TableCell>
 
-                <TableCell>Description</TableCell>
-                <TableCell>
+                <TableCell width="200px">Description</TableCell>
+                <TableCell width="60px">
                   <TableSortLabel
                     active={sortField === 'datePosted'}
                     direction={sortField === 'datePosted' ? sortDirection : 'asc'}
                     onClick={() => handleSort('datePosted')}
                   >
-                    Date Posted
+                    Posted
                   </TableSortLabel>
                 </TableCell>
-                <TableCell>
+                <TableCell width="60px">
                   <TableSortLabel
                     active={sortField === 'createdAt'}
                     direction={sortField === 'createdAt' ? sortDirection : 'asc'}
                     onClick={() => handleSort('createdAt')}
                   >
-                    Found On
+                    Found
                   </TableSortLabel>
                 </TableCell>
-                <TableCell width="90px" align="right">
+                <TableCell width="60px" align="right">
                   Actions
                 </TableCell>
               </TableRow>
@@ -466,7 +497,7 @@ const JobPostings = () => {
                     <TableCell>{jobPosting.location || '-'}</TableCell>
                     <TableCell>
                       <Stack direction="row" alignItems="center">
-                        <FormControl size="small" sx={{ minWidth: 120 }}>
+                        <FormControl size="small" sx={{ minWidth: '120px' }}>
                           <Select
                             value={jobPosting.status}
                             onChange={(e) =>
@@ -477,6 +508,7 @@ const JobPostings = () => {
                                 label={value.charAt(0).toUpperCase() + value.slice(1)}
                                 color={getJobPostingStatusColor(value)}
                                 size="small"
+                                sx={{ width: '100%' }}
                               />
                             )}
                           >
@@ -500,22 +532,22 @@ const JobPostings = () => {
                       </Stack>
                     </TableCell>
                     <TableCell>
-                      <AIRecommendationStatus id={jobPosting.id} status={jobPosting.aiRecommendationStatus} />
-                      <Tooltip title={jobPosting.recommendationExplanation}>
-                        <span>
-                          <Icon name="info" />
-                        </span>
-                      </Tooltip>
+                      <AIRecommendationStatus
+                        id={jobPosting.id}
+                        status={jobPosting.aiRecommendationStatus}
+                        recommendationExplanation={jobPosting.recommendationExplanation}
+                      />
                     </TableCell>
                     <TableCell>
-                      <Tooltip title={jobPosting.description || 'No description'}>
+                      <Tooltip placement="right" title={jobPosting.description || 'No description'}>
                         <Typography
                           variant="body2"
                           sx={{
                             maxWidth: 275,
                           }}
                         >
-                          {`${jobPosting.description?.slice(0, 75)}...` || '-'}
+                          {`${jobPosting.description.slice(0, 60)}${jobPosting.description?.length > 60 ? '...' : ''}` ||
+                            '-'}
                         </Typography>
                       </Tooltip>
                     </TableCell>

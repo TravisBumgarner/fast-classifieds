@@ -73,6 +73,7 @@ const Debugger = () => {
         selector,
         promptId,
         status: 'inactive',
+        notes: '',
       })
 
       if (result.success) {
@@ -110,6 +111,7 @@ const Debugger = () => {
         selector,
         promptId,
         status: 'active',
+        notes: '',
       })
 
       if (result.success) {

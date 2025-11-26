@@ -73,6 +73,7 @@ export type NewSiteDTO = {
   promptId: string
   selector: string
   status: SiteStatus
+  notes: string | null
 }
 
 export type SiteDTO = NewSiteDTO & TimestampsAndID
@@ -84,6 +85,7 @@ export type UpdateSiteDTO = {
   promptId: string
   selector: string
   status: SiteStatus
+  notes: string | null
 }
 
 export type NewJobPostingDTO = {
