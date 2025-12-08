@@ -17,11 +17,10 @@ jobs:
     continue-on-error: true
 
     env:
-      # Prevent puppeteer hangs
       PUPPETEER_SKIP_DOWNLOAD: 'true'
       PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
       SHOULD_APPLE_SIGN: '0'
-      GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} 
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
 
 
     steps:
