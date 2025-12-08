@@ -12,6 +12,7 @@ jobs:
             { name: 'macos', image: 'macos-latest' },
           ]
     runs-on: ${{ matrix.os.image }}
+    continue-on-error: true
     env:
       PUPPETEER_SKIP_DOWNLOAD: 'true'
       PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
