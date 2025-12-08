@@ -17,6 +17,8 @@ const safeConfig = z.object({
 
 const config: ForgeConfig = {
   packagerConfig: {
+    // Must be the same as the name in package.json
+    executableName: 'fast-classifieds',
     asar: true,
     //"You have set packagerConfig.ignore, the Electron Forge Vite plugin normally sets this automatically."
     // This is expected. Error can be ignored.
