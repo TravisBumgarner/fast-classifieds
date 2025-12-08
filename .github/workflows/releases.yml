@@ -19,8 +19,8 @@ jobs:
     continue-on-error: true
 
     env:
-      PUPPETEER_SKIP_DOWNLOAD: 'false'
-      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'false'
+      PUPPETEER_SKIP_DOWNLOAD: 'true'
+      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
       SHOULD_APPLE_SIGN: '0'
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
