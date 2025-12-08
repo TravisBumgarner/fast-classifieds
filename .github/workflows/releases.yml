@@ -1,4 +1,4 @@
-name: Release app
+name: Release app Windows/Linux
 on:
   workflow_dispatch:
 
@@ -13,21 +13,16 @@ jobs:
           [
             { name: 'linux', image: 'ubuntu-latest' },
             { name: 'windows', image: 'windows-latest' },
-            { name: 'macos', image: 'macos-latest' },
           ]
 
     runs-on: ${{ matrix.os.image }}
     continue-on-error: true
 
     env:
-      PUPPETEER_SKIP_DOWNLOAD: 'true'
-      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
-      SHOULD_APPLE_SIGN: ${{ matrix.os.name == 'macos' && '1' || '0' }}
+      PUPPETEER_SKIP_DOWNLOAD: 'false'
+      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'false'
+      SHOULD_APPLE_SIGN: '0'
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-      APPLE_ID: ${{ secrets.APPLE_ID }}
-      APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-      APPLE_IDENTITY: ${{ secrets.APPLE_IDENTITY }}
 
     steps:
       - name: Checkout repo

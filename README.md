@@ -15,3 +15,8 @@ Stop wasting hours manually browsing company career pages. Fast Classifieds uses
 1. Note - Electron's main, the backend, does not have hot module reloading.
    - Everywhere: Restart the `npm run dev` script
    - Within VSCode: Hit the `Restart` button.
+
+
+## Builds
+
+Mac builds are done from my own computer. Windows and Linux are handled by GitHub Actions. 

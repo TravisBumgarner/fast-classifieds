@@ -2,6 +2,7 @@ import { JSDOM } from 'jsdom'
 import { type Browser, launch } from 'puppeteer'
 import type { INTERNAL_ERRORS } from '../../shared/errors'
 import type { ScrapedContentDTO } from '../../shared/types'
+import logger from '../logger'
 import store from '../store'
 import { hashContent } from '../utilities'
 
@@ -81,6 +82,7 @@ export const scrape = async ({
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     })
   } catch (e) {
+    logger.error('Failed to launch browser for scraping', e)
     return { ok: false, errorCode: 'BROWSER_LAUNCH_FAIL', message: String(e) }
   }
 
