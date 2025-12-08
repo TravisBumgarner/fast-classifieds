@@ -12,6 +12,9 @@ jobs:
             { name: 'macos', image: 'macos-latest' },
           ]
     runs-on: ${{ matrix.os.image }}
+    env:
+      PUPPETEER_SKIP_DOWNLOAD: 'true'
+      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
     steps:
       - name: Github checkout
         uses: actions/checkout@v4
