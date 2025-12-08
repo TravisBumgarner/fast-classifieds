@@ -24,6 +24,9 @@ jobs:
       PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
       SHOULD_APPLE_SIGN: '0'
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      APPLE_ID: ${{ secrets.APPLE_ID }}
+      APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
 
 
     steps:
