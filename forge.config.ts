@@ -29,6 +29,7 @@ const config: ForgeConfig = {
     osxSign:
       process.env.SHOULD_APPLE_SIGN === '1'
         ? {
+            identity: process.env.APPLE_IDENTITY,
             optionsForFile: () => {
               return {
                 hardenedRuntime: true,
