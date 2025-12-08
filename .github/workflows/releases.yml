@@ -1,6 +1,7 @@
 name: Release app
 on:
   workflow_dispatch:
+
 jobs:
   build:
     strategy:
@@ -11,20 +12,30 @@ jobs:
             { name: 'windows', image: 'windows-latest' },
             { name: 'macos', image: 'macos-latest' },
           ]
+
     runs-on: ${{ matrix.os.image }}
     continue-on-error: true
+
     env:
+      # Prevent puppeteer hangs
       PUPPETEER_SKIP_DOWNLOAD: 'true'
       PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
+      SHOULD_APPLE_SIGN: '0'
+      GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} 
+
+
     steps:
-      - name: Github checkout
+      - name: Checkout repo
         uses: actions/checkout@v4
+
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
       - run: npm ci
+
       - name: Publish app
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          SHOULD_APPLE_SIGN: ${{ matrix.os.name == 'macos' && '1' || '0' }}
         run: npm run publish
