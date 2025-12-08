@@ -9,6 +9,9 @@ import logger from './logger'
 import './messages'
 import { backfillDevelopment } from './database/backfillDevelopment'
 
+// prevent Squirrel.Windows launches your app multiple times during the installation/updating/uninstallation
+if (require('electron-squirrel-startup') === true) app.quit()
+
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string
 declare const MAIN_WINDOW_VITE_NAME: string
 
