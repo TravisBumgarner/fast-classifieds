@@ -11,16 +11,13 @@ jobs:
       matrix:
         os:
           [
-            { name: 'linux', image: 'ubuntu-latest' },
-            { name: 'windows', image: 'windows-latest' },
+            { name: 'macos', image: 'macos-latest' },
           ]
 
     runs-on: ${{ matrix.os.image }}
     continue-on-error: true
 
     env:
-      PUPPETEER_SKIP_DOWNLOAD: 'true'
-      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
       SHOULD_APPLE_SIGN: '0'
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
