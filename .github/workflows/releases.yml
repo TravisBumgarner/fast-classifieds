@@ -23,6 +23,11 @@ jobs:
     env:
       SHOULD_APPLE_SIGN: ${{ matrix.os.name == 'macos' && '1' || '0' }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      APPLE_ID: ${{ secrets.APPLE_ID }}
+      APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+      APPLE_IDENTITY: ${{ secrets.APPLE_IDENTITY }}
+
 
 
     steps:
