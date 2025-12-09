@@ -8,12 +8,22 @@ export interface ChangelogEntry {
 }
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.7.3',
+    date: '2025-12-09',
+    changes: [
+      {
+        category: 'New',
+        description: 'Automated builds for all operating systems',
+      },
+    ],
+  },
+  {
     version: '1.7.2',
     date: '2025-12-09',
     changes: [
       {
         category: 'Fixed',
-        description: 'Overhauled scraping infra to simplify new installations.',
+        description: 'Overhauled scraping infra to simplify new installations',
       },
     ],
   },
