@@ -6,7 +6,7 @@ export default defineConfig({
     sourcemap: true,
     rollupOptions: {
       // Marking 'electron' and native modules as external to prevent bundling issues
-      external: ['electron', 'better-sqlite3', 'jsdom', 'puppeteer'],
+      external: ['electron', 'better-sqlite3', 'jsdom'],
     },
   },
 })
