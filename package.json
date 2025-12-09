@@ -1,7 +1,7 @@
 {
   "name": "fast-classifieds",
   "productName": "Fast Classifieds",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "description": "An Electron app to quickly browse classified ads sites.",
   "main": ".vite/build/main.js",
   "scripts": {
@@ -86,7 +86,6 @@
     "esbuild-register": "^3.6.0",
     "jsdom": "^27.1.0",
     "openai": "^6.8.1",
-    "puppeteer": "^24.29.1",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.9.4",
     "update-electron-app": "^3.1.1",

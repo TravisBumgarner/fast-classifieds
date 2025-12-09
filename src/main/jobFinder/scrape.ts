@@ -1,38 +1,25 @@
-import { JSDOM } from 'jsdom'
-import { type Browser, launch } from 'puppeteer'
+// import { JSDOM } from 'jsdom' // No longer needed
+import { BrowserWindow } from 'electron'
 import type { INTERNAL_ERRORS } from '../../shared/errors'
 import type { ScrapedContentDTO } from '../../shared/types'
 import logger from '../logger'
 import store from '../store'
 import { hashContent } from '../utilities'
 
-function extractTextAndLinks(html: string, baseUrl = ''): ScrapedContentDTO {
-  const { window } = new JSDOM(html)
-  const { document } = window
-
-  // remove junk
+function extractTextAndLinksFromDOM(baseUrl = ''): Array<{ text: string; link: string | null }> {
+  // Remove junk
   document.querySelectorAll('script, style, noscript').forEach((el) => {
     el.remove()
   })
-
   const items = []
-
-  // walk entire tree
-  const walker = document.createTreeWalker(document.body, window.NodeFilter.SHOW_TEXT, null)
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null)
   while (walker.nextNode()) {
     const text = walker.currentNode.nodeValue?.trim()
     if (!text) continue
-
-    // find closest ancestor link if any
     const linkEl = walker.currentNode.parentElement?.closest('a')
     let link = linkEl?.getAttribute('href') || null
     if (link && baseUrl) {
-      // ignore invalid/broken hrefs like "http:", "https:", "#", "javascript:", etc.
-      if (
-        link === '#' ||
-        link.startsWith('javascript:') ||
-        /^https?:?$/.test(link) // "http:", "https:", "http", "https"
-      ) {
+      if (link === '#' || link.startsWith('javascript:') || /^https?:?$/.test(link)) {
         link = null
       } else {
         try {
@@ -42,10 +29,8 @@ function extractTextAndLinks(html: string, baseUrl = ''): ScrapedContentDTO {
         }
       }
     }
-
     items.push({ text, link })
   }
-
   // dedupe identical text/link combos
   const seen = new Set()
   const unique = []
@@ -56,7 +41,6 @@ function extractTextAndLinks(html: string, baseUrl = ''): ScrapedContentDTO {
       unique.push(i)
     }
   }
-
   return unique
 }
 
@@ -75,46 +59,61 @@ export const scrape = async ({
 
   const delay = store.get('scrapeDelay')
 
-  let browser: Browser
-  try {
-    browser = await launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    })
-  } catch (e) {
-    logger.error('Failed to launch browser for scraping', e)
-    return { ok: false, errorCode: 'BROWSER_LAUNCH_FAIL', message: String(e) }
-  }
-
-  const page = await browser.newPage()
+  const win = new BrowserWindow({
+    show: false,
+    webPreferences: {
+      offscreen: true,
+      nodeIntegration: false,
+      contextIsolation: true,
+    },
+  })
 
   try {
     try {
-      await page.goto(siteUrl, {
-        waitUntil: 'domcontentloaded',
-        timeout: 30_000,
-      })
+      await win.loadURL(siteUrl, { userAgent: 'Mozilla/5.0' })
     } catch (e) {
+      win.destroy()
       return { ok: false, errorCode: 'NAVIGATION_FAIL', message: String(e) }
     }
 
+    // Wait for selector
     try {
-      await page.waitForSelector(selector, { timeout: 10_000 })
+      await win.webContents.executeJavaScript(
+        `
+        new Promise(resolve => {
+          const check = () => {
+            if (document.querySelector('${selector}')) resolve(true)
+            else setTimeout(check, 100)
+          }
+          check()
+        })
+      `,
+        true,
+      )
     } catch (e) {
+      win.destroy()
       return { ok: false, errorCode: 'SELECTOR_NOT_FOUND', message: String(e) }
     }
 
     await new Promise((r) => setTimeout(r, delay))
 
-    const rawContent = await page.$eval(selector, (el) => el.outerHTML)
-    const scrapedContent = extractTextAndLinks(rawContent, siteUrl)
+    // Get the HTML and extract text/links in the renderer context
+    const scrapedContent = await win.webContents.executeJavaScript(
+      `(${extractTextAndLinksFromDOM.toString()})(${JSON.stringify(siteUrl)})`,
+      true,
+    )
+
+    win.destroy()
 
     return {
       ok: true,
       scrapedContent,
       hash: hashContent(JSON.stringify(scrapedContent)),
     }
-  } finally {
-    await browser.close().catch(() => {})
+  } catch (e) {
+    win.destroy()
+    logger.error('Scraping failed', e)
+    // fallback to NAVIGATION_FAIL for unknown errors
+    return { ok: false, errorCode: 'NAVIGATION_FAIL', message: String(e) }
   }
 }
