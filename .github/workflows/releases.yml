@@ -1,13 +1,10 @@
-name: Release app Windows/Linux
+name: Release app Windows/Linux/Mac
 on:
   workflow_dispatch:
 
 permissions:
   contents: write
 
-env:
-  SHOULD_APPLE_SIGN: ${{ matrix.os.name == 'macos' && '1' || '0' }}
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   build:
@@ -22,6 +19,11 @@ jobs:
 
     runs-on: ${{ matrix.os.image }}
     continue-on-error: true
+
+    env:
+      SHOULD_APPLE_SIGN: ${{ matrix.os.name == 'macos' && '1' || '0' }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
     steps:
       - name: Checkout repo
