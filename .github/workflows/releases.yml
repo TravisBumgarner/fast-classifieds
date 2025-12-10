@@ -1,4 +1,4 @@
-name: Release app Windows/Linux/Mac
+name: Release app Windows/Linux
 on:
   workflow_dispatch:
 
@@ -12,7 +12,6 @@ jobs:
       matrix:
         os:
           [
-            { name: 'macos', image: 'macos-latest' },
             { name: 'windows', image: 'windows-latest' },
             { name: 'linux', image: 'ubuntu-latest' }
           ]
