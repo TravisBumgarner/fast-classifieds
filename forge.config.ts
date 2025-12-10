@@ -13,6 +13,7 @@ const safeConfig = z.object({
   APPLE_PASSWORD: z.string().min(1),
   APPLE_TEAM_ID: z.string().min(1),
   GITHUB_TOKEN: z.string().min(1),
+  APPLE_IDENTITY: z.string().min(1),
 })
 
 const parsed = safeConfig.safeParse(process.env)
@@ -33,7 +34,9 @@ const config: ForgeConfig = {
     ignore: [],
     icon: './src/assets/icon',
     extraResource: ['./drizzle'],
-    osxSign: {}, // Docs say this should work for most cases as is.
+    osxSign: {
+      identity: parsed.data.APPLE_IDENTITY,
+    },
     osxNotarize: {
       appleId: parsed.data.APPLE_ID,
       appleIdPassword: parsed.data.APPLE_PASSWORD,
