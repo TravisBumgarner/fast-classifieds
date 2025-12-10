@@ -15,6 +15,13 @@ const safeConfig = z.object({
   GITHUB_TOKEN: z.string().min(1),
 })
 
+const parsed = safeConfig.safeParse(process.env)
+if (!parsed.success) {
+  throw new Error(
+    `Missing or invalid environment variables: ${parsed.error.issues.map((i) => i.path.join('.')).join(', ')}`,
+  )
+}
+
 const config: ForgeConfig = {
   packagerConfig: {
     // Must be the same as the name in package.json
@@ -26,18 +33,12 @@ const config: ForgeConfig = {
     ignore: [],
     icon: './src/assets/icon',
     extraResource: ['./drizzle'],
-    osxSign:
-      process.env.SHOULD_APPLE_SIGN === '1'
-        ? {
-            identity: process.env.APPLE_IDENTITY,
-            optionsForFile: () => {
-              return {
-                hardenedRuntime: true,
-                entitlements: 'entitlements.plist',
-              }
-            },
-          }
-        : undefined,
+    osxSign: {}, // Docs say this should work for most cases as is.
+    osxNotarize: {
+      appleId: parsed.data.APPLE_ID,
+      appleIdPassword: parsed.data.APPLE_PASSWORD,
+      teamId: parsed.data.APPLE_TEAM_ID,
+    },
   },
 
   rebuildConfig: {},
@@ -87,28 +88,6 @@ const config: ForgeConfig = {
     //   [FuseV1Options.OnlyLoadAppFromAsar]: true,
     // }),
   ],
-  hooks: {
-    postPackage: async (_forgeConfig, options: { outputPaths: string[]; platform: string; arch: string }) => {
-      if (options.platform === 'darwin' && process.env.SHOULD_APPLE_SIGN === '1') {
-        const { notarize } = await import('@electron/notarize')
-        const appPath = `${options.outputPaths[0]}/Fast Classifieds.app`
-
-        const safeConfigParsed = safeConfig.parse({
-          APPLE_ID: process.env.APPLE_ID,
-          APPLE_PASSWORD: process.env.APPLE_PASSWORD,
-          APPLE_TEAM_ID: process.env.APPLE_TEAM_ID,
-          GITHUB_TOKEN: process.env.GITHUB_TOKEN,
-        })
-
-        await notarize({
-          appPath,
-          appleId: safeConfigParsed.APPLE_ID,
-          appleIdPassword: safeConfigParsed.APPLE_PASSWORD,
-          teamId: safeConfigParsed.APPLE_TEAM_ID,
-        })
-      }
-    },
-  },
   publishers: [
     {
       name: '@electron-forge/publisher-github',
