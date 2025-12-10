@@ -19,4 +19,11 @@ Stop wasting hours manually browsing company career pages. Fast Classifieds uses
 
 ## Builds
 
-Mac builds are done from my own computer. Windows and Linux are handled by GitHub Actions. 
+I give up the fight for the moment trying to figure out how to get Github Actions to build/sign/notarize the Mac app. 
+Therefore, mac builds are done from my own computer. Windows and Linux are handled by GitHub Actions. 
+To do this, 
+
+1. Bump the version number in package.json and changelog.ts
+1. Deploy via Github actions and build locally via `npm run publish-mac`
+1. This will upload all the files into a draft release on Github.
+1. Publish release. Auto updater will trigger for Mac and Windows. (And maybe Linux but the app has not been confirmed working for Linux yet.)
