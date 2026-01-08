@@ -21,20 +21,20 @@ function toMessage(args: unknown[]): string {
     .join(' ')
 }
 
-function sendToSentry(level: 'info' | 'warning' | 'error', args: unknown[]) {
-  if (!isBundled) return
+// function sendToSentry(level: 'info' | 'warning' | 'error', args: unknown[]) {
+//   if (!isBundled) return
 
-  if (level === 'error' && args[0] instanceof Error) {
-    Sentry.captureException(args[0] as Error)
+//   if (level === 'error' && args[0] instanceof Error) {
+//     Sentry.captureException(args[0] as Error)
 
-    if (args.length > 1) {
-      Sentry.captureMessage(toMessage(args.slice(1)), 'info')
-    }
-    return
-  }
+//     if (args.length > 1) {
+//       Sentry.captureMessage(toMessage(args.slice(1)), 'info')
+//     }
+//     return
+//   }
 
-  Sentry.captureMessage(toMessage(args), level)
-}
+//   Sentry.captureMessage(toMessage(args), level)
+// }
 
 function write(level: 'info' | 'warn' | 'error', args: unknown[]) {
   // Always log inside renderer via electron-log
@@ -57,11 +57,11 @@ function write(level: 'info' | 'warn' | 'error', args: unknown[]) {
     fn(...args)
   }
 
-  // Send to Sentry only in production
-  if (isBundled) {
-    const sentryLevel = level === 'warn' ? 'warning' : level
-    sendToSentry(sentryLevel as 'info' | 'warning' | 'error', args)
-  }
+  // // Send to Sentry only in production
+  // if (isBundled) {
+  //   const sentryLevel = level === 'warn' ? 'warning' : level
+  //   sendToSentry(sentryLevel as 'info' | 'warning' | 'error', args)
+  // }
 }
 
 const logger = {

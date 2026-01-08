@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/electron/main'
+// import * as Sentry from '@sentry/electron/main'
 import electronLog from 'electron-log/main'
 
 const isProd = !process.defaultApp
@@ -20,17 +20,17 @@ function toMessage(args: unknown[]): string {
     .join(' ')
 }
 
-function sendToSentry(level: 'info' | 'warning' | 'error', args: unknown[]) {
-  if (!isProd) return
-  if (level === 'error' && args[0] instanceof Error) {
-    Sentry.captureException(args[0] as Error)
-    if (args.length > 1) {
-      Sentry.captureMessage(toMessage(args.slice(1)), 'info')
-    }
-  } else {
-    Sentry.captureMessage(toMessage(args), level)
-  }
-}
+// function sendToSentry(level: 'info' | 'warning' | 'error', args: unknown[]) {
+//   if (!isProd) return
+//   if (level === 'error' && args[0] instanceof Error) {
+//     Sentry.captureException(args[0] as Error)
+//     if (args.length > 1) {
+//       Sentry.captureMessage(toMessage(args.slice(1)), 'info')
+//     }
+//   } else {
+//     Sentry.captureMessage(toMessage(args), level)
+//   }
+// }
 
 function write(level: 'info' | 'warn' | 'error', args: unknown[]) {
   switch (level) {
@@ -45,14 +45,15 @@ function write(level: 'info' | 'warn' | 'error', args: unknown[]) {
       break
   }
 
-  if (!isProd) {
-    // biome-ignore lint/suspicious/noConsole: it's fine.
-    const consoleFn = level === 'warn' ? console.warn : level === 'error' ? console.error : console.log
-    consoleFn(...args)
-  } else {
-    const sentryLevel = level === 'warn' ? 'warning' : level
-    sendToSentry(sentryLevel as 'info' | 'warning' | 'error', args)
-  }
+  // biome-ignore lint/suspicious/noConsole: it's fine.
+  const consoleFn = level === 'warn' ? console.warn : level === 'error' ? console.error : console.log
+  consoleFn(...args)
+  // if (!isProd) {
+  // } else {
+  //   const sentryLevel = level === 'warn' ? 'warning' : level
+  //   //     sendToSentry(sentryLevel as 'info' | 'warning' | 'error', args)
+  //   consoleFn(...args)
+  // }
 }
 
 const logger = {

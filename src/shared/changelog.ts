@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 }
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.7.4',
+    date: '2026-01-08',
+    changes: [
+      {
+        category: 'Fixed',
+        description: 'Disabled excessive logging to Sentry',
+      },
+    ],
+  },
+  {
     version: '1.7.3',
     date: '2025-12-09',
     changes: [
