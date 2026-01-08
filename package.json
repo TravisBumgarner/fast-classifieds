@@ -53,7 +53,7 @@
     "cross-env": "^10.1.0",
     "dotenv": "^17.2.3",
     "dotenv-cli": "^11.0.0",
-    "drizzle-kit": "latest",
+    "drizzle-kit": "^0.18.1",
     "drizzle-orm": "latest",
     "electron": "^38.2.2",
     "eslint": "^8.57.1",

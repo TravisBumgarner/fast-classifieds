@@ -102,19 +102,6 @@ const AIRecommendationStatus = ({
       )}
     </Box>
   )
-
-  // // if (status === AI_RECOMMENDATION_STATUS.NOT_RECOMMENDED) {
-  // //   return (
-  // //     <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-  // //       <Chip label="No match" color="default" size="small" />
-
-  // //     </Box>
-  // //   )
-  // // }
-
-  // if (status === AI_RECOMMENDATION_STATUS.HUMAN_OVERRIDE) {
-  //   return <Chip sx={{ width: '100%' }} label="User Match" color="info" size="small" />
-  // }
 }
 
 const JobPostings = () => {
@@ -301,22 +288,20 @@ const JobPostings = () => {
     }
   }
 
-  const getJobPostingStatusColor = (status: JobPostingStatus): 'primary' | 'success' | 'error' | 'info' => {
+  const getJobPostingStatusColor = (status: JobPostingStatus) => {
     switch (status) {
       case 'new':
-        return 'primary'
+        return '#eda686'
       case 'applied':
-        return 'info'
+        return '#90caf9'
       case 'interview':
-        return 'success'
+        return '#81c784'
       case 'offer':
-        return 'success'
+        return '#81c784'
       case 'skipped':
-        return 'info'
+        return '#90caf9'
       case 'rejected':
-        return 'error'
-      default:
-        return 'primary'
+        return '#f44336'
     }
   }
 
@@ -506,9 +491,8 @@ const JobPostings = () => {
                             renderValue={(value) => (
                               <Chip
                                 label={value.charAt(0).toUpperCase() + value.slice(1)}
-                                color={getJobPostingStatusColor(value)}
                                 size="small"
-                                sx={{ width: '100%' }}
+                                sx={{ width: '100%', backgroundColor: getJobPostingStatusColor(value) }}
                               />
                             )}
                           >
