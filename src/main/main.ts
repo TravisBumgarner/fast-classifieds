@@ -35,10 +35,6 @@ if (started) {
 }
 
 const createWindow = () => {
-  const displays = screen.getAllDisplays()
-
-  const externalDisplay = displays.length > 1 ? displays[1] : null
-
   const windowOptions: BrowserWindowConstructorOptions = {
     width: app.isPackaged ? 800 : 1200,
     height: 800,
@@ -49,11 +45,6 @@ const createWindow = () => {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     },
-  }
-
-  if (externalDisplay && !app.isPackaged) {
-    windowOptions.x = externalDisplay.bounds.x + 50
-    windowOptions.y = externalDisplay.bounds.y + 50
   }
 
   const mainWindow = new BrowserWindow(windowOptions)
