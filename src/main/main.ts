@@ -1,5 +1,5 @@
 import path from 'node:path'
-import * as Sentry from '@sentry/electron/main'
+// import * as Sentry from '@sentry/electron/main'
 import { app, BrowserWindow, type BrowserWindowConstructorOptions, screen } from 'electron'
 
 import started from 'electron-squirrel-startup'
@@ -15,9 +15,10 @@ if (require('electron-squirrel-startup') === true) app.quit()
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string
 declare const MAIN_WINDOW_VITE_NAME: string
 
-Sentry.init({
-  dsn: 'https://aa9b99c0da19f5f16cde7295bcae0fa4@o196886.ingest.us.sentry.io/4510360742133760',
-})
+// Disabling because of excessive logging.
+// Sentry.init({
+//   dsn: 'https://aa9b99c0da19f5f16cde7295bcae0fa4@o196886.ingest.us.sentry.io/4510360742133760',
+// })
 
 updateElectronApp({
   logger: {
