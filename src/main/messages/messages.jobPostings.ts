@@ -42,23 +42,23 @@ typedIpcMain.handle(CHANNEL_INVOKES.JOB_POSTINGS.GET_ALL, async () => {
 
 typedIpcMain.handle(CHANNEL_INVOKES.JOB_POSTINGS.GET_SUSPECTED_DUPLICATES, async () => {
   try {
-    const groups = await queries.getSuspectedDuplicateGroups()
-    return { groups }
+    const suspectedDuplicates = await queries.getSuspectedDuplicatesWithOriginals()
+    return suspectedDuplicates
   } catch (error) {
     logger.error('Error getting suspected duplicate groups:', error)
-    return { groups: [] }
+    return []
   }
 })
 
-typedIpcMain.handle(CHANNEL_INVOKES.JOB_POSTINGS.GET_DUPLICATE_GROUP, async (_event, params) => {
-  try {
-    const postings = await queries.getJobPostings({ duplicationDetectionId: params.duplicationDetectionId })
-    return { postings }
-  } catch (error) {
-    logger.error('Error getting duplicate group:', error)
-    return { postings: [] }
-  }
-})
+// typedIpcMain.handle(CHANNEL_INVOKES.JOB_POSTINGS.GET_DUPLICATE_GROUP, async (_event, params) => {
+//   try {
+//     const postings = await queries.getJobPostings({ duplicationDetectionId: params.duplicationDetectionId })
+//     return { postings }
+//   } catch (error) {
+//     logger.error('Error getting duplicate group:', error)
+//     return { postings: [] }
+//   }
+// })
 
 typedIpcMain.handle(CHANNEL_INVOKES.JOB_POSTINGS.GET_BY_SITE_ID, async (_event, params) => {
   try {

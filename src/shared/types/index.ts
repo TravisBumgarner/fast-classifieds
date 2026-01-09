@@ -100,7 +100,6 @@ export type NewJobPostingDTO = {
   scrapeRunId: string
   datePosted?: Date | null
   aiRecommendationStatus: AIRecommendationStatus
-  duplicationDetectionId: string
   duplicateStatus: JobPostingDuplicateStatus
 }
 export type JobPostingDTO = { siteTitle: string } & NewJobPostingDTO & TimestampsAndID

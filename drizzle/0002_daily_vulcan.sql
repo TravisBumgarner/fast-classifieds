@@ -1,0 +1,1 @@
+ALTER TABLE `job_postings` DROP COLUMN `duplication_detection_id`;

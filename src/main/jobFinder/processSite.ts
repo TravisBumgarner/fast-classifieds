@@ -5,6 +5,7 @@ import queries from '../database/queries'
 import log from '../logger'
 import { hashContent } from '../utilities'
 import { buildNewJobPostingDTO } from './buildNewJobPostingDTO'
+import { checkDuplicate, generateDuplicateHashMapBySite } from './duplicateDetection'
 import { processText } from './processText'
 import { scrape } from './scrape'
 
@@ -80,9 +81,7 @@ async function processSite({
     })
     log.info(aiJobs)
 
-    const existingDuplicationDetectionIds = new Set(
-      (await queries.getJobPostings({})).map((j) => j.duplicationDetectionId),
-    )
+    const duplicateHashMapBySite = await generateDuplicateHashMapBySite()
 
     const jobs = aiJobs.map((job) =>
       buildNewJobPostingDTO({
@@ -90,7 +89,15 @@ async function processSite({
         siteId,
         scrapeRunId,
         siteUrl,
-        existingDuplicationDetectionIds,
+        duplicateStatus: checkDuplicate(
+          {
+            title: job.title,
+            jobUrl: job.jobUrl,
+            siteUrl,
+            datePosted: job.datePosted ? new Date(job.datePosted) : null,
+          },
+          duplicateHashMapBySite,
+        ),
       }),
     )
 

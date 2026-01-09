@@ -1,8 +1,8 @@
 import { SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT } from '../../shared/consts'
 import { errorCodeToMessage } from '../../shared/errors'
 import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
-import queries from '../database/queries'
 import { buildNewJobPostingDTO } from '../jobFinder/buildNewJobPostingDTO'
+import { checkDuplicate, generateDuplicateHashMapBySite } from '../jobFinder/duplicateDetection'
 import { processText } from '../jobFinder/processText'
 import { scrape } from '../jobFinder/scrape'
 import logger from '../logger'
@@ -51,9 +51,7 @@ typedIpcMain.handle(CHANNEL_INVOKES.DEBUG.AI, async (_event, params) => {
     })
     logger.info('Debug AI result:', result.aiJobs)
 
-    const existingDuplicationDetectionIds = new Set(
-      (await queries.getJobPostings({})).map((j) => j.duplicationDetectionId),
-    )
+    const duplicateHashMapBySite = await generateDuplicateHashMapBySite()
 
     const jobs = result.aiJobs.map((job) =>
       buildNewJobPostingDTO({
@@ -61,7 +59,15 @@ typedIpcMain.handle(CHANNEL_INVOKES.DEBUG.AI, async (_event, params) => {
         siteId: params.siteId,
         scrapeRunId: 'debug-run',
         siteUrl: params.siteUrl,
-        existingDuplicationDetectionIds,
+        duplicateStatus: checkDuplicate(
+          {
+            title: job.title,
+            jobUrl: job.jobUrl,
+            siteUrl: params.siteUrl,
+            datePosted: job.datePosted ? new Date(job.datePosted) : null,
+          },
+          duplicateHashMapBySite,
+        ),
       }),
     )
 

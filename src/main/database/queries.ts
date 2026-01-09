@@ -247,11 +247,9 @@ async function updateScrapeRun(
 async function getJobPostings({
   siteId,
   duplicateStatusArray,
-  duplicationDetectionId,
 }: {
   siteId?: string
   duplicateStatusArray?: JobPostingDuplicateStatus[]
-  duplicationDetectionId?: string
 }): Promise<JobPostingDTO[]> {
   const rows = await db
     .select({
@@ -269,7 +267,6 @@ async function getJobPostings({
       siteTitle: sites.siteTitle,
       aiRecommendationStatus: jobPostings.aiRecommendationStatus,
       jobUrl: jobPostings.jobUrl,
-      duplicationDetectionId: jobPostings.duplicationDetectionId,
       duplicateStatus: jobPostings.duplicateStatus,
       datePosted: jobPostings.datePosted,
     })
@@ -279,7 +276,6 @@ async function getJobPostings({
       and(
         siteId ? eq(jobPostings.siteId, siteId) : undefined,
         duplicateStatusArray ? inArray(jobPostings.duplicateStatus, duplicateStatusArray) : undefined,
-        duplicationDetectionId ? eq(jobPostings.duplicationDetectionId, duplicationDetectionId) : undefined,
       ),
     )
     .orderBy(desc(jobPostings.createdAt))
@@ -287,68 +283,6 @@ async function getJobPostings({
   return rows.map((r) => ({
     ...r,
     siteTitle: r.siteTitle ?? 'Unknown',
-  }))
-}
-
-async function getSuspectedDuplicateGroups(): Promise<
-  Array<{
-    duplicationDetectionId: string
-    total: number
-    titleSample: string
-    siteTitleSample: string
-    latestCreatedAt: Date
-  }>
-> {
-  // Find IDs that have at least one suspected duplicate
-  const suspectedRows = await db
-    .select({
-      duplicationDetectionId: jobPostings.duplicationDetectionId,
-      createdAt: jobPostings.createdAt,
-    })
-    .from(jobPostings)
-    .where(eq(jobPostings.duplicateStatus, 'suspected_duplicate'))
-
-  const ids = Array.from(new Set(suspectedRows.map((r) => r.duplicationDetectionId)))
-  if (ids.length === 0) return []
-
-  const allRows = await db
-    .select({
-      duplicationDetectionId: jobPostings.duplicationDetectionId,
-      createdAt: jobPostings.createdAt,
-      title: jobPostings.title,
-      siteTitle: sites.siteTitle,
-    })
-    .from(jobPostings)
-    .leftJoin(sites, eq(jobPostings.siteId, sites.id))
-    .where(inArray(jobPostings.duplicationDetectionId, ids))
-
-  const grouped = new Map<
-    string,
-    { total: number; latestCreatedAt: Date; titleSample: string; siteTitleSample: string }
-  >()
-  for (const row of allRows) {
-    const existing = grouped.get(row.duplicationDetectionId)
-    const createdAt = row.createdAt
-    if (!existing) {
-      grouped.set(row.duplicationDetectionId, {
-        total: 1,
-        latestCreatedAt: createdAt,
-        titleSample: row.title,
-        siteTitleSample: row.siteTitle ?? 'Unknown',
-      })
-    } else {
-      existing.total += 1
-      if (createdAt > existing.latestCreatedAt) {
-        existing.latestCreatedAt = createdAt
-        existing.titleSample = row.title
-        existing.siteTitleSample = row.siteTitle ?? 'Unknown'
-      }
-    }
-  }
-
-  return Array.from(grouped.entries()).map(([duplicationDetectionId, meta]) => ({
-    duplicationDetectionId,
-    ...meta,
   }))
 }
 
@@ -366,6 +300,98 @@ async function skipNotRecommendedPostings() {
     .set({ status: 'skipped', updatedAt: new Date() })
     .where(eq(jobPostings.aiRecommendationStatus, AI_RECOMMENDATION_STATUS.NOT_RECOMMENDED))
     .returning()
+}
+
+async function getSuspectedDuplicatesWithOriginals(): Promise<
+  Array<{ unique: JobPostingDTO; suspectedDuplicate: JobPostingDTO }>
+> {
+  // Get all job postings that have a suspectedDuplicateOfJobPostingId
+  const suspectedDuplicates = await db
+    .select({
+      id: jobPostings.id,
+      title: jobPostings.title,
+      siteUrl: jobPostings.siteUrl,
+      jobUrl: jobPostings.jobUrl,
+      siteId: jobPostings.siteId,
+      description: jobPostings.description,
+      recommendationExplanation: jobPostings.recommendationExplanation,
+      location: jobPostings.location,
+      status: jobPostings.status,
+      createdAt: jobPostings.createdAt,
+      updatedAt: jobPostings.updatedAt,
+      scrapeRunId: jobPostings.scrapeRunId,
+      aiRecommendationStatus: jobPostings.aiRecommendationStatus,
+      duplicateStatus: jobPostings.duplicateStatus,
+      datePosted: jobPostings.datePosted,
+      suspectedDuplicateOfJobPostingId: jobPostings.suspectedDuplicateOfJobPostingId,
+      siteTitle: sites.siteTitle,
+    })
+    .from(jobPostings)
+    .leftJoin(sites, eq(jobPostings.siteId, sites.id))
+    .where(eq(jobPostings.duplicateStatus, 'suspected_duplicate'))
+
+  // Get the original job postings
+  const originalIds = suspectedDuplicates
+    .map((d) => d.suspectedDuplicateOfJobPostingId)
+    .filter((id) => id !== null) as string[]
+
+  if (originalIds.length === 0) {
+    return []
+  }
+
+  const originalJobPostings = await db
+    .select({
+      id: jobPostings.id,
+      title: jobPostings.title,
+      siteUrl: jobPostings.siteUrl,
+      jobUrl: jobPostings.jobUrl,
+      siteId: jobPostings.siteId,
+      description: jobPostings.description,
+      recommendationExplanation: jobPostings.recommendationExplanation,
+      location: jobPostings.location,
+      status: jobPostings.status,
+      createdAt: jobPostings.createdAt,
+      updatedAt: jobPostings.updatedAt,
+      scrapeRunId: jobPostings.scrapeRunId,
+      aiRecommendationStatus: jobPostings.aiRecommendationStatus,
+      duplicateStatus: jobPostings.duplicateStatus,
+      datePosted: jobPostings.datePosted,
+      siteTitle: sites.siteTitle,
+    })
+    .from(jobPostings)
+    .leftJoin(sites, eq(jobPostings.siteId, sites.id))
+    .where(inArray(jobPostings.id, originalIds))
+
+  // Create a map for quick lookup
+  const originalJobPostingsMap = new Map(
+    originalJobPostings.map((job) => [
+      job.id,
+      {
+        ...job,
+        siteTitle: job.siteTitle ?? 'Unknown',
+      } as JobPostingDTO,
+    ]),
+  )
+
+  // Match suspected duplicates with their originals
+  const result: Array<{ unique: JobPostingDTO; suspectedDuplicate: JobPostingDTO }> = []
+
+  for (const suspectedDuplicate of suspectedDuplicates) {
+    if (suspectedDuplicate.suspectedDuplicateOfJobPostingId) {
+      const unique = originalJobPostingsMap.get(suspectedDuplicate.suspectedDuplicateOfJobPostingId)
+      if (unique) {
+        result.push({
+          unique,
+          suspectedDuplicate: {
+            ...suspectedDuplicate,
+            siteTitle: suspectedDuplicate.siteTitle ?? 'Unknown',
+          } as JobPostingDTO,
+        })
+      }
+    }
+  }
+
+  return result
 }
 
 async function nukeDatabase() {
@@ -406,7 +432,7 @@ export default {
   getAllScrapeRuns,
   getScrapeTasksByRunId,
   getJobPostings,
-  getSuspectedDuplicateGroups,
+  getSuspectedDuplicatesWithOriginals,
   nukeDatabase,
   skipNotRecommendedPostings,
 }

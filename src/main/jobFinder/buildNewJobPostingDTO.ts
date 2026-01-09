@@ -2,9 +2,9 @@ import {
   type AIRecommendationStatus,
   JOB_POSTING_DUPLICATE_STATUS,
   JOB_POSTING_STATUS,
+  type JobPostingDuplicateStatus,
   type NewJobPostingDTO,
 } from '../../shared/types'
-import { generateDuplicationDetectionId } from './duplicateDetection'
 
 export const buildNewJobPostingDTO = (job: {
   title: string
@@ -16,22 +16,13 @@ export const buildNewJobPostingDTO = (job: {
   siteId: string
   scrapeRunId: string
   siteUrl: string
-  existingDuplicationDetectionIds: Set<string>
   datePosted?: string | null
+  duplicateStatus: JobPostingDuplicateStatus | undefined
 }): NewJobPostingDTO => {
-  const duplicationDetectionId = generateDuplicationDetectionId({
-    siteUrl: job.siteUrl,
-    jobUrl: job.jobUrl,
-    jobTitle: job.title,
-  })
-
   return {
     ...job,
     status: JOB_POSTING_STATUS.NEW,
-    duplicationDetectionId,
     datePosted: job.datePosted ? new Date(job.datePosted) : null,
-    duplicateStatus: job.existingDuplicationDetectionIds.has(duplicationDetectionId)
-      ? JOB_POSTING_DUPLICATE_STATUS.SUSPECTED_DUPLICATE
-      : JOB_POSTING_DUPLICATE_STATUS.UNIQUE,
+    duplicateStatus: job.duplicateStatus || JOB_POSTING_DUPLICATE_STATUS.UNIQUE,
   }
 }
