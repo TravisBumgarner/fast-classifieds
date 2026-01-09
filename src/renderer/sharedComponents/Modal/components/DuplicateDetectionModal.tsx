@@ -134,11 +134,11 @@ const ComparisonTable = ({
                     field.uniqueValue
                   )}
                 </TableCell>
-                <TableCell 
-                  sx={{ 
+                <TableCell
+                  sx={{
                     ...(field.isLongText && { maxWidth: '300px' }),
                     borderLeft: '3px solid',
-                    borderColor: 'warning.main'
+                    borderColor: 'warning.main',
                   }}
                 >
                   {typeof field.suspectedValue === 'string' ? (
@@ -165,7 +165,7 @@ const ComparisonTable = ({
           </TableBody>
         </Table>
       </TableContainer>
-      
+
       <Stack
         direction="row"
         spacing={SPACING.SMALL.PX}
@@ -179,11 +179,7 @@ const ComparisonTable = ({
         >
           {updating ? 'Updating...' : 'Confirm Duplicate'}
         </Button>
-        <Button
-          variant="outlined"
-          disabled={updating}
-          onClick={() => onUpdateStatus('unique')}
-        >
+        <Button variant="outlined" disabled={updating} onClick={() => onUpdateStatus('unique')}>
           {updating ? 'Updating...' : 'Not a Duplicate'}
         </Button>
       </Stack>
