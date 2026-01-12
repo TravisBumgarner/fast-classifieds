@@ -1,25 +1,25 @@
 // rendererLogger.ts
 
-import * as Sentry from '@sentry/electron/renderer'
+// import * as Sentry from '@sentry/electron/renderer'
 import log from 'electron-log/renderer'
 
 const isBundled = import.meta.env.PROD
 
-function toMessage(args: unknown[]): string {
-  return args
-    .map((a) => {
-      if (a instanceof Error) return a.stack || a.message
-      if (typeof a === 'object' && a !== null) {
-        try {
-          return JSON.stringify(a)
-        } catch {
-          return String(a)
-        }
-      }
-      return String(a)
-    })
-    .join(' ')
-}
+// function toMessage(args: unknown[]): string {
+//   return args
+//     .map((a) => {
+//       if (a instanceof Error) return a.stack || a.message
+//       if (typeof a === 'object' && a !== null) {
+//         try {
+//           return JSON.stringify(a)
+//         } catch {
+//           return String(a)
+//         }
+//       }
+//       return String(a)
+//     })
+//     .join(' ')
+// }
 
 // function sendToSentry(level: 'info' | 'warning' | 'error', args: unknown[]) {
 //   if (!isBundled) return

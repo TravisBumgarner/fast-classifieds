@@ -8,6 +8,20 @@ export interface ChangelogEntry {
 }
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.8.0',
+    date: '2026-01-12',
+    changes: [
+      {
+        category: 'Improved',
+        description: 'Duplicate detection has much higher detection abilities.',
+      },
+      {
+        category: 'New',
+        description: 'Bulk site imports now include id as selector if included in the URL',
+      },
+    ],
+  },
+  {
     version: '1.7.4',
     date: '2026-01-08',
     changes: [

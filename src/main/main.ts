@@ -1,6 +1,6 @@
 import path from 'node:path'
 // import * as Sentry from '@sentry/electron/main'
-import { app, BrowserWindow, type BrowserWindowConstructorOptions, screen } from 'electron'
+import { app, BrowserWindow, type BrowserWindowConstructorOptions } from 'electron'
 
 import started from 'electron-squirrel-startup'
 import { updateElectronApp } from 'update-electron-app'
