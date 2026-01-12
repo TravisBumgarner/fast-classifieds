@@ -273,15 +273,10 @@ export type Invokes = {
   }
   [CHANNEL_INVOKES.JOB_POSTINGS.GET_SUSPECTED_DUPLICATES]: {
     args: undefined
-    result: {
-      groups: Array<{
-        duplicationDetectionId: string
-        total: number
-        titleSample: string
-        siteTitleSample: string
-        latestCreatedAt: Date
-      }>
-    }
+    result: Array<{
+      unique: JobPostingDTO
+      suspectedDuplicate: JobPostingDTO
+    }>
   }
   [CHANNEL_INVOKES.JOB_POSTINGS.GET_DUPLICATE_GROUP]: {
     args: { duplicationDetectionId: string }

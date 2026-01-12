@@ -1,10 +1,17 @@
 import { SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT } from '../../shared/consts'
 import { errorCodeToMessage } from '../../shared/errors'
-import { SCRAPER_TASK_RESULT, SCRAPER_TASK_STATUS, type ScraperTaskProgress } from '../../shared/types'
+import {
+  JOB_POSTING_DUPLICATE_STATUS,
+  JOB_POSTING_STATUS,
+  SCRAPER_TASK_RESULT,
+  SCRAPER_TASK_STATUS,
+  type ScraperTaskProgress,
+} from '../../shared/types'
 import queries from '../database/queries'
 import log from '../logger'
 import { hashContent } from '../utilities'
 import { buildNewJobPostingDTO } from './buildNewJobPostingDTO'
+import { checkDuplicate, generateDuplicateHashMapBySite } from './duplicateDetection'
 import { processText } from './processText'
 import { scrape } from './scrape'
 
@@ -80,19 +87,27 @@ async function processSite({
     })
     log.info(aiJobs)
 
-    const existingDuplicationDetectionIds = new Set(
-      (await queries.getJobPostings({})).map((j) => j.duplicationDetectionId),
-    )
+    const duplicateHashMapBySite = await generateDuplicateHashMapBySite()
 
-    const jobs = aiJobs.map((job) =>
-      buildNewJobPostingDTO({
-        ...job,
-        siteId,
-        scrapeRunId,
-        siteUrl,
-        existingDuplicationDetectionIds,
-      }),
-    )
+    const jobs = aiJobs
+      .map((job) =>
+        buildNewJobPostingDTO({
+          ...job,
+          siteId,
+          scrapeRunId,
+          siteUrl,
+          duplicateStatus: checkDuplicate(
+            {
+              title: job.title,
+              jobUrl: job.jobUrl,
+              siteUrl,
+              datePosted: job.datePosted ? new Date(job.datePosted) : null,
+            },
+            duplicateHashMapBySite,
+          ),
+        }),
+      )
+      .filter(({ duplicateStatus }) => duplicateStatus !== JOB_POSTING_DUPLICATE_STATUS.CONFIRMED_DUPLICATE)
 
     await queries.insertApiUsage({
       response: rawResponse,

@@ -1,30 +1,95 @@
+import { JOB_POSTING_DUPLICATE_STATUS, type JobPostingDuplicateStatus } from '../../shared/types'
+import queries from '../database/queries'
 import { hashContent } from '../utilities'
 
+/* ---------------- utils ---------------- */
+
+const normalize = (v: string) => v.trim().toLowerCase()
+
+const hashJobUrl = (jobUrl: string) => hashContent(normalize(jobUrl))
+
+const hashTitle = (title: string) => hashContent(normalize(title))
+
+const hashTitleDate = (title: string, datePosted: Date) =>
+  hashContent(`${normalize(title)}_${datePosted.toISOString()}`)
+
+/* ---------------- build map ---------------- */
+
 /**
- * Currently, a scrape run is hashed, via siteContentHash, promptHash, and jobToJSONPromptHash.
- * If a user alter's a prompt, all the jobs previous discovered will be rediscovered. This is
- * the beginnings of preventing that from happening.
+ * Detect duplicates in job postings.
  */
+export const generateDuplicateHashMapBySite = async () => {
+  const existingJobPostings = await queries.getJobPostings({})
+  const hashMapBySite: Record<string, Record<string, JobPostingDuplicateStatus>> = {}
 
-export const generateDuplicationDetectionId = ({
-  siteUrl,
-  jobUrl,
-  jobTitle,
-}: {
-  siteUrl: string
-  jobUrl: string
-  jobTitle: string
-}) => {
-  /**
-   * Hypothesis - If a site is small, there will be unique names even if there are not URLs to each job postings.
-   *    If a site is large, there will be URLs per job posting.
-   *    This algorithm could definitely be improved. For example, if a site posts a "Software Engineer" job today,
-   *    and then again in 2 months, it'll be marked as a suspected duplicate.
-   */
+  for (const job of existingJobPostings) {
+    const siteKey = normalize(job.siteUrl)
+    hashMapBySite[siteKey] ??= {}
 
-  if (siteUrl !== jobUrl) {
-    return hashContent(jobUrl)
+    const siteMap = hashMapBySite[siteKey]
+
+    // 1. Unique job URL → confirmed duplicate
+    if (job.jobUrl && normalize(job.jobUrl) !== siteKey) {
+      siteMap[hashJobUrl(job.jobUrl)] = JOB_POSTING_DUPLICATE_STATUS.CONFIRMED_DUPLICATE
+      continue
+    }
+
+    // 2. Title + datePosted → confirmed duplicate
+    if (job.datePosted) {
+      const hash = hashTitleDate(job.title, job.datePosted)
+      siteMap[hash] = JOB_POSTING_DUPLICATE_STATUS.CONFIRMED_DUPLICATE
+      continue
+    }
+
+    // 3. Title only → suspected duplicate (do not override confirmed)
+    const titleHash = hashTitle(job.title)
+    siteMap[titleHash] ??= JOB_POSTING_DUPLICATE_STATUS.SUSPECTED_DUPLICATE
   }
 
-  return hashContent(jobTitle)
+  return hashMapBySite
+}
+
+/* ---------------- lookup ---------------- */
+
+const getHash = ({
+  title,
+  jobUrl,
+  siteUrl,
+  datePosted,
+}: {
+  title: string
+  jobUrl: string
+  siteUrl: string
+  datePosted: Date | null
+}): string => {
+  const siteKey = normalize(siteUrl)
+
+  if (jobUrl && normalize(jobUrl) !== siteKey) {
+    return hashJobUrl(jobUrl)
+  }
+
+  if (datePosted) {
+    return hashTitleDate(title, datePosted)
+  }
+
+  return hashTitle(title)
+}
+
+/**
+ * Check if a job is a duplicate against the provided hash maps
+ */
+export const checkDuplicate = (
+  job: {
+    title: string
+    jobUrl: string
+    siteUrl: string
+    datePosted: Date | null
+  },
+  hashMaps: Record<string, Record<string, JobPostingDuplicateStatus>>,
+): JobPostingDuplicateStatus => {
+  const siteMap = hashMaps[normalize(job.siteUrl)]
+  if (!siteMap) return JOB_POSTING_DUPLICATE_STATUS.UNIQUE
+
+  const hash = getHash(job)
+  return siteMap[hash] ?? JOB_POSTING_DUPLICATE_STATUS.UNIQUE
 }

@@ -98,56 +98,69 @@ export async function startScraping(siteIds: string[]) {
 
       for (let i = 0; i < sites.length; i++) {
         const site = sites[i]
-        const prompt = await queries.getPromptById(site.promptId)
 
-        // Update progress
-        const currentProgress = activeRuns.get(scrapeRunId)
-        if (currentProgress) {
-          currentProgress.sites[i].status = SCRAPER_TASK_STATUS.SCRAPING
-          activeRuns.set(scrapeRunId, currentProgress)
-        }
+        try {
+          const prompt = await queries.getPromptById(site.promptId)
 
-        // Send progress update to renderer
-        log.info('[Scraper] Sending progress update for site', i, 'runId:', scrapeRunId)
-        typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, undefined)
+          // Update progress
+          const currentProgress = activeRuns.get(scrapeRunId)
+          if (currentProgress) {
+            currentProgress.sites[i].status = SCRAPER_TASK_STATUS.SCRAPING
+            activeRuns.set(scrapeRunId, currentProgress)
+          }
 
-        const result = await processSite({
-          siteId: site.id,
-          siteUrl: site.siteUrl,
-          prompt: prompt.content,
-          selector: site.selector,
-          scrapeRunId,
-          apiKey,
-          model,
-          delay,
-          onProgress: (status) => {
-            const currentProgress = activeRuns.get(scrapeRunId)
-            if (currentProgress) {
-              currentProgress.sites[i].status = status
-              activeRuns.set(scrapeRunId, currentProgress)
-              typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, undefined)
-            }
-          },
-        })
+          // Send progress update to renderer
+          typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, undefined)
 
-        // Update progress with results
-        const updatedProgress = activeRuns.get(scrapeRunId)
-        if (updatedProgress) {
-          updatedProgress.sites[i].status = result.status
-          updatedProgress.sites[i].newJobsFound = result.newJobsFound
-          updatedProgress.sites[i].errorMessage = result.errorMessage
-          updatedProgress.completedSites++
-          activeRuns.set(scrapeRunId, updatedProgress)
-        }
+          const result = await processSite({
+            siteId: site.id,
+            siteUrl: site.siteUrl,
+            prompt: prompt.content,
+            selector: site.selector,
+            scrapeRunId,
+            apiKey,
+            model,
+            delay,
+            onProgress: (status) => {
+              const currentProgress = activeRuns.get(scrapeRunId)
+              if (currentProgress) {
+                currentProgress.sites[i].status = status
+                activeRuns.set(scrapeRunId, currentProgress)
+                typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, undefined)
+              }
+            },
+          })
 
-        if (result.status === SCRAPER_TASK_STATUS.COMPLETE) {
-          successfulSites++
-          totalNewJobs += result.newJobsFound || 0
-        } else if (result.status === SCRAPER_TASK_STATUS.ERROR) {
+          // Update progress with results
+          const updatedProgress = activeRuns.get(scrapeRunId)
+          if (updatedProgress) {
+            updatedProgress.sites[i].status = result.status
+            updatedProgress.sites[i].newJobsFound = result.newJobsFound
+            updatedProgress.sites[i].errorMessage = result.errorMessage
+            updatedProgress.completedSites++
+            activeRuns.set(scrapeRunId, updatedProgress)
+          }
+
+          if (result.status === SCRAPER_TASK_STATUS.COMPLETE) {
+            successfulSites++
+            totalNewJobs += result.newJobsFound || 0
+          } else if (result.status === SCRAPER_TASK_STATUS.ERROR) {
+            failedSites++
+          }
+
+          typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, undefined)
+        } catch (siteError) {
           failedSites++
-        }
 
-        typedIpcMain.send(CHANNEL_FROM_MAIN.SCRAPE.PROGRESS, undefined)
+          // Update progress even on error
+          const errorProgress = activeRuns.get(scrapeRunId)
+          if (errorProgress) {
+            errorProgress.sites[i].status = SCRAPER_TASK_STATUS.ERROR
+            errorProgress.sites[i].errorMessage = siteError instanceof Error ? siteError.message : String(siteError)
+            errorProgress.completedSites++
+            activeRuns.set(scrapeRunId, errorProgress)
+          }
+        }
       }
 
       // Mark run as completed
@@ -158,11 +171,13 @@ export async function startScraping(siteIds: string[]) {
       }
 
       // Update database with completion status
+      const finalStatus = failedSites > 0 ? SCRAPER_RUN_STATUS.FAILED : SCRAPER_RUN_STATUS.COMPLETED
+
       await queries.updateScrapeRun(scrapeRunId, {
         successfulSites,
         failedSites,
         completedAt: new Date(),
-        status: failedSites > 0 ? SCRAPER_RUN_STATUS.FAILED : SCRAPER_RUN_STATUS.COMPLETED,
+        status: finalStatus,
       })
 
       // Send completion event
@@ -180,7 +195,6 @@ export async function startScraping(siteIds: string[]) {
     return { success: true as const, scrapeRunId }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
-    log.error('Failed to start scraping:', errorMessage)
     return { success: false as const, error: errorMessage }
   }
 }

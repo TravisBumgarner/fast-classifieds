@@ -90,7 +90,7 @@ export const jobPostings = sqliteTable('job_postings', {
   aiRecommendationStatus: text('ai_recommendation_status', {
     enum: Object.values(AI_RECOMMENDATION_STATUS) as [AIRecommendationStatus, ...AIRecommendationStatus[]],
   }).notNull(),
-  duplicationDetectionId: text('duplication_detection_id').notNull(), // See duplicateDetection.ts for more details.
+  suspectedDuplicateOfJobPostingId: text('suspected_duplicate_of_job_posting_id'),
   duplicateStatus: text('duplicate_status', {
     enum: Object.values(JOB_POSTING_DUPLICATE_STATUS) as [JobPostingDuplicateStatus, ...JobPostingDuplicateStatus[]],
   }).notNull(),

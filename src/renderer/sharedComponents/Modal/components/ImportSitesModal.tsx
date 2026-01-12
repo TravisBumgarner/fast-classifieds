@@ -198,11 +198,25 @@ const ImportSitesModal = (_props: ImportSitesModalProps) => {
             ),
           }))
 
+          // Extract selector from URL hash if present
+          let selector = 'body'
+          let cleanUrl = url
+          try {
+            const urlObj = new URL(url)
+            if (urlObj.hash) {
+              selector = urlObj.hash
+              urlObj.hash = '' // Remove hash from URL
+              cleanUrl = urlObj.toString()
+            }
+          } catch {
+            // If URL parsing fails, keep original url and default selector
+          }
+
           const result = await ipcMessenger.invoke(CHANNEL_INVOKES.SITES.CREATE, {
             siteTitle: title,
-            siteUrl: url,
+            siteUrl: cleanUrl,
             promptId: selectedPrompt.id,
-            selector: 'body',
+            selector,
             status: 'active',
             notes: '',
           })

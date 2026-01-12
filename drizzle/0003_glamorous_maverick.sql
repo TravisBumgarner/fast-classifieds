@@ -1,0 +1,1 @@
+ALTER TABLE `job_postings` ADD `suspected_duplicate_of_job_posting_id` text;
