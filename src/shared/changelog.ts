@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 }
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.9.0',
+    date: '2026-01-13',
+    changes: [
+      {
+        category: 'Improved',
+        description: 'Better pagination and filtering for job postings.',
+      },
+    ],
+  },
+  {
     version: '1.8.0',
     date: '2026-01-12',
     changes: [
