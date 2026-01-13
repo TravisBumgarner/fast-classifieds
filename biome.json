@@ -2,8 +2,7 @@
   "linter": {
     "rules": {
       "suspicious": {
-        "useBiomeIgnoreFolder": "error",
-        "noConsole": "error"
+        "useBiomeIgnoreFolder": "error"
       }
     }
   },

@@ -16,7 +16,6 @@ const changelogContent = fs.readFileSync(changelogPath, 'utf8')
 const versionMatch = changelogContent.match(/version:\s*["'`](\d+\.\d+\.\d+)["'`]/)
 
 if (!versionMatch) {
-  // biome-ignore lint/suspicious/noConsole: it's fine.
   console.error('Could not find a version in changelog.ts')
   process.exit(1)
 }
@@ -24,12 +23,10 @@ if (!versionMatch) {
 const changelogVersion = versionMatch[1]
 
 if (pkgVersion !== changelogVersion) {
-  // biome-ignore lint/suspicious/noConsole: it's fine.
   console.error(`Version mismatch: package.json (${pkgVersion}) != changelog.ts (${changelogVersion})`)
   process.exit(1)
 }
 
-// biome-ignore lint/suspicious/noConsole: it's fine.
 console.log('Version check passed.')
 
 export default {}

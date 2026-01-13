@@ -332,7 +332,7 @@ const TabData = () => {
             onClick={handleConfirmRestore}
             color="warning"
             variant="contained"
-            disabled={!confirmationText.trim()}
+            disabled={confirmationText.trim() !== 'CONFIRM'}
           >
             Restore from Backup
           </Button>
@@ -367,7 +367,12 @@ const TabData = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancelNuke}>Cancel</Button>
-          <Button onClick={handleConfirmNuke} color="error" variant="contained" disabled={!nukeConfirmationText.trim()}>
+          <Button
+            onClick={handleConfirmNuke}
+            color="error"
+            variant="contained"
+            disabled={nukeConfirmationText.trim() !== 'NUKE'}
+          >
             Nuke Database
           </Button>
         </DialogActions>

@@ -23,7 +23,7 @@ import {
 import { useSignalEffect } from '@preact/signals-react'
 import { useSignals } from '@preact/signals-react/runtime'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   AI_RECOMMENDATION_STATUS,
   type JobPostingStatus,
@@ -33,6 +33,7 @@ import { CHANNEL_FROM_MAIN } from '../../../shared/types/messages.fromMain'
 import { CHANNEL_INVOKES } from '../../../shared/types/messages.invokes'
 import { PAGINATION, QUERY_KEYS } from '../../consts'
 import { useIpcOn } from '../../hooks/useIpcOn'
+import { useLocalStorage } from '../../hooks/useLocalStorage'
 import ipcMessenger from '../../ipcMessenger'
 import logger from '../../logger'
 import Icon from '../../sharedComponents/Icon'
@@ -112,9 +113,10 @@ const JobPostings = () => {
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [selectedJobPostings, setSelectedJobPostings] = useState<Set<string>>(new Set())
   const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(PAGINATION.DEFAULT_ROWS_PER_PAGE)
   const queryClient = useQueryClient()
   const tableScrollContainerRef = useRef<HTMLTableElement>(null)
+  const [rowsPerPage, setRowsPerPage] = useLocalStorage('jobPostingsPagination', PAGINATION.DEFAULT_ROWS_PER_PAGE)
+
   useSignals()
 
   useSignalEffect(() => {
@@ -151,7 +153,8 @@ const JobPostings = () => {
   const { isLoading: isLoadingJobPostings, data: jobPostingsData } = useQuery({
     queryKey: createQueryKey(QUERY_KEYS.JOB_POSTINGS, 'jobPostingsPage'),
     queryFn: async () => {
-      setPage(0)
+      // setPage(0) I can't remember why I added this originally. Commenting out for now.
+      // Every time data changes, the page resets to zero which is unfortunate.
       return await ipcMessenger.invoke(CHANNEL_INVOKES.JOB_POSTINGS.GET_ALL, undefined)
     },
     initialData: { postings: [], suspectedDuplicatesCount: 0 },
@@ -218,6 +221,13 @@ const JobPostings = () => {
   })
 
   const paginatedJobPostings = filteredJobPostings.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+
+  useEffect(() => {
+    // If the current page has no items (e.g., after filtering), go back a page
+    if (page > 0 && paginatedJobPostings.length === 0) {
+      setPage(page - 1)
+    }
+  }, [paginatedJobPostings, page])
 
   const handleChangePage = (_event: unknown, newPage: number) => {
     if (tableScrollContainerRef.current) {
@@ -360,7 +370,7 @@ const JobPostings = () => {
           <Table stickyHeader sx={{ tableLayout: 'fixed' }}>
             <TableHead>
               <TableRow>
-                <TableCell width="35px">
+                <TableCell width="5%">
                   <Checkbox
                     size="small"
                     indeterminate={
@@ -370,7 +380,7 @@ const JobPostings = () => {
                     onChange={handleSelectAllJobPostings}
                   />
                 </TableCell>
-                <TableCell width="80px">
+                <TableCell width="10%">
                   <TableSortLabel
                     active={sortField === 'site'}
                     direction={sortField === 'site' ? sortDirection : 'asc'}
@@ -379,7 +389,7 @@ const JobPostings = () => {
                     Site
                   </TableSortLabel>
                 </TableCell>
-                <TableCell width="150px">
+                <TableCell width="15%">
                   <TableSortLabel
                     active={sortField === 'title'}
                     direction={sortField === 'title' ? sortDirection : 'asc'}
@@ -388,7 +398,7 @@ const JobPostings = () => {
                     Title
                   </TableSortLabel>
                 </TableCell>
-                <TableCell width="90px">
+                <TableCell width="10%">
                   <TableSortLabel
                     active={sortField === 'location'}
                     direction={sortField === 'location' ? sortDirection : 'asc'}
@@ -398,7 +408,7 @@ const JobPostings = () => {
                   </TableSortLabel>
                 </TableCell>
 
-                <TableCell width="160px">
+                <TableCell width="20%">
                   <TableSortLabel
                     active={sortField === 'status'}
                     direction={sortField === 'status' ? sortDirection : 'asc'}
@@ -408,7 +418,7 @@ const JobPostings = () => {
                   </TableSortLabel>
                 </TableCell>
 
-                <TableCell width="110px">
+                <TableCell width="15%">
                   <TableSortLabel
                     active={sortField === 'aiRecommendationStatus'}
                     direction={sortField === 'aiRecommendationStatus' ? sortDirection : 'asc'}
@@ -418,8 +428,8 @@ const JobPostings = () => {
                   </TableSortLabel>
                 </TableCell>
 
-                <TableCell width="200px">Description</TableCell>
-                <TableCell width="60px">
+                {/* <TableCell width="200px">Description</TableCell>  Shows absolutely nothing of use*/}
+                <TableCell width="10%">
                   <TableSortLabel
                     active={sortField === 'datePosted'}
                     direction={sortField === 'datePosted' ? sortDirection : 'asc'}
@@ -428,7 +438,7 @@ const JobPostings = () => {
                     Posted
                   </TableSortLabel>
                 </TableCell>
-                <TableCell width="60px">
+                <TableCell width="8%">
                   <TableSortLabel
                     active={sortField === 'createdAt'}
                     direction={sortField === 'createdAt' ? sortDirection : 'asc'}
@@ -437,7 +447,7 @@ const JobPostings = () => {
                     Found
                   </TableSortLabel>
                 </TableCell>
-                <TableCell width="60px" align="right">
+                <TableCell width="8%" align="right">
                   Actions
                 </TableCell>
               </TableRow>
@@ -522,7 +532,7 @@ const JobPostings = () => {
                         recommendationExplanation={jobPosting.recommendationExplanation}
                       />
                     </TableCell>
-                    <TableCell>
+                    {/* <TableCell>
                       <Tooltip placement="right" title={jobPosting.description || 'No description'}>
                         <Typography
                           variant="body2"
@@ -534,7 +544,7 @@ const JobPostings = () => {
                             '-'}
                         </Typography>
                       </Tooltip>
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell>
                       {jobPosting.datePosted ? new Date(jobPosting.datePosted).toLocaleDateString() : 'Unknown'}
                     </TableCell>

@@ -21,6 +21,7 @@ import { KNOWN_MODELS } from '../../shared/consts'
 import type { ApiUsageDTO } from '../../shared/types'
 import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
 import { PAGINATION, QUERY_KEYS } from '../consts'
+import { useLocalStorage } from '../hooks/useLocalStorage'
 import ipcMessenger from '../ipcMessenger'
 import Icon from '../sharedComponents/Icon'
 import Link from '../sharedComponents/Link'
@@ -301,7 +302,8 @@ const ApiUsage = () => {
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [expandedUsageId, setExpandedUsageId] = useState<string | null>(null)
   const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(PAGINATION.DEFAULT_ROWS_PER_PAGE)
+  const [rowsPerPage, setRowsPerPage] = useLocalStorage('apiUsagePagination', PAGINATION.DEFAULT_ROWS_PER_PAGE)
+
   const tableScrollContainerRef = useRef<HTMLTableElement>(null)
 
   const handleSort = (field: SortField) => {

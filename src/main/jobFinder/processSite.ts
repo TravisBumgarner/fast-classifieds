@@ -2,7 +2,6 @@ import { SITE_HTML_TO_JSON_JOBS_PROMPT_DEFAULT } from '../../shared/consts'
 import { errorCodeToMessage } from '../../shared/errors'
 import {
   JOB_POSTING_DUPLICATE_STATUS,
-  JOB_POSTING_STATUS,
   SCRAPER_TASK_RESULT,
   SCRAPER_TASK_STATUS,
   type ScraperTaskProgress,

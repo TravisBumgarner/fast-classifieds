@@ -16,6 +16,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Fragment, useRef, useState } from 'react'
 import { CHANNEL_INVOKES } from '../../../shared/types/messages.invokes'
 import { PAGINATION, QUERY_KEYS } from '../../consts'
+import { useLocalStorage } from '../../hooks/useLocalStorage'
 import ipcMessenger from '../../ipcMessenger'
 import Message from '../../sharedComponents/Message'
 import PageWrapper from '../../sharedComponents/PageWrapper'
@@ -34,7 +35,7 @@ const ScrapeRuns = () => {
   const tableScrollContainerRef = useRef<HTMLTableElement>(null)
 
   const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(PAGINATION.DEFAULT_ROWS_PER_PAGE)
+  const [rowsPerPage, setRowsPerPage] = useLocalStorage('scrapeRunsPagination', PAGINATION.DEFAULT_ROWS_PER_PAGE)
 
   const { data, error, isLoading } = useQuery({
     queryKey: createQueryKey(QUERY_KEYS.SCRAPE_RUNS, 'scrapeRunsPage'),

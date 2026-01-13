@@ -52,7 +52,6 @@ function write(level: 'info' | 'warn' | 'error', args: unknown[]) {
 
   // Always console-log when NOT bundled (dev)
   if (!isBundled) {
-    // biome-ignore lint/suspicious/noConsole: it's fine.
     const fn = level === 'warn' ? console.warn : level === 'error' ? console.error : console.log
     fn(...args)
   }
