@@ -84,12 +84,12 @@ export const scrape = async ({
 
   // Add common headers to look more like a real browser
   session.webRequest.onBeforeSendHeaders((details, callback) => {
-    details.requestHeaders['Accept'] =
+    details.requestHeaders.Accept =
       'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8'
     details.requestHeaders['Accept-Language'] = 'en-US,en;q=0.9'
     details.requestHeaders['Accept-Encoding'] = 'gzip, deflate, br'
     details.requestHeaders['Cache-Control'] = 'no-cache'
-    details.requestHeaders['Pragma'] = 'no-cache'
+    details.requestHeaders.Pragma = 'no-cache'
     details.requestHeaders['Sec-Fetch-Dest'] = 'document'
     details.requestHeaders['Sec-Fetch-Mode'] = 'navigate'
     details.requestHeaders['Sec-Fetch-Site'] = 'none'

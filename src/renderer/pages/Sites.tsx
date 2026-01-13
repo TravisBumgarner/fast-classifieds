@@ -29,6 +29,7 @@ import { useNavigate } from 'react-router-dom'
 import type { JobPostingDTO, SiteDTO } from '../../shared/types'
 import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
 import { PAGINATION, QUERY_KEYS, ROUTES } from '../consts'
+import { useLocalStorage } from '../hooks/useLocalStorage'
 import ipcMessenger from '../ipcMessenger'
 import logger from '../logger'
 import Icon from '../sharedComponents/Icon'
@@ -57,7 +58,8 @@ const Sites = () => {
   const [loadingJobs, setLoadingJobs] = useState<Record<string, boolean>>({})
   const [page, setPage] = useState(0)
   const navigate = useNavigate()
-  const [rowsPerPage, setRowsPerPage] = useState(PAGINATION.DEFAULT_ROWS_PER_PAGE)
+  const [rowsPerPage, setRowsPerPage] = useLocalStorage('sitesPagination', PAGINATION.DEFAULT_ROWS_PER_PAGE)
+
   const queryClient = useQueryClient()
   const tableScrollContainerRef = useRef<HTMLTableElement>(null)
 

@@ -45,7 +45,6 @@ function write(level: 'info' | 'warn' | 'error', args: unknown[]) {
       break
   }
 
-  // biome-ignore lint/suspicious/noConsole: it's fine.
   const consoleFn = level === 'warn' ? console.warn : level === 'error' ? console.error : console.log
   consoleFn(...args)
   // if (!isProd) {

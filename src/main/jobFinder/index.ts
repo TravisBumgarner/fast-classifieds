@@ -6,7 +6,6 @@ import {
 } from '../../shared/types'
 import { CHANNEL_FROM_MAIN } from '../../shared/types/messages.fromMain'
 import queries from '../database/queries'
-import log from '../logger'
 import { typedIpcMain } from '../messages/ipcMain'
 import store from '../store'
 import processSite from './processSite'

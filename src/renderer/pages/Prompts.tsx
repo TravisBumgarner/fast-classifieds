@@ -25,6 +25,7 @@ import { useRef, useState } from 'react'
 import type { PromptDTO, PromptStatus } from '../../shared/types'
 import { CHANNEL_INVOKES } from '../../shared/types/messages.invokes'
 import { PAGINATION, QUERY_KEYS } from '../consts'
+import { useLocalStorage } from '../hooks/useLocalStorage'
 import ipcMessenger from '../ipcMessenger'
 import logger from '../logger'
 import Icon from '../sharedComponents/Icon'
@@ -45,7 +46,8 @@ const Prompts = () => {
   const [sortField, setSortField] = useState<SortField>('title')
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
   const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(PAGINATION.DEFAULT_ROWS_PER_PAGE)
+  const [rowsPerPage, setRowsPerPage] = useLocalStorage('promptsPagination', PAGINATION.DEFAULT_ROWS_PER_PAGE)
+
   const queryClient = useQueryClient()
   const tableScrollContainerRef = useRef<HTMLTableElement>(null)
 
