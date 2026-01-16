@@ -53,23 +53,28 @@ typedIpcMain.handle(CHANNEL_INVOKES.DEBUG.AI, async (_event, params) => {
 
     const duplicateHashMapBySite = await generateDuplicateHashMapBySite()
 
-    const jobs = result.aiJobs.map((job) =>
-      buildNewJobPostingDTO({
+    const jobs = result.aiJobs.map((job) => {
+      const duplicateCheck = checkDuplicate(
+        {
+          title: job.title,
+          jobUrl: job.jobUrl,
+          siteUrl: params.siteUrl,
+          datePosted: job.datePosted ? new Date(job.datePosted) : null,
+        },
+        duplicateHashMapBySite,
+      )
+
+      console.log('duplicateCheck', duplicateCheck, job.title)
+
+      return buildNewJobPostingDTO({
         ...job,
         siteId: params.siteId,
         scrapeRunId: 'debug-run',
         siteUrl: params.siteUrl,
-        duplicateStatus: checkDuplicate(
-          {
-            title: job.title,
-            jobUrl: job.jobUrl,
-            siteUrl: params.siteUrl,
-            datePosted: job.datePosted ? new Date(job.datePosted) : null,
-          },
-          duplicateHashMapBySite,
-        ),
-      }),
-    )
+        duplicateStatus: duplicateCheck.duplicateStatus,
+        suspectedDuplicateOfJobPostingId: duplicateCheck.jobPostingId,
+      })
+    })
 
     return {
       success: true as const,

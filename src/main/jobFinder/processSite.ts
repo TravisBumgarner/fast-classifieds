@@ -87,25 +87,31 @@ async function processSite({
     log.info(aiJobs)
 
     const duplicateHashMapBySite = await generateDuplicateHashMapBySite()
+    console.log('duplicateHashMapBySite', duplicateHashMapBySite)
 
     const jobs = aiJobs
-      .map((job) =>
-        buildNewJobPostingDTO({
+      .map((job) => {
+        const duplicateCheck = checkDuplicate(
+          {
+            title: job.title,
+            jobUrl: job.jobUrl,
+            siteUrl,
+            datePosted: job.datePosted ? new Date(job.datePosted) : null,
+          },
+          duplicateHashMapBySite,
+        )
+
+        console.log('duplicateCheck', duplicateCheck, job.title)
+
+        return buildNewJobPostingDTO({
           ...job,
           siteId,
           scrapeRunId,
           siteUrl,
-          duplicateStatus: checkDuplicate(
-            {
-              title: job.title,
-              jobUrl: job.jobUrl,
-              siteUrl,
-              datePosted: job.datePosted ? new Date(job.datePosted) : null,
-            },
-            duplicateHashMapBySite,
-          ),
-        }),
-      )
+          duplicateStatus: duplicateCheck.duplicateStatus,
+          suspectedDuplicateOfJobPostingId: duplicateCheck.jobPostingId,
+        })
+      })
       .filter(({ duplicateStatus }) => duplicateStatus !== JOB_POSTING_DUPLICATE_STATUS.CONFIRMED_DUPLICATE)
 
     await queries.insertApiUsage({
