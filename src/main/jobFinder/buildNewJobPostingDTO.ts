@@ -18,6 +18,7 @@ export const buildNewJobPostingDTO = (job: {
   siteUrl: string
   datePosted?: string | null
   duplicateStatus: JobPostingDuplicateStatus | undefined
+  suspectedDuplicateOfJobPostingId?: string
 }): NewJobPostingDTO => {
   return {
     ...job,

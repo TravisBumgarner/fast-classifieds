@@ -20,7 +20,10 @@ const hashTitleDate = (title: string, datePosted: Date) =>
  */
 export const generateDuplicateHashMapBySite = async () => {
   const existingJobPostings = await queries.getJobPostings({})
-  const hashMapBySite: Record<string, Record<string, JobPostingDuplicateStatus>> = {}
+  const hashMapBySite: Record<
+    string,
+    Record<string, { duplicateStatus: JobPostingDuplicateStatus; jobPostingId: string }>
+  > = {}
 
   for (const job of existingJobPostings) {
     const siteKey = normalize(job.siteUrl)
@@ -30,20 +33,23 @@ export const generateDuplicateHashMapBySite = async () => {
 
     // 1. Unique job URL → confirmed duplicate
     if (job.jobUrl && normalize(job.jobUrl) !== siteKey) {
-      siteMap[hashJobUrl(job.jobUrl)] = JOB_POSTING_DUPLICATE_STATUS.CONFIRMED_DUPLICATE
+      siteMap[hashJobUrl(job.jobUrl)] = {
+        duplicateStatus: JOB_POSTING_DUPLICATE_STATUS.CONFIRMED_DUPLICATE,
+        jobPostingId: job.id,
+      }
       continue
     }
 
     // 2. Title + datePosted → confirmed duplicate
     if (job.datePosted) {
       const hash = hashTitleDate(job.title, job.datePosted)
-      siteMap[hash] = JOB_POSTING_DUPLICATE_STATUS.CONFIRMED_DUPLICATE
+      siteMap[hash] = { duplicateStatus: JOB_POSTING_DUPLICATE_STATUS.CONFIRMED_DUPLICATE, jobPostingId: job.id }
       continue
     }
 
     // 3. Title only → suspected duplicate (do not override confirmed)
     const titleHash = hashTitle(job.title)
-    siteMap[titleHash] ??= JOB_POSTING_DUPLICATE_STATUS.SUSPECTED_DUPLICATE
+    siteMap[titleHash] ??= { duplicateStatus: JOB_POSTING_DUPLICATE_STATUS.SUSPECTED_DUPLICATE, jobPostingId: job.id }
   }
 
   return hashMapBySite
@@ -85,11 +91,11 @@ export const checkDuplicate = (
     siteUrl: string
     datePosted: Date | null
   },
-  hashMaps: Record<string, Record<string, JobPostingDuplicateStatus>>,
-): JobPostingDuplicateStatus => {
+  hashMaps: Record<string, Record<string, { duplicateStatus: JobPostingDuplicateStatus; jobPostingId: string }>>,
+): { duplicateStatus: JobPostingDuplicateStatus; jobPostingId?: string } => {
   const siteMap = hashMaps[normalize(job.siteUrl)]
-  if (!siteMap) return JOB_POSTING_DUPLICATE_STATUS.UNIQUE
+  if (!siteMap) return { duplicateStatus: JOB_POSTING_DUPLICATE_STATUS.UNIQUE }
 
   const hash = getHash(job)
-  return siteMap[hash] ?? JOB_POSTING_DUPLICATE_STATUS.UNIQUE
+  return siteMap[hash] ?? { duplicateStatus: JOB_POSTING_DUPLICATE_STATUS.UNIQUE }
 }
