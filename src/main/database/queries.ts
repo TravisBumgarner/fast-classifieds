@@ -339,6 +339,8 @@ async function getSuspectedDuplicatesWithOriginals(): Promise<
     return []
   }
 
+  console.log('originalIds', originalIds)
+
   const originalJobPostings = await db
     .select({
       id: jobPostings.id,
@@ -361,6 +363,8 @@ async function getSuspectedDuplicatesWithOriginals(): Promise<
     .from(jobPostings)
     .leftJoin(sites, eq(jobPostings.siteId, sites.id))
     .where(inArray(jobPostings.id, originalIds))
+
+  console.log('originalJobPostings', originalJobPostings)
 
   // Create a map for quick lookup
   const originalJobPostingsMap = new Map(
@@ -390,7 +394,7 @@ async function getSuspectedDuplicatesWithOriginals(): Promise<
       }
     }
   }
-
+  console.log('returning dups', result)
   return result
 }
 

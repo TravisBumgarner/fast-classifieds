@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 }
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.10.0',
+    date: '2026-01-16',
+    changes: [
+      {
+        category: 'Fixed',
+        description: 'Duplicate detection was finding duplicates but not displaying them to the user.',
+      },
+    ],
+  },
+  {
     version: '1.9.0',
     date: '2026-01-13',
     changes: [
