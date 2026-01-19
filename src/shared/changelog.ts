@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 }
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.11.0',
+    date: '2026-01-16',
+    changes: [
+      {
+        category: 'Fixed',
+        description: 'Missing package error.',
+      },
+    ],
+  },
+  {
     version: '1.10.0',
     date: '2026-01-16',
     changes: [
