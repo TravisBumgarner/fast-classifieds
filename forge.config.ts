@@ -23,7 +23,7 @@ const config: ForgeConfig = {
     //"You have set packagerConfig.ignore, the Electron Forge Vite plugin normally sets this automatically."
     // This is expected. Error can be ignored.
     // https://github.com/electron/forge/issues/3738#issuecomment-2692534953
-    ignore: [/node_modules\/(?!(better-sqlite3|bindings|file-uri-to-path)\/)/],
+    ignore: [],
     icon: './src/assets/icon',
     extraResource: ['./drizzle'],
     osxSign:
