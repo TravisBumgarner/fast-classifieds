@@ -1,3 +1,5 @@
+import * as fs from 'node:fs'
+import * as path from 'node:path'
 import { MakerDeb } from '@electron-forge/maker-deb'
 import { MakerDMG } from '@electron-forge/maker-dmg'
 import { MakerRpm } from '@electron-forge/maker-rpm'
@@ -43,11 +45,26 @@ const config: ForgeConfig = {
   rebuildConfig: {},
   makers: [
     // Will only build for os X on when run on os X.
-    new MakerSquirrel({}),
-    new MakerDMG({}),
+    new MakerSquirrel({
+      name: 'fast-classifieds',
+      setupExe: 'Fast-Classifieds-win32-x64-setup.exe',
+    }),
+    new MakerDMG({
+      name: 'Fast-Classifieds-darwin',
+    }),
     new MakerZIP({}, ['darwin']),
-    new MakerRpm({}),
-    new MakerDeb({}),
+    new MakerRpm({
+      options: {
+        name: 'fast-classifieds',
+        productName: 'Fast Classifieds',
+      },
+    }),
+    new MakerDeb({
+      options: {
+        name: 'fast-classifieds',
+        productName: 'Fast Classifieds',
+      },
+    }),
   ],
   plugins: [
     ...(process.env.SHOULD_APPLE_SIGN === '1' ? [new AutoUnpackNativesPlugin({})] : []),
@@ -108,6 +125,31 @@ const config: ForgeConfig = {
         })
       }
     },
+    postMake: async (_forgeConfig, makeResults) => {
+      for (const result of makeResults) {
+        for (let i = 0; i < result.artifacts.length; i++) {
+          const artifact = result.artifacts[i]
+          const dir = path.dirname(artifact)
+          const ext = path.extname(artifact)
+
+          let newName: string | null = null
+          if (ext === '.deb') {
+            newName = `fast-classifieds-linux-${result.arch}.deb`
+          } else if (ext === '.rpm') {
+            newName = `fast-classifieds-linux-${result.arch}.rpm`
+          } else if (ext === '.zip' && result.platform === 'darwin') {
+            newName = `Fast-Classifieds-darwin-${result.arch}.zip`
+          }
+
+          if (newName) {
+            const newPath = path.join(dir, newName)
+            fs.renameSync(artifact, newPath)
+            result.artifacts[i] = newPath
+          }
+        }
+      }
+      return makeResults
+    },
   },
   publishers: [
     {
@@ -115,7 +157,7 @@ const config: ForgeConfig = {
       config: {
         repository: { owner: 'travisbumgarner', name: 'fast-classifieds' },
         prerelease: false,
-        draft: true,
+        draft: false,
       },
     },
   ],
