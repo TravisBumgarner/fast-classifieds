@@ -380,15 +380,7 @@ const JobPostings = () => {
                     onChange={handleSelectAllJobPostings}
                   />
                 </TableCell>
-                <TableCell width="10%">
-                  <TableSortLabel
-                    active={sortField === 'site'}
-                    direction={sortField === 'site' ? sortDirection : 'asc'}
-                    onClick={() => handleSort('site')}
-                  >
-                    Site
-                  </TableSortLabel>
-                </TableCell>
+
                 <TableCell width="15%">
                   <TableSortLabel
                     active={sortField === 'title'}
@@ -396,6 +388,15 @@ const JobPostings = () => {
                     onClick={() => handleSort('title')}
                   >
                     Title
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell width="10%">
+                  <TableSortLabel
+                    active={sortField === 'site'}
+                    direction={sortField === 'site' ? sortDirection : 'asc'}
+                    onClick={() => handleSort('site')}
+                  >
+                    Site
                   </TableSortLabel>
                 </TableCell>
                 <TableCell width="10%">
@@ -487,8 +488,24 @@ const JobPostings = () => {
                         onChange={() => handleToggleJobPosting(jobPosting.id)}
                       />
                     </TableCell>
-                    <TableCell>{jobPosting.siteTitle || '-'}</TableCell>
                     <TableCell>{jobPosting.title}</TableCell>
+                    <TableCell>
+                      {jobPosting.siteTitle || '-'}{' '}
+                      <Tooltip title="Edit Site">
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            activeModalSignal.value = {
+                              id: MODAL_ID.EDIT_SITE_MODAL,
+                              siteId: jobPosting.siteId,
+                            }
+                          }}
+                        >
+                          <Icon name="edit" />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+
                     <TableCell>{jobPosting.location || '-'}</TableCell>
                     <TableCell>
                       <Stack direction="row" alignItems="center">
