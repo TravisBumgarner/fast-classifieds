@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 }
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '2.0.0',
+    date: '2026-03-02',
+    changes: [
+      {
+        category: 'Improved',
+        description: 'Replaced OpenAI with Anthropic.',
+      },
+    ],
+  },
+  {
     version: '1.12.0',
     date: '2026-01-22',
     changes: [

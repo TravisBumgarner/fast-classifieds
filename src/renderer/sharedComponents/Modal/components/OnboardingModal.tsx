@@ -16,11 +16,11 @@ const OnboardingModal = () => {
 
   const steps = [
     {
-      label: 'Get an OpenAI API Key',
+      label: 'Get an Anthropic API Key',
       description: (
         <>
           <Typography variant="body2">
-            In the menu, go to Settings &gt; OpenAI and enter your API key to get started. There are instructions and a
+            In the menu, go to Settings &gt; Claude and enter your API key to get started. There are instructions and a
             link to get your key.
           </Typography>
         </>

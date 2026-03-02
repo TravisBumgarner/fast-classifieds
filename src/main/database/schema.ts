@@ -19,6 +19,7 @@ import {
 export const apiUsage = sqliteTable('api_usage', {
   id: text('id').primaryKey(),
   responseId: text('response_id'),
+  scrapeRunId: text('scrape_run_id'),
   actualModel: text('actual_model').notNull(),
   userSelectedModel: text('user_selected_model').notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),

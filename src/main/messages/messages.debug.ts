@@ -40,7 +40,7 @@ typedIpcMain.handle(CHANNEL_INVOKES.DEBUG.AI, async (_event, params) => {
     logger.info('Debug AI params:', params)
     const storeData = getStore()
     const result = await processText({
-      apiKey: storeData.openaiApiKey,
+      apiKey: storeData.anthropicApiKey,
       model: storeData.selectedModel.model,
       prompt: params.prompt,
       scrapedContent: params.scrapedContent,
@@ -86,7 +86,7 @@ typedIpcMain.handle(CHANNEL_INVOKES.DEBUG.AI, async (_event, params) => {
 
     return {
       success: false as const,
-      error: errorCodeToMessage({ error, type: 'OPEN_AI' }),
+      error: errorCodeToMessage({ error, type: 'ANTHROPIC' }),
     }
   }
 })

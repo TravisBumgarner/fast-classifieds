@@ -1,0 +1,1 @@
+ALTER TABLE `api_usage` ADD `scrape_run_id` text;

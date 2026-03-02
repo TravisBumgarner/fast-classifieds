@@ -121,6 +121,7 @@ async function processSite({
       siteContent: JSON.stringify(scrapedContent),
       siteUrl,
       siteTitle: siteUrl,
+      scrapeRunId,
     })
 
     if (jobs.length > 0) {
@@ -147,7 +148,7 @@ async function processSite({
 
     return { newJobsFound: jobs.length, status: SCRAPER_TASK_STATUS.COMPLETE }
   } catch (error) {
-    const errorMessage = errorCodeToMessage({ error, type: 'OPEN_AI' })
+    const errorMessage = errorCodeToMessage({ error, type: 'ANTHROPIC' })
     log.error(`✗ Error processing ${siteUrl}:`, error)
 
     await queries.insertScrapeTask({

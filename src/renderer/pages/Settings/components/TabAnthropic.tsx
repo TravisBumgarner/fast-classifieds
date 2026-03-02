@@ -21,18 +21,18 @@ import ipcMessenger from '../../../ipcMessenger'
 import Icon from '../../../sharedComponents/Icon'
 import { SPACING } from '../../../styles/consts'
 
-const TabOpenAI = ({
+const TabAnthropic = ({
   loadStoreSettings,
-  initialOpenAiApiKey,
+  initialAnthropicApiKey,
   initialSelectedModel,
   initialCustomModels,
 }: {
   loadStoreSettings: () => Promise<void>
-  initialOpenAiApiKey: string
+  initialAnthropicApiKey: string
   initialSelectedModel: KnownModel
   initialCustomModels: KnownModel[]
 }) => {
-  const [apiKey, setApiKey] = useState<string>(initialOpenAiApiKey)
+  const [apiKey, setApiKey] = useState<string>(initialAnthropicApiKey)
   const [selectedModel, setSelectedModel] = useState<KnownModel>(initialSelectedModel)
   const [customModels, setCustomModels] = useState<KnownModel[]>(initialCustomModels)
   const [isCustom, setIsCustom] = useState<boolean>(!KNOWN_MODELS.some((m) => m.model === initialSelectedModel.model))
@@ -45,7 +45,7 @@ const TabOpenAI = ({
 
   const allModels = [...KNOWN_MODELS, ...customModels]
   const hasChanges =
-    apiKey !== initialOpenAiApiKey ||
+    apiKey !== initialAnthropicApiKey ||
     selectedModel.model !== initialSelectedModel.model ||
     JSON.stringify(customModels) !== JSON.stringify(initialCustomModels)
 
@@ -102,7 +102,7 @@ const TabOpenAI = ({
   const handleSaveApiSettings = async () => {
     try {
       await ipcMessenger.invoke(CHANNEL_INVOKES.STORE.SET, {
-        openaiApiKey: apiKey,
+        anthropicApiKey: apiKey,
         selectedModel: selectedModel,
         customModels: customModels,
       })
@@ -126,10 +126,10 @@ const TabOpenAI = ({
   return (
     <Box sx={{ p: SPACING.MEDIUM.PX }}>
       <Typography variant="subtitle2" gutterBottom>
-        OpenAI API Configuration
+        Anthropic API Configuration
       </Typography>
       <Typography variant="body2" color="textSecondary" sx={{ mb: SPACING.MEDIUM.PX }}>
-        Configure your OpenAI API key and model for job scraping
+        Configure your Anthropic API key and Claude model for job scraping
       </Typography>
 
       {apiMessage && (
@@ -146,7 +146,7 @@ const TabOpenAI = ({
             type="password"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
-            placeholder="sk-..."
+            placeholder="sk-ant-..."
             fullWidth
             size="small"
           />
@@ -154,7 +154,7 @@ const TabOpenAI = ({
             title={
               <span>
                 <a
-                  href="https://platform.openai.com/settings/organization/api-keys"
+                  href="https://console.anthropic.com/settings/keys"
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
@@ -164,11 +164,11 @@ const TabOpenAI = ({
                   onClick={(e) => {
                     e.preventDefault()
                     ipcMessenger.invoke(CHANNEL_INVOKES.UTILS.OPEN_URL, {
-                      url: 'https://platform.openai.com/settings/organization/api-keys',
+                      url: 'https://console.anthropic.com/settings/keys',
                     })
                   }}
                 >
-                  Get your API key from OpenAI
+                  Get your API key from Anthropic
                 </a>
               </span>
             }
@@ -220,7 +220,7 @@ const TabOpenAI = ({
               <span>
                 Prices are per 1 million tokens. <br />
                 <a
-                  href="https://platform.openai.com/docs/pricing"
+                  href="https://www.anthropic.com/pricing"
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
@@ -230,7 +230,7 @@ const TabOpenAI = ({
                   onClick={(e) => {
                     e.preventDefault()
                     ipcMessenger.invoke(CHANNEL_INVOKES.UTILS.OPEN_URL, {
-                      url: 'https://platform.openai.com/docs/pricing',
+                      url: 'https://www.anthropic.com/pricing',
                     })
                   }}
                 >
@@ -258,7 +258,7 @@ const TabOpenAI = ({
                   label="Model Name"
                   value={customModelName}
                   onChange={(e) => setCustomModelName(e.target.value)}
-                  placeholder="e.g., gpt-4-custom"
+                  placeholder="e.g., claude-sonnet-4-6"
                   fullWidth
                   size="small"
                   required
@@ -268,7 +268,7 @@ const TabOpenAI = ({
                   type="number"
                   value={customInputPrice}
                   onChange={(e) => setCustomInputPrice(e.target.value)}
-                  placeholder="1.25"
+                  placeholder="3.00"
                   fullWidth
                   size="small"
                   required
@@ -278,7 +278,7 @@ const TabOpenAI = ({
                   type="number"
                   value={customCachedInputPrice}
                   onChange={(e) => setCustomCachedInputPrice(e.target.value)}
-                  placeholder="0.125"
+                  placeholder="0.30"
                   fullWidth
                   size="small"
                 />
@@ -287,7 +287,7 @@ const TabOpenAI = ({
                   type="number"
                   value={customOutputPrice}
                   onChange={(e) => setCustomOutputPrice(e.target.value)}
-                  placeholder="10.0"
+                  placeholder="15.00"
                   fullWidth
                   size="small"
                   required
@@ -308,4 +308,4 @@ const TabOpenAI = ({
   )
 }
 
-export default TabOpenAI
+export default TabAnthropic

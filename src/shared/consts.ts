@@ -21,55 +21,25 @@ Rules:
 6. Do NOT infer, summarize, expand, embellish, or generalize. Use ONLY literal text from the content.
 `
 
-// https://openai.com/api/pricing/
+// https://www.anthropic.com/pricing
 export const KNOWN_MODELS: KnownModel[] = [
   {
-    model: 'gpt-5.1',
-    input: 1.25,
-    cachedInput: 0.125,
-    output: 10.0,
+    model: 'claude-haiku-4-5',
+    input: 0.8,
+    cachedInput: 0.08,
+    output: 4.0,
   },
   {
-    model: 'gpt-5',
-    input: 1.25,
-    cachedInput: 0.125,
-    output: 10.0,
+    model: 'claude-sonnet-4-6',
+    input: 3.0,
+    cachedInput: 0.3,
+    output: 15.0,
   },
   {
-    model: 'gpt-5-mini',
-    input: 0.25,
-    cachedInput: 0.025,
-    output: 2.0,
-  },
-  {
-    model: 'gpt-5-nano',
-    input: 0.05,
-    cachedInput: 0.005,
-    output: 0.4,
-  },
-  {
-    model: 'gpt-5.1-chat-latest',
-    input: 1.25,
-    cachedInput: 0.125,
-    output: 10.0,
-  },
-  {
-    model: 'gpt-5-chat-latest',
-    input: 1.25,
-    cachedInput: 0.125,
-    output: 10.0,
-  },
-  {
-    model: 'gpt-5.1-codex',
-    input: 1.25,
-    cachedInput: 0.125,
-    output: 10.0,
-  },
-  {
-    model: 'gpt-5-codex',
-    input: 1.25,
-    cachedInput: 0.125,
-    output: 10.0,
+    model: 'claude-opus-4-6',
+    input: 15.0,
+    cachedInput: 1.5,
+    output: 75.0,
   },
 ]
 
