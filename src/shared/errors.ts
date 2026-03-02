@@ -1,5 +1,6 @@
-export const OPEN_AI_ERRORS = {
-  invalid_api_key: 'Invalid Open AI key',
+export const ANTHROPIC_ERRORS: Record<string, string> = {
+  authentication_error: 'Invalid Anthropic API key',
+  invalid_api_key: 'Invalid Anthropic API key',
 }
 
 export const INTERNAL_ERRORS = {
@@ -10,11 +11,11 @@ export const INTERNAL_ERRORS = {
   SELECTOR_NOT_FOUND: 'Selector not found on the page',
 }
 
-export const ERRORS = { ...OPEN_AI_ERRORS, ...INTERNAL_ERRORS }
+export const ERRORS = { ...ANTHROPIC_ERRORS, ...INTERNAL_ERRORS }
 
-type OpenAI = {
+type Anthropic = {
   error: unknown
-  type: 'OPEN_AI'
+  type: 'ANTHROPIC'
 }
 
 type InternalApp = {
@@ -22,16 +23,30 @@ type InternalApp = {
   type: 'INTERNAL'
 }
 
-export const errorCodeToMessage = (error: OpenAI | InternalApp): string => {
-  // This function is a mess. Good enough for now though.
+export const errorCodeToMessage = (error: Anthropic | InternalApp): string => {
   let errorMessage = 'Unknown Error'
 
-  if (error.type === 'OPEN_AI') {
-    const errorCode = (error.error as { code: string }).code || 'unknown_error'
-    if (ERRORS[errorCode as keyof typeof ERRORS]) {
-      errorMessage = OPEN_AI_ERRORS[errorCode as keyof typeof OPEN_AI_ERRORS]
-    } else {
-      console.log('Unmapped error code:', errorCode)
+  if (error.type === 'ANTHROPIC') {
+    const err = error.error as {
+      code?: string
+      type?: string
+      message?: string
+      status?: number
+      error?: { type?: string; message?: string; error?: { type?: string; message?: string } }
+    }
+
+    // Try mapped error codes first (e.g. authentication_error)
+    const errorCode = err.error?.error?.type || err.error?.type || err.code || err.type
+    if (errorCode && ANTHROPIC_ERRORS[errorCode]) {
+      errorMessage = ANTHROPIC_ERRORS[errorCode]
+    }
+    // SDK BadRequestError / APIError .message (e.g. "400 ...")
+    else if (err.error?.error?.message) {
+      errorMessage = err.error.error.message
+    } else if (err.error?.message) {
+      errorMessage = err.error.message
+    } else if (err.message) {
+      errorMessage = err.message
     }
   }
 

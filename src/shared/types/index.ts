@@ -48,6 +48,7 @@ export type HashDTO = NewHashDTO & TimestampsAndID
 export type ApiUsageDTO = {
   id: string
   responseId: string | null
+  scrapeRunId: string | null
   actualModel: string
   userSelectedModel: string
   createdAt: Date
@@ -105,7 +106,7 @@ export type NewJobPostingDTO = {
 export type JobPostingDTO = { siteTitle: string } & NewJobPostingDTO & TimestampsAndID
 
 export interface StoreSchema {
-  openaiApiKey: string
+  anthropicApiKey: string
   selectedModel: KnownModel
   customModels: KnownModel[]
   changelogLastSeenVersion: string | null

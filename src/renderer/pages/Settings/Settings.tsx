@@ -5,9 +5,9 @@ import { CHANNEL_INVOKES } from '../../../shared/types/messages.invokes'
 import ipcMessenger from '../../ipcMessenger'
 import PageWrapper from '../../sharedComponents/PageWrapper'
 import { SPACING } from '../../styles/consts'
+import TabAnthropic from './components/TabAnthropic'
 import TabData from './components/TabData'
 import TabJobFinder from './components/TabJobFinder'
-import TabOpenAI from './components/TabOpenAI'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Settings = () => {
@@ -46,14 +46,14 @@ const Settings = () => {
           onChange={(_e, newValue) => setActiveTab(newValue)}
           sx={{ borderBottom: 1, borderColor: 'divider' }}
         >
-          <Tab label="OpenAI" />
+          <Tab label="Claude" />
           <Tab label="Job Finder" />
           <Tab label="Data" />
         </Tabs>
 
         {activeTab === 0 && (
-          <TabOpenAI
-            initialOpenAiApiKey={storeFromServer.openaiApiKey}
+          <TabAnthropic
+            initialAnthropicApiKey={storeFromServer.anthropicApiKey}
             loadStoreSettings={loadStoreSettings}
             initialSelectedModel={storeFromServer.selectedModel}
             initialCustomModels={storeFromServer.customModels}

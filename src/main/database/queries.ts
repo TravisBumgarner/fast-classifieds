@@ -1,5 +1,4 @@
 import { and, count, desc, eq, inArray } from 'drizzle-orm'
-import type OpenAI from 'openai'
 import { v4 as uuidv4 } from 'uuid'
 import {
   AI_RECOMMENDATION_STATUS,
@@ -14,6 +13,7 @@ import {
   type ScrapeRunStatus,
   type UpdateSiteDTO,
 } from '../../shared/types'
+import type { AnthropicResponse } from '../jobFinder/processText'
 import { db } from './client'
 import { apiUsage, hashes, jobPostings, prompts, scrapeRuns, scrapeTasks, sites } from './schema'
 
@@ -24,35 +24,48 @@ async function insertApiUsage({
   siteContent,
   siteUrl,
   siteTitle,
+  scrapeRunId,
 }: {
-  response: OpenAI.Responses.Response
+  response: AnthropicResponse
   userSelectedModel: string
   prompt: string
   siteContent: string
   siteUrl: string
   siteTitle: string
+  scrapeRunId?: string
 }) {
+  const outputText = response.content
+    .filter((block) => block.type === 'text')
+    .map((block) => ('text' in block ? block.text : ''))
+    .join('')
+
+  const toolUseText = response.content
+    .filter((block) => block.type === 'tool_use')
+    .map((block) => ('input' in block ? JSON.stringify(block.input) : ''))
+    .join('')
+
   return db
     .insert(apiUsage)
     .values({
       id: uuidv4(),
       responseId: response.id,
+      scrapeRunId: scrapeRunId || null,
       actualModel: response.model,
       userSelectedModel: userSelectedModel,
       createdAt: new Date(),
-      status: response.status,
+      status: response.stop_reason,
       siteTitle: siteTitle,
       inputTokens: response.usage?.input_tokens || 0,
       outputTokens: response.usage?.output_tokens || 0,
-      totalTokens: response.usage?.total_tokens || 0,
+      totalTokens: (response.usage?.input_tokens || 0) + (response.usage?.output_tokens || 0),
 
-      cachedTokens: response.usage?.input_tokens_details.cached_tokens || 0,
-      reasoningTokens: response.usage?.output_tokens_details.reasoning_tokens || 0,
+      cachedTokens: response.usage?.cache_read_input_tokens || 0,
+      reasoningTokens: null,
 
       prompt,
       siteContent,
       siteUrl,
-      outputText: response.output_text,
+      outputText: outputText || toolUseText,
     })
     .returning()
 }

@@ -33,12 +33,12 @@ export async function startScraping(siteIds: string[]) {
     const selectedModel = store.get('selectedModel')
     const model = selectedModel.model
     const delay = store.get('scrapeDelay')
-    const apiKey = store.get('openaiApiKey')
+    const apiKey = store.get('anthropicApiKey')
 
     if (!model) {
       return {
         success: false as const,
-        error: 'OpenAI model not configured. Please set it in Settings.',
+        error: 'Claude model not configured. Please set it in Settings.',
       }
     }
 
@@ -52,7 +52,7 @@ export async function startScraping(siteIds: string[]) {
     if (!apiKey) {
       return {
         success: false as const,
-        error: 'OpenAI API key not configured. Please set it in Settings.',
+        error: 'Anthropic API key not configured. Please set it in Settings.',
       }
     }
 

@@ -3,8 +3,8 @@ import { KNOWN_MODELS } from '../shared/consts'
 import type { StoreSchema } from '../shared/types'
 
 const defaults: StoreSchema = {
-  openaiApiKey: '',
-  selectedModel: KNOWN_MODELS.find((m) => m.model === 'gpt-5-nano') || KNOWN_MODELS[0],
+  anthropicApiKey: '',
+  selectedModel: KNOWN_MODELS.find((m) => m.model === 'claude-haiku-4-5') || KNOWN_MODELS[0],
   customModels: [],
   changelogLastSeenVersion: null,
   scrapeDelay: 3000,
@@ -17,7 +17,7 @@ const store = new Store<StoreSchema>({ defaults })
 // Helper function to only allow defined keys
 export const getStore = () => {
   const data = {
-    openaiApiKey: store.get('openaiApiKey'),
+    anthropicApiKey: store.get('anthropicApiKey'),
     selectedModel: store.get('selectedModel'),
     customModels: store.get('customModels'),
     changelogLastSeenVersion: store.get('changelogLastSeenVersion'),
